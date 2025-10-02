@@ -490,8 +490,16 @@ class FragmentTaskActivity : AppCompatActivity() {
             filteredTasks = emptyList()
             currentTaskIndex = 0
 
+            // Show appropriate empty message based on current filter
+            val emptyMessage = when (currentFilter) {
+                FilterType.ALL -> "No tasks available"
+                FilterType.TODAY -> "No tasks due today"
+                FilterType.PENDING -> "No pending tasks"
+                FilterType.DONE -> "No completed tasks"
+            }
+
             // Hide all task display views
-            tvTaskTitle.text = "No tasks available"
+            tvTaskTitle.text = emptyMessage
             tvTaskDescription.visibility = View.GONE
             layoutPriority.visibility = View.GONE
             layoutStatus.visibility = View.GONE
@@ -499,8 +507,11 @@ class FragmentTaskActivity : AppCompatActivity() {
             layoutProgress.visibility = View.GONE
             btnMarkDone.visibility = View.GONE
             layoutNavigation.visibility = View.GONE
+            
+            // ✅ Ensure card is visible even in empty state
+            cardEmpty.visibility = View.VISIBLE
 
-            android.util.Log.d("FragmentTaskActivity", "📋 Showing empty state")
+            android.util.Log.d("FragmentTaskActivity", "📋 Showing empty state: $emptyMessage")
 
         } catch (e: Exception) {
             android.util.Log.e("FragmentTaskActivity", "Error showing empty state", e)
