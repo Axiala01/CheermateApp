@@ -17,7 +17,7 @@ interface UserDao {
     suspend fun delete(user: User)
 
     @Query("DELETE FROM User WHERE User_ID = :userId")
-    suspend fun deleteById(userId: Int)
+    suspend fun deleteById(userId: Int): Int
 
     // ✅ QUERY METHODS
     @Query("SELECT * FROM `User` WHERE User_ID = :userId LIMIT 1")

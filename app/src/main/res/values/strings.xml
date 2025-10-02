@@ -26,6 +26,18 @@
     <string name="_0_found">0 found</string>
     <string name="today_0">Today (0)</string>
     <string name="jasper">Jasper</string>
+    <string name="personality_type">Personality Type</string>
+    <string name="personality_description_goes_here">Personality description goes here!</string>
+    <string name="mark_as_done">✅ Mark as Done</string>
+    <string name="next">Next ▶</string>
+    <string name="_1_3">1 / 3</string>
+    <string name="previous">◀ Previous</string>
+    <string name="month_day_year_at_time">Month/Day/Year at Time</string>
+    <string name="_0">0%</string>
+    <string name="medium">🟡 Medium</string>
+    <string name="no_tasks_yet_create_your_first_task_to_get_started">No tasks yet. Create your first task to get started!</string>
+    <string name="tasks_description">Tasks Description</string>
+    <string name="tasks_title">Tasks Title</string>
 
 
 </resources>

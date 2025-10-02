@@ -35,7 +35,7 @@ import com.google.gson.Gson
         Settings::class,
         MessageTemplate::class
     ],
-    version = 10,
+    version = 12,
     exportSchema = false
 )
 @TypeConverters(AppTypeConverters::class)
@@ -54,18 +54,22 @@ abstract class AppDb : RoomDatabase() {
 
         fun get(context: Context): AppDb {
             return INSTANCE ?: synchronized(this) {
-                val gson = Gson()
-                val instance = Room.databaseBuilder(
-                    context.applicationContext,
-                    AppDb::class.java,
-                    "cheermate_database"
-                )
-                    .addTypeConverter(AppTypeConverters(gson))  // Add ProvidedTypeConverter
-                    .fallbackToDestructiveMigration()  // Enable destructive migration
-                    .build()
-                INSTANCE = instance
-                instance
+                INSTANCE ?: buildDatabase(context.applicationContext).also { INSTANCE = it }
             }
+        }
+
+        private fun buildDatabase(appContext: Context): AppDb {
+            val gson = Gson()
+            return Room.databaseBuilder(
+                appContext,
+                AppDb::class.java,
+                "cheermate_database"
+            )
+                // Uses ProvidedTypeConverter to supply Gson at runtime
+                .addTypeConverter(AppTypeConverters(gson))
+                // Consider replacing with proper migrations in production
+                .fallbackToDestructiveMigration()
+                .build()
         }
     }
 }

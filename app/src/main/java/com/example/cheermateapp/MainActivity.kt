@@ -732,7 +732,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 val personality: Personality? = withContext(Dispatchers.IO) {
-                    db.personalityDao().getByUser(userId.toString())
+                    db.personalityDao().getByUser(userId)
                 }
 
                 // ✅ FIXED: Define completedTasks properly
@@ -1255,7 +1255,7 @@ class MainActivity : AppCompatActivity() {
                     val db = AppDb.get(this@MainActivity)
 
                     val personality: Personality? = withContext(Dispatchers.IO) {
-                        db.personalityDao().getByUser(userId.toString())
+                        db.personalityDao().getByUser(userId)
                     }
 
                     val motivationalMessages = when (personality?.Name?.lowercase()) {
@@ -1320,7 +1320,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 val personality: Personality? = withContext(Dispatchers.IO) {
-                    db.personalityDao().getByUser(userId.toString())
+                    db.personalityDao().getByUser(userId)
                 }
 
                 val tvUsername = findViewById<TextView>(R.id.tvUsername)
@@ -1718,7 +1718,6 @@ class MainActivity : AppCompatActivity() {
             if (!task.DueTime.isNullOrBlank()) {
                 append("⏰ Due Time: ${task.DueTime}\n")
             }
-            append("📅 Created: ${task.CreatedAt}")
         }
 
         AlertDialog.Builder(this)

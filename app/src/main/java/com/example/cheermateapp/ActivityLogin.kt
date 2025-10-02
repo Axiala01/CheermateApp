@@ -11,6 +11,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.example.cheermateapp.data.model.Personality
+
 
 class ActivityLogin : AppCompatActivity() {
 
@@ -53,8 +55,8 @@ class ActivityLogin : AppCompatActivity() {
                                     if (user != null) {
                                         // Check if user has selected a personality
                                         uiScope.launch {
-                                            val personality = withContext(Dispatchers.IO) {
-                                                db.personalityDao().getByUser(user.User_ID.toString())
+                                            val personality: Personality? = withContext(Dispatchers.IO) {
+                                                db.personalityDao().getByUser(user.User_ID)
                                             }
 
                                             if (personality != null) {

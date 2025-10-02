@@ -74,7 +74,7 @@ class FragmentSettingsActivity : AppCompatActivity() {
                     }
 
                     val personality: Personality? = withContext(Dispatchers.IO) {
-                        db.personalityDao().getByUser(userId.toString())
+                        db.personalityDao().getByUser(userId)
                     }
 
                     // ✅ USE YOUR ACTUAL XML IDs
@@ -273,7 +273,7 @@ class FragmentSettingsActivity : AppCompatActivity() {
                         .format(java.util.Date())
                     val todayTasks = db.taskDao().getTodayTasksCount(userId, today)
                     val pendingTasks = db.taskDao().getPendingTasksCount(userId)
-                    val overdueTasks = db.taskDao().getOverdueTasksCount(userId, today)
+                    val overdueTasks = db.taskDao().getOverdueTasksCount(userId)
 
                     mapOf(
                         "total" to totalTasks,
@@ -569,7 +569,7 @@ class FragmentSettingsActivity : AppCompatActivity() {
                 val db = AppDb.get(this@FragmentSettingsActivity)
                 withContext(Dispatchers.IO) {
                     db.taskDao().deleteAllTasksForUser(userId)
-                    db.userDao().delete(userId)
+                    db.userDao().deleteById(userId)
                 }
 
                 Toast.makeText(this@FragmentSettingsActivity, "Account deleted successfully", Toast.LENGTH_SHORT).show()
