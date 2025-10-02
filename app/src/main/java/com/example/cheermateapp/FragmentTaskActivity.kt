@@ -47,11 +47,9 @@ class FragmentTaskActivity : AppCompatActivity() {
     private lateinit var tvTaskPriority: TextView
     private lateinit var tvTaskStatus: TextView
     private lateinit var tvTaskDueDate: TextView
-    private lateinit var tvTaskProgress: TextView
     private lateinit var layoutPriority: LinearLayout
     private lateinit var layoutStatus: LinearLayout
     private lateinit var layoutDueDate: LinearLayout
-    private lateinit var layoutProgress: LinearLayout
     private lateinit var btnMarkDone: TextView
 
     // ✅ Navigation elements
@@ -173,11 +171,9 @@ class FragmentTaskActivity : AppCompatActivity() {
             tvTaskPriority = findViewById(R.id.tvTaskPriority)
             tvTaskStatus = findViewById(R.id.tvTaskStatus)
             tvTaskDueDate = findViewById(R.id.tvTaskDueDate)
-            tvTaskProgress = findViewById(R.id.tvTaskProgress)
             layoutPriority = findViewById(R.id.layoutPriority)
             layoutStatus = findViewById(R.id.layoutStatus)
             layoutDueDate = findViewById(R.id.layoutDueDate)
-            layoutProgress = findViewById(R.id.layoutProgress)
             btnMarkDone = findViewById(R.id.btnMarkDone)
 
             // ✅ ADD: Navigation elements
@@ -272,20 +268,34 @@ class FragmentTaskActivity : AppCompatActivity() {
 
     // ✅ FIXED: All navigation methods at class level
     private fun navigateToPreviousTask() {
-        if (filteredTasks.isNotEmpty() && currentTaskIndex > 0) {
+        if (filteredTasks.isEmpty()) {
+            return
+        }
+        
+        if (currentTaskIndex > 0) {
             currentTaskIndex--
             showTaskInCard(filteredTasks[currentTaskIndex])
             updateNavigationState()
             Toast.makeText(this, "◀ Previous task", Toast.LENGTH_SHORT).show()
+        } else {
+            // Already at the first task
+            Toast.makeText(this, "Start of list", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun navigateToNextTask() {
-        if (filteredTasks.isNotEmpty() && currentTaskIndex < filteredTasks.size - 1) {
+        if (filteredTasks.isEmpty()) {
+            return
+        }
+        
+        if (currentTaskIndex < filteredTasks.size - 1) {
             currentTaskIndex++
             showTaskInCard(filteredTasks[currentTaskIndex])
             updateNavigationState()
             Toast.makeText(this, "Next task ▶", Toast.LENGTH_SHORT).show()
+        } else {
+            // Already at the last task
+            Toast.makeText(this, "End of list", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -346,6 +356,7 @@ class FragmentTaskActivity : AppCompatActivity() {
             // Update the existing XML TextViews with task data from database
             tvTaskTitle.text = task.Title
             tvTaskTitle.visibility = View.VISIBLE
+            tvTaskTitle.gravity = android.view.Gravity.START // Reset to left alignment for tasks
             
             // Show or hide description based on whether it exists
             if (!task.Description.isNullOrBlank()) {
@@ -367,10 +378,6 @@ class FragmentTaskActivity : AppCompatActivity() {
             // Display due date
             tvTaskDueDate.text = task.getFormattedDueDateTime()
             layoutDueDate.visibility = View.VISIBLE
-            
-            // Display progress
-            tvTaskProgress.text = "${task.TaskProgress}%"
-            layoutProgress.visibility = View.VISIBLE
             
             // Show/hide Mark as Done button based on task status
             if (task.Status != Status.Completed) {
@@ -493,20 +500,20 @@ class FragmentTaskActivity : AppCompatActivity() {
 
             // Show appropriate empty message based on current filter
             val emptyMessage = when (currentFilter) {
-                FilterType.ALL -> "No tasks available"
-                FilterType.TODAY -> "No tasks due today"
-                FilterType.PENDING -> "No pending tasks"
-                FilterType.DONE -> "No completed tasks"
+                FilterType.ALL -> "No task available"
+                FilterType.TODAY -> "No task available"
+                FilterType.PENDING -> "No task available"
+                FilterType.DONE -> "No task available"
             }
 
-            // Show title with empty message and hide all task detail views
+            // Show title with empty message (centered) and hide all task detail views
             tvTaskTitle.text = emptyMessage
             tvTaskTitle.visibility = View.VISIBLE
+            tvTaskTitle.gravity = android.view.Gravity.CENTER
             tvTaskDescription.visibility = View.GONE
             layoutPriority.visibility = View.GONE
             layoutStatus.visibility = View.GONE
             layoutDueDate.visibility = View.GONE
-            layoutProgress.visibility = View.GONE
             btnMarkDone.visibility = View.GONE
             layoutNavigation.visibility = View.GONE
             
