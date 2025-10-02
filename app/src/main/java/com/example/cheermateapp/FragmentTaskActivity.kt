@@ -345,6 +345,7 @@ class FragmentTaskActivity : AppCompatActivity() {
 
             // Update the existing XML TextViews with task data from database
             tvTaskTitle.text = task.Title
+            tvTaskTitle.visibility = View.VISIBLE
             
             // Show or hide description based on whether it exists
             if (!task.Description.isNullOrBlank()) {
@@ -498,8 +499,9 @@ class FragmentTaskActivity : AppCompatActivity() {
                 FilterType.DONE -> "No completed tasks"
             }
 
-            // Hide all task display views
+            // Show title with empty message and hide all task detail views
             tvTaskTitle.text = emptyMessage
+            tvTaskTitle.visibility = View.VISIBLE
             tvTaskDescription.visibility = View.GONE
             layoutPriority.visibility = View.GONE
             layoutStatus.visibility = View.GONE
