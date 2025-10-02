@@ -331,19 +331,53 @@ class FragmentTaskActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ FIXED: Corrected showTaskInCard method
+    // ✅ FIXED: Use existing XML views to display task data
     private fun showTaskInCard(task: Task) {
         try {
             android.util.Log.d("DEBUG", "🎯 showTaskInCard called with task: ${task.Title}")
 
             currentDisplayedTask = task
 
-            // Clear the cardEmpty and populate it like MainActivity does
-            val cardEmpty = findViewById<LinearLayout>(R.id.cardEmpty)
-            cardEmpty.removeAllViews() // Clear existing content
-
-            // Create task display similar to MainActivity's createTaskCard
-            createTaskDisplayInCard(task, cardEmpty)
+            // Update the existing XML TextViews with task data from database
+            tvTaskTitle.text = task.Title
+            
+            // Show or hide description based on whether it exists
+            if (!task.Description.isNullOrBlank()) {
+                tvTaskDescription.text = task.Description
+                tvTaskDescription.visibility = View.VISIBLE
+            } else {
+                tvTaskDescription.visibility = View.GONE
+            }
+            
+            // Display priority with emoji and color
+            tvTaskPriority.text = task.getPriorityText()
+            tvTaskPriority.setTextColor(task.getPriorityColor())
+            layoutPriority.visibility = View.VISIBLE
+            
+            // Display status
+            tvTaskStatus.text = task.getStatusText()
+            layoutStatus.visibility = View.VISIBLE
+            
+            // Display due date
+            tvTaskDueDate.text = task.getFormattedDueDateTime()
+            layoutDueDate.visibility = View.VISIBLE
+            
+            // Display progress
+            tvTaskProgress.text = "${task.TaskProgress}%"
+            layoutProgress.visibility = View.VISIBLE
+            
+            // Show/hide Mark as Done button based on task status
+            if (task.Status != Status.Completed) {
+                btnMarkDone.text = when (task.Status) {
+                    Status.Pending -> "✅ Mark as Done"
+                    Status.InProgress -> "✅ Complete Task"
+                    Status.OverDue -> "✅ Complete (Overdue)"
+                    else -> "✅ Mark as Done"
+                }
+                btnMarkDone.visibility = View.VISIBLE
+            } else {
+                btnMarkDone.visibility = View.GONE
+            }
 
             android.util.Log.d("DEBUG", "✅ showTaskInCard completed successfully")
 
@@ -353,113 +387,6 @@ class FragmentTaskActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ ADD: Missing createTaskDisplayInCard method
-    private fun createTaskDisplayInCard(task: Task, container: LinearLayout) {
-        try {
-            // ✅ TOP ROW: Status emoji + Title + Priority
-            val topRow = LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
-                gravity = android.view.Gravity.CENTER_VERTICAL
-                setPadding(0, 0, 0, 16)
-            }
-
-            // Status emoji
-            val statusEmoji = TextView(this).apply {
-                text = task.getStatusEmoji()
-                textSize = 20f
-                setPadding(0, 0, 16, 0)
-            }
-            topRow.addView(statusEmoji)
-
-            // Task title
-            val titleText = TextView(this).apply {
-                text = task.Title
-                textSize = 18f
-                setTextColor(android.graphics.Color.WHITE)
-                setTypeface(null, android.graphics.Typeface.BOLD)
-                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-            }
-            topRow.addView(titleText)
-
-            // Priority chip
-            val priorityChip = TextView(this).apply {
-                text = task.getPriorityText()
-                textSize = 12f
-                setTextColor(android.graphics.Color.WHITE)
-                setPadding(12, 6, 12, 6)
-                background = createRoundedDrawable(task.getPriorityColor())
-            }
-            topRow.addView(priorityChip)
-
-            container.addView(topRow)
-
-            // ✅ DESCRIPTION (if exists)
-            if (!task.Description.isNullOrBlank()) {
-                val descriptionText = TextView(this).apply {
-                    text = "📝 ${task.Description}"
-                    textSize = 14f
-                    setTextColor(android.graphics.Color.LTGRAY)
-                    setPadding(0, 0, 0, 12)
-                }
-                container.addView(descriptionText)
-            }
-
-            // ✅ STATUS ROW
-            val statusText = TextView(this).apply {
-                text = "📊 Status: ${task.getStatusText()}"
-                textSize = 14f
-                setTextColor(android.graphics.Color.WHITE)
-                setPadding(0, 0, 0, 8)
-            }
-            container.addView(statusText)
-
-            // ✅ DUE DATE AND TIME
-            val dueDateText = TextView(this).apply {
-                text = "📅 Due: ${task.getFormattedDueDateTime()}"
-                textSize = 14f
-                setTextColor(android.graphics.Color.WHITE)
-                setPadding(0, 0, 0, 8)
-            }
-            container.addView(dueDateText)
-
-            // ✅ PROGRESS
-            val progressText = TextView(this).apply {
-                text = "📈 Progress: ${task.TaskProgress}%"
-                textSize = 14f
-                setTextColor(android.graphics.Color.WHITE)
-                setPadding(0, 0, 0, 16)
-            }
-            container.addView(progressText)
-
-            // ✅ MARK AS DONE BUTTON (if not completed)
-            if (task.Status != Status.Completed) {
-                val markDoneButton = Button(this).apply {
-                    text = when (task.Status) {
-                        Status.Pending -> "✅ Mark as Done"
-                        Status.InProgress -> "✅ Complete Task"
-                        Status.OverDue -> "✅ Complete (Overdue)"
-                        else -> "✅ Mark as Done"
-                    }
-                    layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                    )
-                    setOnClickListener {
-                        markTaskAsDone(task)
-                    }
-                }
-                container.addView(markDoneButton)
-            }
-
-            // Make the card clickable for details
-            container.setOnClickListener {
-                showTaskDetailDialog(task)
-            }
-
-        } catch (e: Exception) {
-            android.util.Log.e("FragmentTaskActivity", "Error creating task display", e)
-        }
-    }
 
     // ✅ NEW: Mark task as done (UPDATE OPERATION)
     private fun markTaskAsDone(task: Task) {
@@ -558,20 +485,14 @@ class FragmentTaskActivity : AppCompatActivity() {
             filteredTasks = emptyList()
             currentTaskIndex = 0
 
-            val cardEmpty = findViewById<LinearLayout>(R.id.cardEmpty)
-            cardEmpty.removeAllViews() // Clear all content
-
-            // Add empty state message
-            val emptyText = TextView(this).apply {
-                text = "📋 No tasks available\nAdd a new task or check other filters"
-                textSize = 16f
-                setTextColor(android.graphics.Color.WHITE)
-                gravity = android.view.Gravity.CENTER
-                setPadding(20, 40, 20, 40)
-            }
-            cardEmpty.addView(emptyText)
-
-            // Hide navigation
+            // Hide all task display views
+            tvTaskTitle.text = "No tasks available"
+            tvTaskDescription.visibility = View.GONE
+            layoutPriority.visibility = View.GONE
+            layoutStatus.visibility = View.GONE
+            layoutDueDate.visibility = View.GONE
+            layoutProgress.visibility = View.GONE
+            btnMarkDone.visibility = View.GONE
             layoutNavigation.visibility = View.GONE
 
             android.util.Log.d("FragmentTaskActivity", "📋 Showing empty state")
@@ -833,15 +754,24 @@ class FragmentTaskActivity : AppCompatActivity() {
     private fun searchTasks(query: String?) {
         if (query.isNullOrBlank()) {
             displayTaskInCard(allTasks)
+            chipFound.text = "${allTasks.size} found"
         } else {
             val searchResults = allTasks.filter { task ->
                 task.Title.contains(query, ignoreCase = true) ||
                         (task.Description?.contains(query, ignoreCase = true) == true)
             }
             displayTaskInCard(searchResults)
+            
+            // Display task titles in chipFound
+            if (searchResults.isEmpty()) {
+                chipFound.text = "No tasks found"
+            } else if (searchResults.size == 1) {
+                chipFound.text = "Found: ${searchResults[0].Title}"
+            } else {
+                // Show first task title and count
+                chipFound.text = "Found: ${searchResults[0].Title} +${searchResults.size - 1} more"
+            }
         }
-
-        chipFound.text = "${currentTasks.size} found"
     }
 
     private fun showSortOptionsDialog() {
