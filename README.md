@@ -41,7 +41,10 @@ A comprehensive Android task management application built with Kotlin, featuring
 
 ## 📋 Development
 
+### 🚀 New Here? Start with **[QUICKSTART.md](QUICKSTART.md)** - Your guide to the project!
+
 ### Documentation
+- **[QUICKSTART.md](QUICKSTART.md)** - Quick reference guide for contributors
 - **[TODO.md](TODO.md)** - Immediate tasks and known issues to address
 - **[ROADMAP.md](ROADMAP.md)** - Long-term development roadmap and feature planning
 - **[TESTING_CHECKLIST.md](TESTING_CHECKLIST.md)** - Comprehensive testing guidelines
