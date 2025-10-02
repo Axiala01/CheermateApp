@@ -11,6 +11,7 @@ import com.example.cheermateapp.data.dao.SecurityDao
 import com.example.cheermateapp.data.dao.SettingsDao
 import com.example.cheermateapp.data.dao.SubTaskDao
 import com.example.cheermateapp.data.dao.TaskDao
+import com.example.cheermateapp.data.dao.TaskDependencyDao
 import com.example.cheermateapp.data.dao.TaskReminderDao
 import com.example.cheermateapp.data.dao.TaskTemplateDao
 import com.example.cheermateapp.data.dao.UserDao
@@ -22,6 +23,7 @@ import com.example.cheermateapp.data.model.UserSecurityAnswer
 import com.example.cheermateapp.data.model.Settings
 import com.example.cheermateapp.data.model.SubTask
 import com.example.cheermateapp.data.model.Task
+import com.example.cheermateapp.data.model.TaskDependency
 import com.example.cheermateapp.data.model.TaskReminder
 import com.example.cheermateapp.data.model.TaskTemplate
 import com.example.cheermateapp.data.model.User
@@ -39,9 +41,10 @@ import com.google.gson.Gson
         Settings::class,
         MessageTemplate::class,
         RecurringTask::class,
-        TaskTemplate::class
+        TaskTemplate::class,
+        TaskDependency::class
     ],
-    version = 13,
+    version = 14,
     exportSchema = false
 )
 @TypeConverters(AppTypeConverters::class)
@@ -55,6 +58,7 @@ abstract class AppDb : RoomDatabase() {
     abstract fun personalityDao(): PersonalityDao
     abstract fun recurringTaskDao(): RecurringTaskDao
     abstract fun taskTemplateDao(): TaskTemplateDao
+    abstract fun taskDependencyDao(): TaskDependencyDao
 
     companion object {
         @Volatile
