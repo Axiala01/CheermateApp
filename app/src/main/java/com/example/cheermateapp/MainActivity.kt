@@ -788,7 +788,7 @@ class MainActivity : AppCompatActivity() {
             try {
                 val db = AppDb.get(this@MainActivity)
                 val user = withContext(Dispatchers.IO) {
-                    db.userDao().getById(currentUserId)
+                    db.userDao().getById(userId)
                 }
 
                 if (user == null) {

@@ -61,8 +61,11 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.4")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.4")
 
-    // ✅ GSON IS ALREADY HERE! (Version 2.13.2 is newer than 2.10.1)
+    // GSON
     implementation("com.google.code.gson:gson:2.13.2")
+
+    // BCrypt for password hashing
+    implementation("at.favre.lib:bcrypt:0.10.2")
 
     // Multidex support
     implementation("androidx.multidex:multidex:2.0.1")
