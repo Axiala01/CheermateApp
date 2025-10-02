@@ -1171,7 +1171,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                     try {
                         val db = AppDb.get(this@FragmentTaskActivity)
                         withContext(Dispatchers.IO) {
-                            db.taskDao().softDelete(task.Task_ID, task.User_ID)
+                            db.taskDao().softDelete(task.User_ID, task.Task_ID)
                         }
 
                         Toast.makeText(this@FragmentTaskActivity, "🗑️ Task deleted", Toast.LENGTH_SHORT).show()
