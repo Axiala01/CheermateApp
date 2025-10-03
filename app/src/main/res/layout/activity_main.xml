@@ -487,20 +487,13 @@
                         android:textSize="14sp" />
                 </LinearLayout>
 
+                <!-- Content area for dynamically loaded tasks from item_task.xml -->
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="120dp"
-                    android:gravity="center">
-
-                    <TextView
-                        android:id="@+id/RecentTask"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:fontFamily="@font/sf_pro_rounded_regular"
-                        android:text="@string/no_tasks_yet_create_your_first_task_to_get_started"
-                        android:textColor="@color/text_secondary_white_70"
-                        android:textSize="12sp" />
-                </LinearLayout>
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:minHeight="120dp"
+                    android:gravity="center" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
