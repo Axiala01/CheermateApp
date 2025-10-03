@@ -14,6 +14,7 @@ import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.viewpager2.widget.ViewPager2
 import com.example.cheermateapp.data.db.AppDb
 import com.example.cheermateapp.data.model.Personality
 import com.example.cheermateapp.data.model.Task
@@ -1681,7 +1682,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ ENHANCED RECENT TASKS DISPLAY - SHOW ALL TASKS WITH LIVE STATUS
+    // ✅ ENHANCED RECENT TASKS DISPLAY - HYBRID TASK STACK WITH SWIPEABLE TASKS
     private fun updateRecentTasksDisplay(tasks: List<Task>) {
         try {
             val recentTasksContainer = findViewById<LinearLayout>(R.id.cardRecent)
@@ -1699,127 +1700,109 @@ class MainActivity : AppCompatActivity() {
                     emptyText.setPadding(20, 30, 20, 30)
                     contentArea?.addView(emptyText)
                 } else {
-                    // ✅ DECLARE ALL TASK GROUPS PROPERLY
-                    val overdueTasks = tasks.filter { task ->
-                        task.Status == com.example.cheermateapp.data.model.Status.Pending &&
-                                isTaskOverdue(task, System.currentTimeMillis())
-                    }
+                    // Get active tasks (pending, in-progress, overdue) for swipeable view
+                    val activeTasks = tasks.filter { task ->
+                        task.Status == Status.Pending || 
+                        task.Status == Status.InProgress ||
+                        (task.Status == Status.Pending && isTaskOverdue(task, System.currentTimeMillis()))
+                    }.sortedWith(compareBy<Task> { 
+                        // Sort by overdue first, then priority
+                        when {
+                            isTaskOverdue(it, System.currentTimeMillis()) -> 0
+                            else -> 1
+                        }
+                    }.thenBy { 
+                        when (it.Priority) {
+                            Priority.High -> 0
+                            Priority.Medium -> 1
+                            Priority.Low -> 2
+                        }
+                    })
 
-                    // ✅ ADDED: Declare pendingTasks variable
-                    val pendingTasks = tasks.filter { task ->
-                        task.Status == com.example.cheermateapp.data.model.Status.Pending &&
-                                !isTaskOverdue(task, System.currentTimeMillis())
-                    }
+                    if (activeTasks.isNotEmpty()) {
+                        // Add swipeable task section header
+                        val swipeHeader = TextView(this)
+                        swipeHeader.text = "📋 Next Task (swipe to navigate)"
+                        swipeHeader.textSize = 14f
+                        swipeHeader.setTextColor(android.graphics.Color.WHITE)
+                        swipeHeader.setTypeface(null, android.graphics.Typeface.BOLD)
+                        swipeHeader.gravity = android.view.Gravity.CENTER
+                        swipeHeader.setPadding(8, 8, 8, 8)
+                        contentArea?.addView(swipeHeader)
 
-                    // ✅ ADDED: Also get in-progress and completed tasks
-                    val inProgressTasks = tasks.filter { task ->
-                        task.Status == com.example.cheermateapp.data.model.Status.InProgress
-                    }
+                        // Create ViewPager2 for swipeable tasks
+                        val viewPager = ViewPager2(this)
+                        viewPager.layoutParams = LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                        ).apply {
+                            setMargins(0, 8, 0, 8)
+                        }
+                        
+                        // Set up adapter with callbacks
+                        val adapter = TaskPagerAdapter(
+                            activeTasks,
+                            onCompleteClick = { task -> markTaskAsDone(task) },
+                            onEditClick = { task -> showTaskQuickActions(task) },
+                            onDeleteClick = { task -> deleteTask(task) }
+                        )
+                        viewPager.adapter = adapter
+                        contentArea?.addView(viewPager)
 
-                    val completedTasks = tasks.filter { task ->
-                        task.Status == com.example.cheermateapp.data.model.Status.Completed
-                    }
+                        // Add task counter
+                        val counterText = TextView(this)
+                        counterText.id = View.generateViewId()
+                        counterText.text = "1 / ${activeTasks.size}"
+                        counterText.textSize = 14f
+                        counterText.setTextColor(android.graphics.Color.WHITE)
+                        counterText.setTypeface(null, android.graphics.Typeface.BOLD)
+                        counterText.gravity = android.view.Gravity.CENTER
+                        counterText.setPadding(8, 8, 8, 8)
+                        contentArea?.addView(counterText)
 
-                    // Show overdue tasks first
-                    if (overdueTasks.isNotEmpty()) {
-                        val overdueHeader = TextView(this)
-                        overdueHeader.text = "🔴 OVERDUE TASKS (${overdueTasks.size})"
-                        overdueHeader.textSize = 12f
-                        overdueHeader.setTextColor(android.graphics.Color.RED)
-                        overdueHeader.setTypeface(null, android.graphics.Typeface.BOLD)
-                        overdueHeader.setPadding(8, 8, 8, 8)
-                        contentArea?.addView(overdueHeader)
+                        // Update counter when page changes
+                        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                            override fun onPageSelected(position: Int) {
+                                counterText.text = "${position + 1} / ${activeTasks.size}"
+                            }
+                        })
 
-                        overdueTasks.forEach { task ->
-                            createTaskCard(task, contentArea)
+                        // Add expandable section for remaining tasks
+                        if (activeTasks.size > 1) {
+                            val collapsedText = TextView(this)
+                            collapsedText.text = "▼ ${activeTasks.size - 1} more tasks pending (tap to expand)"
+                            collapsedText.textSize = 12f
+                            collapsedText.setTextColor(android.graphics.Color.LTGRAY)
+                            collapsedText.gravity = android.view.Gravity.CENTER
+                            collapsedText.setPadding(8, 16, 8, 8)
+                            collapsedText.setTypeface(null, android.graphics.Typeface.BOLD)
+                            contentArea?.addView(collapsedText)
+
+                            // Create collapsible container for remaining tasks
+                            val collapsibleContainer = LinearLayout(this)
+                            collapsibleContainer.orientation = LinearLayout.VERTICAL
+                            collapsibleContainer.visibility = View.GONE
+                            contentArea?.addView(collapsibleContainer)
+
+                            // Add remaining tasks to collapsible section
+                            activeTasks.drop(1).forEach { task ->
+                                createCompactTaskCard(task, collapsibleContainer)
+                            }
+
+                            // Toggle visibility on click
+                            var isExpanded = false
+                            collapsedText.setOnClickListener {
+                                isExpanded = !isExpanded
+                                if (isExpanded) {
+                                    collapsibleContainer.visibility = View.VISIBLE
+                                    collapsedText.text = "▲ Hide pending tasks"
+                                } else {
+                                    collapsibleContainer.visibility = View.GONE
+                                    collapsedText.text = "▼ ${activeTasks.size - 1} more tasks pending (tap to expand)"
+                                }
+                            }
                         }
                     }
-
-                    // ✅ FIXED: Now pendingTasks is properly declared
-                    if (pendingTasks.isNotEmpty()) {
-                        val pendingHeader = TextView(this)
-                        pendingHeader.text = "⏳ PENDING TASKS (${pendingTasks.size})"
-                        pendingHeader.textSize = 12f
-                        pendingHeader.setTextColor(android.graphics.Color.YELLOW)
-                        pendingHeader.setTypeface(null, android.graphics.Typeface.BOLD)
-                        pendingHeader.setPadding(8, 16, 8, 8)
-                        contentArea?.addView(pendingHeader)
-
-                        pendingTasks.forEach { task ->
-                            createTaskCard(task, contentArea)
-                        }
-                    }
-
-                    // ✅ ADDED: Show in-progress tasks
-                    if (inProgressTasks.isNotEmpty()) {
-                        val inProgressHeader = TextView(this)
-                        inProgressHeader.text = "🔄 IN PROGRESS (${inProgressTasks.size})"
-                        inProgressHeader.textSize = 12f
-                        inProgressHeader.setTextColor(android.graphics.Color.CYAN)
-                        inProgressHeader.setTypeface(null, android.graphics.Typeface.BOLD)
-                        inProgressHeader.setPadding(8, 16, 8, 8)
-                        contentArea?.addView(inProgressHeader)
-
-                        inProgressTasks.forEach { task ->
-                            createTaskCard(task, contentArea)
-                        }
-                    }
-
-                    // ✅ ADDED: Show completed tasks (recent ones)
-                    if (completedTasks.isNotEmpty() && completedTasks.size <= 3) {
-                        val completedHeader = TextView(this)
-                        completedHeader.text = "✅ RECENTLY COMPLETED (${completedTasks.size})"
-                        completedHeader.textSize = 12f
-                        completedHeader.setTextColor(android.graphics.Color.GREEN)
-                        completedHeader.setTypeface(null, android.graphics.Typeface.BOLD)
-                        completedHeader.setPadding(8, 16, 8, 8)
-                        contentArea?.addView(completedHeader)
-
-                        completedTasks.take(3).forEach { task ->
-                            createTaskCard(task, contentArea)
-                        }
-                    }
-
-                    // ✅ ENHANCED: Add summary stats
-                    if (tasks.isNotEmpty()) {
-                        val summaryText = TextView(this)
-                        val totalTasks = tasks.size
-                        val completedCount = completedTasks.size
-                        val progressPercent = if (totalTasks > 0) (completedCount * 100) / totalTasks else 0
-
-                        summaryText.text = "📊 Progress: $completedCount/$totalTasks tasks ($progressPercent%)"
-                        summaryText.textSize = 11f
-                        summaryText.setTextColor(android.graphics.Color.LTGRAY)
-                        summaryText.gravity = android.view.Gravity.CENTER
-                        summaryText.setPadding(8, 8, 8, 8)
-                        contentArea?.addView(summaryText)
-                    }
-
-                    // Add action buttons
-                    val buttonLayout = LinearLayout(this).apply {
-                        orientation = LinearLayout.HORIZONTAL
-                        setPadding(0, 16, 0, 0)
-                    }
-
-                    val viewAllButton = Button(this).apply {
-                        text = "📋 Manage All"
-                        layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
-                            setMargins(0, 0, 8, 0)
-                        }
-                        setOnClickListener { navigateToTasks() }
-                    }
-
-                    val addTaskButton = Button(this).apply {
-                        text = "➕ Add Task"
-                        layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
-                            setMargins(8, 0, 0, 0)
-                        }
-                        setOnClickListener { showQuickAddTaskDialog() }
-                    }
-
-                    buttonLayout.addView(viewAllButton)
-                    buttonLayout.addView(addTaskButton)
-                    contentArea?.addView(buttonLayout)
                 }
             }
         } catch (e: Exception) {
@@ -1966,6 +1949,80 @@ class MainActivity : AppCompatActivity() {
 
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error creating task card", e)
+        }
+    }
+
+    // ✅ CREATE COMPACT TASK CARD FOR COLLAPSIBLE SECTION
+    private fun createCompactTaskCard(task: Task, container: LinearLayout?) {
+        try {
+            val cardView = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                setPadding(12, 8, 12, 8)
+                setBackgroundColor(android.graphics.Color.parseColor("#1AFFFFFF"))
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    setMargins(0, 4, 0, 4)
+                }
+            }
+
+            // Priority indicator
+            val priorityDot = View(this).apply {
+                layoutParams = LinearLayout.LayoutParams(8, 8).apply {
+                    setMargins(0, 4, 8, 0)
+                }
+                setBackgroundColor(when (task.Priority) {
+                    Priority.High -> android.graphics.Color.RED
+                    Priority.Medium -> android.graphics.Color.YELLOW
+                    Priority.Low -> android.graphics.Color.GREEN
+                })
+            }
+
+            // Task info
+            val taskInfo = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                layoutParams = LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f
+                )
+            }
+
+            val titleText = TextView(this).apply {
+                text = task.Title
+                textSize = 13f
+                setTextColor(android.graphics.Color.WHITE)
+                setTypeface(null, android.graphics.Typeface.BOLD)
+            }
+
+            val statusText = TextView(this).apply {
+                text = when (task.Status) {
+                    Status.Pending -> "⏳ Pending"
+                    Status.InProgress -> "🔄 In Progress"
+                    Status.Completed -> "✅ Completed"
+                    Status.OverDue -> "🔴 Overdue"
+                    Status.Cancelled -> "❌ Cancelled"
+                }
+                textSize = 11f
+                setTextColor(android.graphics.Color.LTGRAY)
+            }
+
+            taskInfo.addView(titleText)
+            taskInfo.addView(statusText)
+
+            cardView.addView(priorityDot)
+            cardView.addView(taskInfo)
+
+            // Click to see details
+            cardView.setOnClickListener {
+                showTaskDetailsDialog(task)
+            }
+
+            container?.addView(cardView)
+
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Error creating compact task card", e)
         }
     }
 

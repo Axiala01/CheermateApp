@@ -70,6 +70,9 @@ dependencies {
     // Multidex support
     implementation("androidx.multidex:multidex:2.0.1")
 
+    // ViewPager2 for swipeable tasks
+    implementation("androidx.viewpager2:viewpager2:1.0.0")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
