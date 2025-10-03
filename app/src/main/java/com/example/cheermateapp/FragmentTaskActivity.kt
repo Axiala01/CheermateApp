@@ -5,9 +5,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.RecyclerView
 import com.example.cheermateapp.data.model.Status
 import androidx.lifecycle.lifecycleScope
 import com.example.cheermateapp.data.db.AppDb
@@ -222,61 +224,8 @@ class FragmentTaskActivity : AppCompatActivity() {
     }
 
     // ✅ FIXED: All navigation methods at class level
-    private fun navigateToPreviousTask() {
-        if (filteredTasks.isEmpty()) {
-            return
-        }
-        
-        if (currentTaskIndex > 0) {
-            currentTaskIndex--
-            showTaskInCard(filteredTasks[currentTaskIndex])
-            updateNavigationState()
-            Toast.makeText(this, "◀ Previous task", Toast.LENGTH_SHORT).show()
-        } else {
-            // Already at the first task
-            Toast.makeText(this, "Start of list", Toast.LENGTH_SHORT).show()
-        }
-    }
 
-    private fun navigateToNextTask() {
-        if (filteredTasks.isEmpty()) {
-            return
-        }
-        
-        if (currentTaskIndex < filteredTasks.size - 1) {
-            currentTaskIndex++
-            showTaskInCard(filteredTasks[currentTaskIndex])
-            updateNavigationState()
-            Toast.makeText(this, "Next task ▶", Toast.LENGTH_SHORT).show()
-        } else {
-            // Already at the last task
-            Toast.makeText(this, "End of list", Toast.LENGTH_SHORT).show()
-        }
-    }
 
-    private fun updateNavigationState() {
-        try {
-            if (filteredTasks.size <= 1) {
-                // Hide navigation if only one or no tasks
-                layoutNavigation.visibility = View.GONE
-            } else {
-                // Show navigation if multiple tasks
-                layoutNavigation.visibility = View.VISIBLE
-
-                // Update counter with space for better readability
-                tvTaskCounter.text = "${currentTaskIndex + 1} / ${filteredTasks.size}"
-
-                // Enable/disable buttons based on position
-                btnPreviousTask.alpha = if (currentTaskIndex > 0) 1.0f else 0.5f
-                btnPreviousTask.isClickable = currentTaskIndex > 0
-
-                btnNextTask.alpha = if (currentTaskIndex < filteredTasks.size - 1) 1.0f else 0.5f
-                btnNextTask.isClickable = currentTaskIndex < filteredTasks.size - 1
-            }
-        } catch (e: Exception) {
-            android.util.Log.e("FragmentTaskActivity", "Error updating navigation state", e)
-        }
-    }
 
     // ✅ UPDATED: Display tasks with navigation support
     private fun displayTaskInCard(tasks: List<Task>) {
@@ -301,66 +250,6 @@ class FragmentTaskActivity : AppCompatActivity() {
         recyclerViewTasks.visibility = View.VISIBLE
         tvEmptyState.visibility = View.GONE
         taskListAdapter.updateTasks(tasks)
-    }
-
-    // ✅ FIXED: Use existing XML views to display task data
-    private fun showTaskInCard(task: Task) {
-        try {
-            android.util.Log.d("DEBUG", "🎯 showTaskInCard called with task: ${task.Title}")
-
-            currentDisplayedTask = task
-            
-            // ✅ Ensure card is visible when showing task
-            cardEmpty.visibility = View.VISIBLE
-
-            // Update the existing XML TextViews with task data from database
-            tvTaskTitle.text = task.Title
-            tvTaskTitle.visibility = View.VISIBLE
-            tvTaskTitle.gravity = android.view.Gravity.START // Reset to left alignment for tasks
-            
-            // Show description if it exists, otherwise show placeholder
-            if (!task.Description.isNullOrBlank()) {
-                tvTaskDescription.text = task.Description
-                tvTaskDescription.visibility = View.VISIBLE
-                tvTaskDescription.alpha = 0.8f
-            } else {
-                tvTaskDescription.text = "No description available"
-                tvTaskDescription.visibility = View.VISIBLE
-                tvTaskDescription.alpha = 0.5f // Lower opacity for placeholder
-            }
-            
-            // Display priority with emoji and color
-            tvTaskPriority.text = task.getPriorityText()
-            tvTaskPriority.setTextColor(task.getPriorityColor())
-            layoutPriority.visibility = View.VISIBLE
-            
-            // Display status
-            tvTaskStatus.text = task.getStatusText()
-            layoutStatus.visibility = View.VISIBLE
-            
-            // Display due date
-            tvTaskDueDate.text = task.getFormattedDueDateTime()
-            layoutDueDate.visibility = View.VISIBLE
-            
-            // Show/hide Mark as Done button based on task status
-            if (task.Status != Status.Completed) {
-                btnMarkDone.text = when (task.Status) {
-                    Status.Pending -> "✅ Mark as Done"
-                    Status.InProgress -> "✅ Complete Task"
-                    Status.OverDue -> "✅ Complete (Overdue)"
-                    else -> "✅ Mark as Done"
-                }
-                btnMarkDone.visibility = View.VISIBLE
-            } else {
-                btnMarkDone.visibility = View.GONE
-            }
-
-            android.util.Log.d("DEBUG", "✅ showTaskInCard completed successfully")
-
-        } catch (e: Exception) {
-            android.util.Log.e("DEBUG", "❌ Error in showTaskInCard: ${e.message}", e)
-            showEmptyState()
-        }
     }
 
 
@@ -463,33 +352,30 @@ class FragmentTaskActivity : AppCompatActivity() {
     // ✅ FIXED: Corrected showEmptyState method
     private fun showEmptyState() {
         try {
-            currentDisplayedTask = null
             filteredTasks = emptyList()
-            currentTaskIndex = 0
+            currentTasks.clear()
 
-            // Show appropriate empty message based on current filter
+            recyclerViewTasks.visibility = View.GONE
+            tvEmptyState.visibility = View.VISIBLE
+
             val emptyMessage = when (currentFilter) {
-                FilterType.ALL -> "No task available"
-                FilterType.TODAY -> "No task available"
-                FilterType.PENDING -> "No task available"
-                FilterType.DONE -> "No task available"
+                FilterType.ALL -> "📋 No tasks available
+
+Tap the + button to create your first task!"
+                FilterType.TODAY -> "📅 No tasks due today
+
+Great! You're all caught up for today!"
+                FilterType.PENDING -> "⏳ No pending tasks
+
+All tasks are either completed or not yet assigned!"
+                FilterType.DONE -> "✅ No completed tasks yet
+
+Start completing tasks to see them here!"
             }
 
-            // Show title with empty message (centered) and hide all task detail views
-            tvTaskTitle.text = emptyMessage
-            tvTaskTitle.visibility = View.VISIBLE
-            tvTaskTitle.gravity = android.view.Gravity.CENTER
-            tvTaskDescription.visibility = View.GONE
-            layoutPriority.visibility = View.GONE
-            layoutStatus.visibility = View.GONE
-            layoutDueDate.visibility = View.GONE
-            btnMarkDone.visibility = View.GONE
-            layoutNavigation.visibility = View.GONE
-            
-            // ✅ Ensure card is visible even in empty state
-            cardEmpty.visibility = View.VISIBLE
+            tvEmptyState.text = emptyMessage
 
-            android.util.Log.d("FragmentTaskActivity", "📋 Showing empty state: $emptyMessage")
+            android.util.Log.d("FragmentTaskActivity", "📋 Showing empty state")
 
         } catch (e: Exception) {
             android.util.Log.e("FragmentTaskActivity", "Error showing empty state", e)
@@ -858,6 +744,95 @@ class FragmentTaskActivity : AppCompatActivity() {
     }
 
     // ✅ CRUD OPERATION: READ - Show task details dialog
+    // Show task details in a dialog with custom layout
+    private fun showTaskDetailsDialog(task: Task) {
+        try {
+            val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_task_details, null)
+            
+            // Find views
+            val layoutPriorityIndicator = dialogView.findViewById<View>(R.id.layoutPriorityIndicator)
+            val tvTaskTitle = dialogView.findViewById<TextView>(R.id.tvTaskTitle)
+            val tvTaskDescription = dialogView.findViewById<TextView>(R.id.tvTaskDescription)
+            val tvTaskPriority = dialogView.findViewById<TextView>(R.id.tvTaskPriority)
+            val tvTaskStatus = dialogView.findViewById<TextView>(R.id.tvTaskStatus)
+            val tvTaskDueDate = dialogView.findViewById<TextView>(R.id.tvTaskDueDate)
+            val tvTaskProgress = dialogView.findViewById<TextView>(R.id.tvTaskProgress)
+            val progressBar = dialogView.findViewById<ProgressBar>(R.id.progressBar)
+            val progressBarLayout = dialogView.findViewById<LinearLayout>(R.id.progressBarLayout)
+            val btnComplete = dialogView.findViewById<TextView>(R.id.btnComplete)
+            val btnEdit = dialogView.findViewById<TextView>(R.id.btnEdit)
+            val btnDelete = dialogView.findViewById<TextView>(R.id.btnDelete)
+            
+            // Set priority indicator color
+            layoutPriorityIndicator.setBackgroundColor(task.getPriorityColor())
+            
+            // Set task title
+            tvTaskTitle.text = task.Title
+            
+            // Set description
+            if (!task.Description.isNullOrBlank()) {
+                tvTaskDescription.text = task.Description
+                tvTaskDescription.visibility = View.VISIBLE
+            } else {
+                tvTaskDescription.visibility = View.GONE
+            }
+            
+            // Set priority
+            tvTaskPriority.text = task.Priority.name
+            
+            // Set status
+            tvTaskStatus.text = "${task.getStatusEmoji()} ${task.Status.name}"
+            
+            // Set progress
+            if (task.TaskProgress > 0) {
+                progressBarLayout.visibility = View.VISIBLE
+                progressBar.progress = task.TaskProgress
+                tvTaskProgress.text = "${task.TaskProgress}%"
+            } else {
+                progressBarLayout.visibility = View.GONE
+            }
+            
+            // Set due date
+            tvTaskDueDate.text = task.getFormattedDueDateTime()
+            
+            // Create dialog
+            val dialog = AlertDialog.Builder(this)
+                .setView(dialogView)
+                .create()
+            
+            // Set up button click listeners
+            btnComplete.setOnClickListener {
+                dialog.dismiss()
+                markTaskAsDone(task)
+            }
+            
+            btnEdit.setOnClickListener {
+                dialog.dismiss()
+                showEditTaskDialog(task)
+            }
+            
+            btnDelete.setOnClickListener {
+                dialog.dismiss()
+                deleteTask(task)
+            }
+            
+            // Update button state based on task status
+            if (task.Status == Status.Completed) {
+                btnComplete.text = "✅ Completed"
+                btnComplete.alpha = 0.5f
+                btnComplete.isEnabled = false
+            }
+            
+            dialog.show()
+            
+        } catch (e: Exception) {
+            android.util.Log.e("FragmentTaskActivity", "Error showing task details", e)
+            // Fallback to simple dialog
+            showTaskDetailDialog(task)
+        }
+    }
+
+    // Fallback simple dialog
     private fun showTaskDetailDialog(task: Task) {
         val message = """
         📋 ${task.Title}
