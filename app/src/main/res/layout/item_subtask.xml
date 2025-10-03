@@ -22,7 +22,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Subtask name"
+        android:text="@string/subtask_name"
         android:textSize="14sp"
         android:textColor="?android:attr/textColorPrimary"
         android:maxLines="2"
@@ -35,9 +35,9 @@
         android:layout_height="24dp"
         android:layout_marginStart="8dp"
         android:src="@android:drawable/ic_menu_delete"
-        android:tint="?android:attr/textColorSecondary"
-        android:contentDescription="Delete subtask"
+        android:contentDescription="@string/delete_subtask"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:padding="4dp" />
+        android:padding="4dp"
+        app:tint="?android:attr/textColorSecondary" />
 
 </LinearLayout>

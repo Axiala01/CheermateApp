@@ -10,7 +10,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Set Reminder Time"
+        android:text="@string/set_reminder_time"
         android:textSize="16sp"
         android:textStyle="bold"
         android:layout_marginBottom="12dp" />
@@ -43,7 +43,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Or choose a quick option:"
+        android:text="@string/or_choose_a_quick_option"
         android:textSize="14sp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp" />
@@ -58,35 +58,35 @@
             android:id="@+id/rb15Minutes"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="15 minutes before due time"
+            android:text="@string/_15_minutes_before_due_time"
             android:padding="8dp" />
 
         <RadioButton
             android:id="@+id/rb30Minutes"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="30 minutes before due time"
+            android:text="@string/_30_minutes_before_due_time"
             android:padding="8dp" />
 
         <RadioButton
             android:id="@+id/rb1Hour"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="1 hour before due time"
+            android:text="@string/_1_hour_before_due_time"
             android:padding="8dp" />
 
         <RadioButton
             android:id="@+id/rb1Day"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="1 day before due time"
+            android:text="@string/_1_day_before_due_time"
             android:padding="8dp" />
 
         <RadioButton
             android:id="@+id/rbCustom"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Custom (use date/time above)"
+            android:text="@string/custom_use_date_time_above"
             android:padding="8dp"
             android:checked="true" />
 
@@ -98,7 +98,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="No reminder time selected"
+        android:text="@string/no_reminder_time_selected"
         android:textSize="12sp"
         android:textColor="?android:attr/textColorSecondary"
         android:gravity="center" />

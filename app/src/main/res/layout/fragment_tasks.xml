@@ -294,7 +294,7 @@
                 android:layout_height="wrap_content"
                 android:alpha="0.7"
                 android:fontFamily="@font/sf_pro_rounded_regular"
-                android:text="Due: "
+                android:text="@string/due"
                 android:textColor="@android:color/white"
                 android:textSize="14sp" />
 
