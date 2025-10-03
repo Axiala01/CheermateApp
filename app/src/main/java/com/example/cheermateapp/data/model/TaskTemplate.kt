@@ -1,6 +1,9 @@
 package com.example.cheermateapp.data.model
 
 import androidx.room.*
+import com.example.cheermateapp.data.model.Priority
+import com.example.cheermateapp.data.model.Status
+
 
 /**
  * TaskTemplate model for reusable task templates
@@ -41,7 +44,7 @@ data class TaskTemplate(
     val TaskDescription: String? = null,
 
     @ColumnInfo(name = "Priority")
-    val Priority: Priority = Priority.Medium,
+    val Priority: Priority = com.example.cheermateapp.data.model.Priority.Medium,
 
     @ColumnInfo(name = "EstimatedDuration")
     val EstimatedDuration: Int? = null, // Duration in minutes
