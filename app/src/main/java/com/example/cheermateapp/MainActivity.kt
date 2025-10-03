@@ -1766,42 +1766,6 @@ class MainActivity : AppCompatActivity() {
                                 counterText.text = "${position + 1} / ${activeTasks.size}"
                             }
                         })
-
-                        // Add expandable section for remaining tasks
-                        if (activeTasks.size > 1) {
-                            val collapsedText = TextView(this)
-                            collapsedText.text = "▼ ${activeTasks.size - 1} more tasks pending (tap to expand)"
-                            collapsedText.textSize = 12f
-                            collapsedText.setTextColor(android.graphics.Color.LTGRAY)
-                            collapsedText.gravity = android.view.Gravity.CENTER
-                            collapsedText.setPadding(8, 16, 8, 8)
-                            collapsedText.setTypeface(null, android.graphics.Typeface.BOLD)
-                            contentArea?.addView(collapsedText)
-
-                            // Create collapsible container for remaining tasks
-                            val collapsibleContainer = LinearLayout(this)
-                            collapsibleContainer.orientation = LinearLayout.VERTICAL
-                            collapsibleContainer.visibility = View.GONE
-                            contentArea?.addView(collapsibleContainer)
-
-                            // Add remaining tasks to collapsible section
-                            activeTasks.drop(1).forEach { task ->
-                                createCompactTaskCard(task, collapsibleContainer)
-                            }
-
-                            // Toggle visibility on click
-                            var isExpanded = false
-                            collapsedText.setOnClickListener {
-                                isExpanded = !isExpanded
-                                if (isExpanded) {
-                                    collapsibleContainer.visibility = View.VISIBLE
-                                    collapsedText.text = "▲ Hide pending tasks"
-                                } else {
-                                    collapsibleContainer.visibility = View.GONE
-                                    collapsedText.text = "▼ ${activeTasks.size - 1} more tasks pending (tap to expand)"
-                                }
-                            }
-                        }
                     }
                 }
             }
