@@ -359,18 +359,10 @@ class FragmentTaskActivity : AppCompatActivity() {
             tvEmptyState.visibility = View.VISIBLE
 
             val emptyMessage = when (currentFilter) {
-                FilterType.ALL -> "📋 No tasks available
-
-Tap the + button to create your first task!"
-                FilterType.TODAY -> "📅 No tasks due today
-
-Great! You're all caught up for today!"
-                FilterType.PENDING -> "⏳ No pending tasks
-
-All tasks are either completed or not yet assigned!"
-                FilterType.DONE -> "✅ No completed tasks yet
-
-Start completing tasks to see them here!"
+                FilterType.ALL -> "📋 No tasks available\n\nTap the + button to create your first task!"
+                FilterType.TODAY -> "📅 No tasks due today\n\nGreat! You're all caught up for today!"
+                FilterType.PENDING -> "⏳ No pending tasks\n\nAll tasks are either completed or not yet assigned!"
+                FilterType.DONE -> "✅ No completed tasks yet\n\nStart completing tasks to see them here!"
             }
 
             tvEmptyState.text = emptyMessage
