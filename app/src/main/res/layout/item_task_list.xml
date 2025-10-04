@@ -4,12 +4,11 @@
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="4dp"
     android:layout_marginVertical="6dp"
-    android:background="@drawable/bg_card_glass_hover"
+    android:background="@drawable/gradient_background"
     android:clickable="true"
     android:elevation="2dp"
     android:focusable="true"
-    android:orientation="horizontal"
-    android:padding="16dp">
+    android:orientation="horizontal">
 
     <!-- Priority Indicator -->
     <View
@@ -34,7 +33,7 @@
             android:ellipsize="end"
             android:fontFamily="@font/sf_pro_rounded_bold"
             android:maxLines="1"
-            android:text="Task Title"
+            android:text="@string/task_title"
             android:textColor="@android:color/white"
             android:textSize="16sp" />
 
@@ -47,7 +46,7 @@
             android:ellipsize="end"
             android:fontFamily="@font/sf_pro_rounded_regular"
             android:maxLines="1"
-            android:text="Task Description"
+            android:text="@string/task_description"
             android:textColor="@color/text_secondary_white_70"
             android:textSize="13sp"
             android:visibility="gone" />
@@ -67,7 +66,7 @@
                 android:fontFamily="@font/sf_pro_rounded_bold"
                 android:paddingHorizontal="8dp"
                 android:paddingVertical="4dp"
-                android:text="🎯 High"
+                android:text="@string/high"
                 android:textColor="@android:color/white"
                 android:textSize="11sp" />
 
@@ -80,7 +79,7 @@
                 android:fontFamily="@font/sf_pro_rounded_bold"
                 android:paddingHorizontal="8dp"
                 android:paddingVertical="4dp"
-                android:text="⏳ Pending"
+                android:text="@string/pending1"
                 android:textColor="@android:color/white"
                 android:textSize="11sp" />
 
@@ -94,7 +93,7 @@
                 android:fontFamily="@font/sf_pro_rounded_regular"
                 android:gravity="end"
                 android:maxLines="1"
-                android:text="📅 Dec 25"
+                android:text="@string/duedate"
                 android:textColor="@color/text_secondary_white_70"
                 android:textSize="11sp" />
         </LinearLayout>

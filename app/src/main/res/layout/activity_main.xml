@@ -498,7 +498,7 @@
         android:tint="@android:color/white"
         android:backgroundTint="#6B48FF"
         android:elevation="6dp"
-        android:visibility="gone"
+        android:visibility="visible"
         app:borderWidth="0dp" />
 
     <!-- Bottom navigation (3 items) -->

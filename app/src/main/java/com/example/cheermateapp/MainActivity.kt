@@ -408,11 +408,6 @@ class MainActivity : AppCompatActivity() {
             )
             taskRecyclerView?.adapter = taskAdapter
 
-            // ✅ Initialize FAB in fragment_tasks
-            val fabAddTask = findViewById<FloatingActionButton>(R.id.fabAddTask)
-            fabAddTask?.setOnClickListener {
-                showQuickAddTaskDialog()
-            }
 
             // ✅ Show FAB in activity_main when on tasks fragment
             val fabAddTaskMain = findViewById<FloatingActionButton>(R.id.fabAddTaskMain)
