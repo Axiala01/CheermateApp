@@ -14,6 +14,8 @@ import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.example.cheermateapp.data.db.AppDb
 import com.example.cheermateapp.data.model.Personality
@@ -21,6 +23,7 @@ import com.example.cheermateapp.data.model.Task
 import com.example.cheermateapp.data.model.Priority
 import com.example.cheermateapp.data.model.User
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -37,6 +40,10 @@ class MainActivity : AppCompatActivity() {
 
     private val uiScope = CoroutineScope(Dispatchers.Main)
     private var userId: Int = 0
+
+    // ✅ RecyclerView and TaskAdapter for fragment_tasks
+    private var taskRecyclerView: RecyclerView? = null
+    private var taskAdapter: TaskAdapter? = null
 
     // ✅ LIVE TASK UPDATE SYSTEM
     private var taskUpdateHandler = android.os.Handler(android.os.Looper.getMainLooper())
@@ -310,6 +317,10 @@ class MainActivity : AppCompatActivity() {
             val container = findViewById<FrameLayout>(R.id.contentContainer)
             container?.removeAllViews()
             container?.visibility = View.GONE
+            
+            // Hide FAB when not on tasks fragment
+            findViewById<FloatingActionButton>(R.id.fabAddTaskMain)?.visibility = View.GONE
+            
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error showing home screen", e)
         }
@@ -351,6 +362,9 @@ class MainActivity : AppCompatActivity() {
             container?.removeAllViews()
             container?.visibility = View.VISIBLE
 
+            // Hide FAB when not on tasks fragment
+            findViewById<FloatingActionButton>(R.id.fabAddTaskMain)?.visibility = View.GONE
+
             // Inflate settings fragment layout into the container
             LayoutInflater.from(this).inflate(R.layout.fragment_settings, container, true)
 
@@ -379,7 +393,33 @@ class MainActivity : AppCompatActivity() {
             val tabToday = findViewById<TextView>(R.id.tabToday)
             val tabPending = findViewById<TextView>(R.id.tabPending)
             val tabDone = findViewById<TextView>(R.id.tabDone)
+            val tvEmptyState = findViewById<TextView>(R.id.tvEmptyState)
+            
+            // ✅ Initialize RecyclerView and TaskAdapter
+            taskRecyclerView = findViewById<RecyclerView>(R.id.recyclerViewTasks)
+            taskRecyclerView?.layoutManager = LinearLayoutManager(this)
+            
+            taskAdapter = TaskAdapter(
+                tasks = mutableListOf(),
+                onTaskClick = { task -> onTaskClick(task) },
+                onTaskComplete = { task -> onTaskComplete(task) },
+                onTaskEdit = { task -> onTaskEdit(task) },
+                onTaskDelete = { task -> onTaskDelete(task) }
+            )
+            taskRecyclerView?.adapter = taskAdapter
 
+            // ✅ Initialize FAB in fragment_tasks
+            val fabAddTask = findViewById<FloatingActionButton>(R.id.fabAddTask)
+            fabAddTask?.setOnClickListener {
+                showQuickAddTaskDialog()
+            }
+
+            // ✅ Show FAB in activity_main when on tasks fragment
+            val fabAddTaskMain = findViewById<FloatingActionButton>(R.id.fabAddTaskMain)
+            fabAddTaskMain?.visibility = View.VISIBLE
+            fabAddTaskMain?.setOnClickListener {
+                showQuickAddTaskDialog()
+            }
 
             btnSort?.setOnClickListener {
                 showSortOptionsDialog()
@@ -425,7 +465,7 @@ class MainActivity : AppCompatActivity() {
             // Load initial task data
             loadTasksFragmentData()
 
-            android.util.Log.d("MainActivity", "✅ Tasks fragment initialized")
+            android.util.Log.d("MainActivity", "✅ Tasks fragment initialized with RecyclerView")
 
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error setting up tasks fragment", e)
@@ -550,40 +590,28 @@ class MainActivity : AppCompatActivity() {
                 findViewById<TextView>(R.id.tabPending)?.text = "Pending (${counts["pending"]})"
                 findViewById<TextView>(R.id.tabDone)?.text = "Done (${counts["done"]})"
 
-                // Show task list (simplified - you can enhance this)
-                displayTasksList()
+                // ✅ Update RecyclerView with tasks
+                val tvEmptyState = findViewById<TextView>(R.id.tvEmptyState)
+                if (currentTasks.isEmpty()) {
+                    taskRecyclerView?.visibility = View.GONE
+                    tvEmptyState?.visibility = View.VISIBLE
+                    tvEmptyState?.text = when (currentTaskFilter) {
+                        "TODAY" -> "No tasks for today\n\nTap the + button to create your first task"
+                        "PENDING" -> "No pending tasks\n\nAll caught up!"
+                        "DONE" -> "No completed tasks yet\n\nComplete a task to see it here"
+                        else -> "No tasks available\n\nTap the + button to create your first task"
+                    }
+                } else {
+                    taskRecyclerView?.visibility = View.VISIBLE
+                    tvEmptyState?.visibility = View.GONE
+                    taskAdapter?.updateTasks(currentTasks)
+                }
+
+                android.util.Log.d("MainActivity", "✅ Updated RecyclerView with ${currentTasks.size} tasks")
 
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error updating tasks fragment UI", e)
             }
-        }
-    }
-
-    private fun displayTasksList() {
-        try {
-            if (currentTasks.isNotEmpty()) {
-                // Create a simple task list display
-                val taskListText = StringBuilder()
-                taskListText.append("📋 Your Tasks:\n\n")
-
-                currentTasks.take(5).forEach { task ->
-                    taskListText.append("${task.getStatusEmoji()} ${task.Title}\n")
-                    taskListText.append("   Priority: ${task.Priority} | Status: ${task.Status}\n")
-                    if (task.DueAt != null) {
-                        taskListText.append("   Due: ${task.getFormattedDueDateTime()}\n")
-                    }
-                    taskListText.append("\n")
-                }
-
-                if (currentTasks.size > 5) {
-                    taskListText.append("... and ${currentTasks.size - 5} more tasks\n")
-                }
-
-                // Show in a toast for now (you can create a proper RecyclerView later)
-                Toast.makeText(this, taskListText.toString(), Toast.LENGTH_LONG).show()
-            }
-        } catch (e: Exception) {
-            android.util.Log.e("MainActivity", "Error displaying tasks list", e)
         }
     }
 
@@ -623,6 +651,82 @@ class MainActivity : AppCompatActivity() {
             currentTasks.addAll(filteredTasks)
             updateTasksFragmentUI()
         }
+    }
+
+    // ✅ TASK ACTION HANDLERS FOR RECYCLERVIEW
+    private fun onTaskClick(task: Task) {
+        // Show task details in a dialog
+        val message = buildString {
+            append("Title: ${task.Title}\n\n")
+            if (!task.Description.isNullOrBlank()) {
+                append("Description:\n${task.Description}\n\n")
+            }
+            append("Priority: ${task.Priority}\n")
+            append("Status: ${task.Status}\n")
+            if (task.DueAt != null) {
+                append("Due: ${task.getFormattedDueDateTime()}\n")
+            }
+            append("Progress: ${task.TaskProgress}%")
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("📋 Task Details")
+            .setMessage(message)
+            .setPositiveButton("OK", null)
+            .setNeutralButton("Edit") { _, _ -> onTaskEdit(task) }
+            .show()
+    }
+
+    private fun onTaskComplete(task: Task) {
+        uiScope.launch {
+            try {
+                val db = AppDb.get(this@MainActivity)
+                val updatedTask = task.copy(
+                    Status = Status.Completed,
+                    TaskProgress = 100
+                )
+                
+                withContext(Dispatchers.IO) {
+                    db.taskDao().update(updatedTask)
+                }
+                
+                Toast.makeText(this@MainActivity, "✅ Task completed!", Toast.LENGTH_SHORT).show()
+                loadTasksFragmentData() // Reload to refresh the list
+                
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Error completing task", e)
+                Toast.makeText(this@MainActivity, "Failed to complete task", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun onTaskEdit(task: Task) {
+        // Navigate to edit task screen or show edit dialog
+        Toast.makeText(this, "Edit task: ${task.Title}", Toast.LENGTH_SHORT).show()
+        // TODO: Implement edit functionality
+    }
+
+    private fun onTaskDelete(task: Task) {
+        AlertDialog.Builder(this)
+            .setTitle("Delete Task")
+            .setMessage("Are you sure you want to delete '${task.Title}'?")
+            .setPositiveButton("Delete") { _, _ ->
+                uiScope.launch {
+                    try {
+                        val db = AppDb.get(this@MainActivity)
+                        withContext(Dispatchers.IO) {
+                            db.taskDao().delete(task)
+                        }
+                        Toast.makeText(this@MainActivity, "🗑️ Task deleted", Toast.LENGTH_SHORT).show()
+                        loadTasksFragmentData() // Reload to refresh the list
+                    } catch (e: Exception) {
+                        android.util.Log.e("MainActivity", "Error deleting task", e)
+                        Toast.makeText(this@MainActivity, "Failed to delete task", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun showSortOptionsDialog() {

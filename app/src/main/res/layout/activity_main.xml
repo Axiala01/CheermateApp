@@ -486,6 +486,21 @@
         android:layout_weight="1"
         android:visibility="gone" />
 
+    <!-- Floating Action Button for Adding Tasks (visible only in Tasks fragment) -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAddTaskMain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="80dp"
+        android:src="@android:drawable/ic_input_add"
+        android:tint="@android:color/white"
+        android:backgroundTint="#6B48FF"
+        android:elevation="6dp"
+        android:visibility="gone"
+        app:borderWidth="0dp" />
+
     <!-- Bottom navigation (3 items) -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
