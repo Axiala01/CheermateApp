@@ -176,8 +176,11 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewTasks"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
         android:layout_marginTop="10dp"
+
+        android:background="@drawable/bg_card_glass_hover"
         android:layout_weight="1"
         android:clipToPadding="false"
         android:paddingBottom="80dp" />
@@ -194,7 +197,7 @@
         android:fontFamily="@font/sf_pro_rounded_regular"
         android:gravity="center"
         android:padding="20dp"
-        android:text="📋 No tasks available\n\nTap the + button to create your first task!"
+        android:text="@string/no_tasks_available_n_ntap_the_button_to_create_your_first_task"
         android:textAlignment="center"
         android:textColor="@color/text_secondary_white_70"
         android:textSize="16sp"
