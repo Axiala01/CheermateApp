@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+<LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/gradient_background"
@@ -415,15 +420,15 @@
                         android:id="@+id/progressFill"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
-                        android:layout_weight="25"
+                        android:layout_weight="0"
                         android:background="#A686F5FF" />
-                </LinearLayout>
 
-                <!-- remainder (transparent spacer) -->
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="75" />
+                    <!-- remainder (transparent spacer) -->
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="100" />
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/progressPercent"
@@ -502,3 +507,18 @@
         app:labelVisibilityMode="selected"
         app:menu="@menu/menu_bottom_nav" />
 </LinearLayout>
+
+    <!-- Floating Action Button for adding tasks -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAddTask"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="80dp"
+        android:backgroundTint="#6B48FF"
+        android:elevation="6dp"
+        android:src="@android:drawable/ic_input_add"
+        android:tint="@android:color/white"
+        app:borderWidth="0dp" />
+</FrameLayout>

@@ -376,6 +376,11 @@ class MainActivity : AppCompatActivity() {
     // ✅ FRAGMENT SETUP METHODS - MAKE FRAGMENTS FUNCTIONAL
     private fun setupTasksFragment() {
         try {
+            // ✅ Setup FAB for adding tasks (in fragment view)
+            findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fabAddTask)?.setOnClickListener {
+                showQuickAddTaskDialog()
+            }
+
             // Initialize all task fragment components
             val tvTasksTitle = findViewById<TextView>(R.id.tvTasksTitle)
             val tvTasksSub = findViewById<TextView>(R.id.tvTasksSub)
@@ -673,6 +678,11 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this@MainActivity, "✅ Task completed!", Toast.LENGTH_SHORT).show()
                 loadTasksFragmentData() // Reload to refresh the list
                 
+                // ✅ Update home screen progress bar if on home screen
+                if (findViewById<ScrollView>(R.id.homeScroll)?.visibility == View.VISIBLE) {
+                    loadTaskStatistics()
+                }
+                
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error completing task", e)
                 Toast.makeText(this@MainActivity, "Failed to complete task", Toast.LENGTH_SHORT).show()
@@ -699,6 +709,11 @@ class MainActivity : AppCompatActivity() {
                         }
                         Toast.makeText(this@MainActivity, "🗑️ Task deleted", Toast.LENGTH_SHORT).show()
                         loadTasksFragmentData() // Reload to refresh the list
+                        
+                        // ✅ Update home screen progress bar if on home screen
+                        if (findViewById<ScrollView>(R.id.homeScroll)?.visibility == View.VISIBLE) {
+                            loadTaskStatistics()
+                        }
                     } catch (e: Exception) {
                         android.util.Log.e("MainActivity", "Error deleting task", e)
                         Toast.makeText(this@MainActivity, "Failed to delete task", Toast.LENGTH_SHORT).show()
@@ -1136,6 +1151,11 @@ class MainActivity : AppCompatActivity() {
     // ✅ HOME SCREEN INTERACTIONS (DASHBOARD ONLY)
     private fun setupHomeScreenInteractions() {
         try {
+            // ✅ Setup FAB for adding tasks
+            findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fabAddTask)?.setOnClickListener {
+                showQuickAddTaskDialog()
+            }
+
             findViewById<View>(R.id.cardCalendar)?.setOnClickListener {
                 Toast.makeText(this, "📅 Select a date to see tasks!", Toast.LENGTH_SHORT).show()
             }
@@ -1647,28 +1667,31 @@ class MainActivity : AppCompatActivity() {
                     val todayStr = dateToString(today.time)
 
                     val todayTasks = db.taskDao().getTodayTasksCount(userId, todayStr)
+                    val todayCompletedTasks = db.taskDao().getCompletedTodayTasksCount(userId, todayStr)
                     // ✅ FIXED: Use the correct method signature
                     val overdueTasks = db.taskDao().getOverdueTasksCount(userId)
 
                     android.util.Log.d("MainActivity", "✅ Dashboard statistics - Today: $todayStr")
-                    android.util.Log.d("MainActivity", "✅ Today tasks: $todayTasks, Overdue: $overdueTasks")
+                    android.util.Log.d("MainActivity", "✅ Today tasks: $todayTasks, Completed today: $todayCompletedTasks, Overdue: $overdueTasks")
 
                     mapOf(
                         "total" to totalTasks,
                         "completed" to completedTasks,
                         "today" to todayTasks,
+                        "todayCompleted" to todayCompletedTasks,
                         "overdue" to overdueTasks
                     )
                 }
 
                 updateStatisticsDisplay(stats)
-                updateProgressDisplay(stats["completed"] ?: 0, stats["total"] ?: 0)
+                // ✅ Update progress bar with today's tasks progress
+                updateProgressDisplay(stats["todayCompleted"] ?: 0, stats["today"] ?: 0)
 
                 android.util.Log.d("MainActivity", "✅ Dashboard statistics loaded")
 
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error loading dashboard statistics", e)
-                val fallbackStats: Map<String, Int> = mapOf("total" to 0, "completed" to 0, "today" to 0, "overdue" to 0)
+                val fallbackStats: Map<String, Int> = mapOf("total" to 0, "completed" to 0, "today" to 0, "todayCompleted" to 0, "overdue" to 0)
                 updateStatisticsDisplay(fallbackStats)
             }
         }
@@ -1716,13 +1739,28 @@ class MainActivity : AppCompatActivity() {
 
             val percentage = if (total > 0) (completed * 100) / total else 0
 
-            progressSubtitle?.text = "$completed of $total tasks completed"
+            progressSubtitle?.text = "$completed of $total tasks completed today"
             progressPercent?.text = "$percentage%"
 
+            // ✅ Update progress bar weight to reflect percentage
+            // The progress fill should take up percentage of the bar, remainder takes the rest
             progressFill?.layoutParams?.let { params ->
                 if (params is LinearLayout.LayoutParams) {
-                    params.weight = percentage.coerceAtLeast(5).toFloat()
+                    // Weight should be the percentage (0-100)
+                    params.weight = percentage.toFloat()
                     progressFill.layoutParams = params
+                    
+                    // Update the remainder weight
+                    val progressBar = progressFill.parent as? LinearLayout
+                    if (progressBar != null && progressBar.childCount > 1) {
+                        val remainder = progressBar.getChildAt(1)
+                        remainder?.layoutParams?.let { remParams ->
+                            if (remParams is LinearLayout.LayoutParams) {
+                                remParams.weight = (100 - percentage).toFloat()
+                                remainder.layoutParams = remParams
+                            }
+                        }
+                    }
                 }
             }
 
