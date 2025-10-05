@@ -106,8 +106,8 @@ class TaskListAdapter(
         holder.layoutCollapsed.visibility = if (isExpanded) View.GONE else View.VISIBLE
         holder.layoutExpanded.visibility = if (isExpanded) View.VISIBLE else View.GONE
 
-        // Click on collapsed view to expand
-        holder.layoutCollapsed.setOnClickListener {
+        // Click on item view to toggle expand/collapse
+        holder.itemView.setOnClickListener {
             val previousExpandedPosition = expandedPosition
             if (isExpanded) {
                 expandedPosition = -1
