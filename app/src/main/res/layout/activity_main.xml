@@ -515,10 +515,10 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="20dp"
-        android:layout_marginBottom="80dp"
+        android:layout_marginBottom="100dp"
         android:backgroundTint="#6B48FF"
         android:elevation="6dp"
         android:src="@android:drawable/ic_input_add"
-        android:tint="@android:color/white"
+        android:tint="@android:color/background_dark"
         app:borderWidth="0dp" />
 </FrameLayout>
