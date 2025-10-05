@@ -399,7 +399,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sf_pro_rounded_regular"
                     android:paddingTop="6dp"
-                    android:text="0 of 0 tasks completed"
+                    android:text="@string/_0_of_0_tasks_completed"
                     android:textColor="@color/text_secondary_white_70"
                     android:textSize="12sp" />
 
@@ -462,7 +462,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/sf_pro_rounded_bold"
-                        android:text="Recent Tasks"
+                        android:text="@string/recent_tasks"
                         android:textColor="@android:color/white"
                         android:textSize="16sp" />
                 </LinearLayout>
@@ -493,7 +493,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="20dp"
-        android:layout_marginBottom="80dp"
+        android:layout_marginBottom="10dp"
         android:src="@android:drawable/ic_input_add"
         android:tint="@android:color/white"
         android:backgroundTint="#6B48FF"
