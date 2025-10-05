@@ -2255,8 +2255,24 @@ class MainActivity : AppCompatActivity() {
             val calendarView = CalendarView(this)
             calendarView.layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT
+                0,
+                1f // Use weight to share space
             )
+
+            // ✅ CREATE A HELPER TEXT VIEW for showing date task info
+            val dateInfoTextView = TextView(this)
+            dateInfoTextView.layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            dateInfoTextView.apply {
+                setPadding(16, 8, 16, 8)
+                textSize = 12f
+                setTextColor(android.graphics.Color.WHITE)
+                gravity = android.view.Gravity.CENTER
+                text = "Tap a date to view tasks"
+                fontFeatureSettings = "smcp" // Small caps
+            }
 
             // ✅ CONFIGURE CALENDAR SETTINGS
             calendarView.firstDayOfWeek = Calendar.MONDAY
@@ -2266,9 +2282,17 @@ class MainActivity : AppCompatActivity() {
                 // ✅ STYLING (OPTIONAL)
                 calendarView.setBackgroundColor(android.graphics.Color.TRANSPARENT)
 
-                // ✅ DATE SELECTION LISTENER
+                // ✅ DATE SELECTION LISTENER with visual feedback
                 calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
+                    // Show loading indicator
+                    dateInfoTextView.text = "Loading tasks..."
+                    
+                    // Load and display tasks for date
                     showTasksForDate(year, month, dayOfMonth)
+                    
+                    // Update helper text with task info
+                    updateDateInfoText(dateInfoTextView, year, month, dayOfMonth)
+                    
                     android.util.Log.d("MainActivity", "📅 Date selected: $dayOfMonth/${month + 1}/$year")
                 }
 
@@ -2278,14 +2302,66 @@ class MainActivity : AppCompatActivity() {
                 android.util.Log.e("MainActivity", "⚠️ Error applying calendar styling", e)
             }
 
-            // ✅ ADD CALENDAR TO CONTAINER
+            // ✅ ADD CALENDAR AND HELPER TEXT TO CONTAINER
             calendarPlaceholder.addView(calendarView)
+            calendarPlaceholder.addView(dateInfoTextView)
+            
+            // ✅ Load task dates for current month to show info
+            loadTaskDatesForCurrentMonth()
 
             android.util.Log.d("MainActivity", "✅ Calendar added to placeholder")
 
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "❌ Error setting up calendar", e)
             setupFallbackCalendar()
+        }
+    }
+    
+    // ✅ NEW: Update date info text with task count and priority
+    private fun updateDateInfoText(textView: TextView, year: Int, month: Int, day: Int) {
+        uiScope.launch {
+            try {
+                val db = AppDb.get(this@MainActivity)
+                val tasksForDate: List<Task> = withContext(Dispatchers.IO) {
+                    val calendar = Calendar.getInstance()
+                    calendar.set(year, month, day)
+                    val dateStr = dateToString(calendar.time)
+                    db.taskDao().getTodayTasks(userId, dateStr)
+                }
+                
+                if (tasksForDate.isEmpty()) {
+                    textView.text = "No tasks for this date"
+                } else {
+                    val highestPriority = com.example.cheermateapp.util.CalendarDecorator.getHighestPriority(tasksForDate)
+                    val priorityDot = com.example.cheermateapp.util.CalendarDecorator.getPriorityDot(highestPriority)
+                    val dateFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
+                    val calendar = Calendar.getInstance()
+                    calendar.set(year, month, day)
+                    val formattedDate = dateFormat.format(calendar.time)
+                    
+                    textView.text = "$priorityDot $formattedDate: ${tasksForDate.size} task(s) - Tap to view"
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Error updating date info text", e)
+                textView.text = "Error loading task info"
+            }
+        }
+    }
+    
+    // ✅ NEW: Load task dates for current month to prepare data
+    private fun loadTaskDatesForCurrentMonth() {
+        uiScope.launch {
+            try {
+                val db = AppDb.get(this@MainActivity)
+                withContext(Dispatchers.IO) {
+                    val allTasks = db.taskDao().getAllTasksForUser(userId)
+                    val taskDateMap = com.example.cheermateapp.util.CalendarDecorator.getCalendarDateInfoMap(allTasks)
+                    
+                    android.util.Log.d("MainActivity", "✅ Loaded ${taskDateMap.size} dates with tasks")
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Error loading task dates", e)
+            }
         }
     }
 
