@@ -32,7 +32,6 @@
             android:layout_height="wrap_content"
             android:padding="0dp">
 
-
             <!-- Overdue Status Badge -->
             <LinearLayout
                 android:id="@+id/overdue_row"
@@ -49,266 +48,236 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
 
-            <TextView
-                android:id="@+id/overdue_text"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="⏰ Overdue by 12 days"
-                android:textColor="#FFED8936"
-                android:textStyle="bold"
-                android:fontFamily="@font/sf_pro_rounded_bold"
-                android:textSize="14sp" />
-        </LinearLayout>
-
-        <!-- Task Details Card -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/task_card"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="16dp"
-            app:cardCornerRadius="16dp"
-            app:cardBackgroundColor="#33FFFFFF"
-            app:cardElevation="4dp"
-            app:layout_constraintTop_toBottomOf="@id/overdue_row"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp"
-                android:background="@drawable/bg_card_glass">
-
-                <!-- Task Title -->
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:id="@+id/overdue_text"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Task Title"
-                    android:textColor="@color/text_secondary_white_70"
-                    android:fontFamily="@font/sf_pro_rounded_regular"
-                    android:textSize="12sp" />
-
-                <EditText
-                    android:id="@+id/et_task_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Enter task title"
-                    android:textColor="@android:color/white"
-                    android:textColorHint="@color/text_secondary_white_70"
-                    android:fontFamily="@font/sf_pro_rounded_bold"
-                    android:textSize="18sp"
-                    android:background="@android:color/transparent"
-                    android:padding="8dp" />
-
-                <!-- Task Description -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Description"
-                    android:textColor="@color/text_secondary_white_70"
-                    android:fontFamily="@font/sf_pro_rounded_regular"
-                    android:textSize="12sp"
-                    android:layout_marginTop="12dp" />
-
-                <EditText
-                    android:id="@+id/et_task_description"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Enter description"
-                    android:textColor="@android:color/white"
-                    android:textColorHint="@color/text_secondary_white_70"
-                    android:fontFamily="@font/sf_pro_rounded_regular"
-                    android:textSize="14sp"
-                    android:background="@android:color/transparent"
-                    android:padding="8dp"
-                    android:gravity="top"
-                    android:minLines="2"
-                    android:maxLines="4" />
-
-                <!-- Category Section -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Category"
-                    android:textColor="@color/text_secondary_white_70"
-                    android:fontFamily="@font/sf_pro_rounded_regular"
-                    android:textSize="12sp"
-                    android:layout_marginTop="16dp" />
-
-                <Button
-                    android:id="@+id/btn_task_category"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="📌 Others"
-                    android:textColor="@android:color/white"
-                    android:fontFamily="@font/sf_pro_rounded_bold"
-                    android:background="@drawable/bg_chip_glass"
-                    android:padding="12dp"
-                    android:layout_marginTop="8dp"
-                    android:textAllCaps="false" />
-
-                <!-- Priority Section -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Priority"
-                    android:textColor="@color/text_secondary_white_70"
-                    android:fontFamily="@font/sf_pro_rounded_regular"
-                    android:textSize="12sp"
-                    android:layout_marginTop="16dp" />
-
-                <Button
-                    android:id="@+id/btn_task_priority"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🟡 Medium"
-                    android:textColor="@android:color/white"
-                    android:fontFamily="@font/sf_pro_rounded_bold"
-                    android:background="@drawable/bg_chip_glass"
-                    android:padding="12dp"
-                    android:layout_marginTop="8dp"
-                    android:textAllCaps="false" />
-
-                <!-- Due Date Section -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Due Date"
-                    android:textColor="@color/text_secondary_white_70"
-                    android:fontFamily="@font/sf_pro_rounded_regular"
-                    android:textSize="12sp"
-                    android:layout_marginTop="16dp" />
-
-                <Button
-                    android:id="@+id/btn_task_due_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="📅 Select Date"
-                    android:textColor="@android:color/white"
-                    android:fontFamily="@font/sf_pro_rounded_bold"
-                    android:background="@drawable/bg_chip_glass"
-                    android:padding="12dp"
-                    android:layout_marginTop="8dp"
-                    android:textAllCaps="false" />
-
-                <!-- Reminder Section -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Reminder"
-                    android:textColor="@color/text_secondary_white_70"
-                    android:fontFamily="@font/sf_pro_rounded_regular"
-                    android:textSize="12sp"
-                    android:layout_marginTop="16dp" />
-
-                <Button
-                    android:id="@+id/btn_task_reminder"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="⏰ Set Reminder"
-                    android:textColor="@android:color/white"
-                    android:fontFamily="@font/sf_pro_rounded_bold"
-                    android:background="@drawable/bg_chip_glass"
-                    android:padding="12dp"
-                    android:layout_marginTop="8dp"
-                    android:textAllCaps="false" />
-
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- Subtasks Section -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/subtask_card"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="16dp"
-            app:cardBackgroundColor="#33FFFFFF"
-            app:cardElevation="4dp"
-            app:layout_constraintTop_toBottomOf="@id/task_card"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp"
-                android:background="@drawable/bg_card_glass">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Subtasks"
-                    android:textSize="16sp"
+                    android:layout_weight="1"
+                    android:text="⏰ Overdue by 12 days"
+                    android:textColor="#FFED8936"
                     android:textStyle="bold"
                     android:fontFamily="@font/sf_pro_rounded_bold"
-                    android:textColor="@android:color/white" />
+                    android:textSize="14sp" />
+            </LinearLayout>
 
-                <!-- Subtask Input -->
+            <!-- Task Details Card -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/task_card"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#33FFFFFF"
+                app:cardElevation="4dp"
+                app:layout_constraintTop_toBottomOf="@id/overdue_row"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
                 <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="12dp"
-                    android:gravity="center_vertical">
-
-                    <EditText
-                        android:id="@+id/et_subtask_input"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="Add subtask"
-                        android:textColor="@android:color/white"
-                        android:textColorHint="@color/text_secondary_white_70"
-                        android:fontFamily="@font/sf_pro_rounded_regular"
-                        android:textSize="14sp"
-                        android:background="@drawable/bg_chip_glass"
-                        android:padding="12dp" />
-
-                    <Button
-                        android:id="@+id/btn_add_subtask"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Add"
-                        android:textColor="@android:color/white"
-                        android:fontFamily="@font/sf_pro_rounded_bold"
-                        android:background="@drawable/bg_chip_glass"
-                        android:padding="12dp"
-                        android:layout_marginStart="8dp"
-                        android:visibility="gone"
-                        android:textAllCaps="false" />
-                </LinearLayout>
-
-                <!-- Subtasks List Container -->
-                <LinearLayout
-                    android:id="@+id/subtasks_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_marginTop="12dp">
+                    android:padding="16dp"
+                    android:background="@drawable/bg_card_glass">
 
+                    <!-- Task Title label then field -->
                     <TextView
-                        android:id="@+id/tv_no_subtasks"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:text="Task title"
+                        android:textColor="@color/text_secondary_white_70"
+                        android:fontFamily="@font/sf_pro_rounded_regular"
+                        android:textSize="14sp" />
+
+                    <EditText
+                        android:id="@+id/et_task_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Task title"
+                        android:textColor="@android:color/white"
+                        android:textColorHint="@color/text_secondary_white_70"
+                        android:fontFamily="@font/sf_pro_rounded_bold"
+                        android:textSize="20sp"
+                        android:background="@android:color/transparent"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp" />
+
+                    <!-- Task Description label then field -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Task description"
+                        android:textColor="@color/text_secondary_white_70"
+                        android:fontFamily="@font/sf_pro_rounded_regular"
+                        android:textSize="14sp"
+                        android:layout_marginTop="16dp" />
+
+                    <EditText
+                        android:id="@+id/et_task_description"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Task description"
+                        android:textColor="@android:color/white"
+                        android:textColorHint="@color/text_secondary_white_70"
+                        android:fontFamily="@font/sf_pro_rounded_regular"
+                        android:textSize="16sp"
+                        android:background="@android:color/transparent"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
+                        android:gravity="top"
+                        android:minLines="2"
+                        android:maxLines="3" />
+
+                    <!-- Row: category, priority, due date -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/btn_task_category"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:background="@drawable/bg_chip_glass"
+                            android:minWidth="0dp"
+                            android:paddingLeft="14dp"
+                            android:paddingRight="14dp"
+                            android:text="Work"
+                            android:textAllCaps="false"
+                            android:textColor="@android:color/white"
+                            android:textSize="16sp" />
+
+                        <Button
+                            android:id="@+id/btn_task_priority"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginStart="12dp"
+                            android:background="@drawable/bg_chip_glass"
+                            android:minWidth="0dp"
+                            android:paddingLeft="14dp"
+                            android:paddingRight="14dp"
+                            android:text="Medium"
+                            android:textAllCaps="false"
+                            android:textColor="@android:color/white"
+                            android:textSize="16sp" />
+
+                        <Button
+                            android:id="@+id/btn_task_due_date"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginStart="12dp"
+                            android:background="@drawable/bg_chip_glass"
+                            android:minWidth="0dp"
+                            android:paddingLeft="14dp"
+                            android:paddingRight="14dp"
+                            android:text="9/24/2025"
+                            android:textAllCaps="false"
+                            android:textColor="@android:color/white"
+                            android:textSize="16sp" />
+                    </LinearLayout>
+
+                    <!-- Reminder on its own row -->
+                    <Button
+                        android:id="@+id/btn_task_reminder"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/bg_chip_glass"
+                        android:enabled="false"
+                        android:minWidth="0dp"
+                        android:paddingLeft="14dp"
+                        android:paddingRight="14dp"
+                        android:text="Reminder"
+                        android:textAllCaps="false"
+                        android:textColor="@color/text_secondary_white_70"
+                        android:textSize="16sp" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Subtasks Section -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/subtask_card"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#33FFFFFF"
+                app:cardElevation="4dp"
+                app:layout_constraintTop_toBottomOf="@id/task_card"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:background="@drawable/bg_card_glass">
+
+                    <!-- Header row: title left, count right -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Subtasks"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:fontFamily="@font/sf_pro_rounded_bold"
+                            android:textColor="@android:color/white" />
+
+                        <TextView
+                            android:id="@+id/tv_items_count"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0 items"
+                            android:textSize="14sp"
+                            android:textColor="@color/text_secondary_white_70" />
+                    </LinearLayout>
+
+                    <!-- Placeholder input label like screenshot -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="Subtask title"
+                        android:textSize="16sp"
+                        android:fontFamily="@font/sf_pro_rounded_regular"
+                        android:textColor="@color/text_secondary_white_70" />
+
+                    <!-- Empty state centered -->
+                    <TextView
+                        android:id="@+id/tv_no_subtasks"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:gravity="center"
                         android:text="No subtasks yet"
                         android:textSize="14sp"
                         android:fontFamily="@font/sf_pro_rounded_regular"
                         android:textColor="@color/text_secondary_white_70" />
+
+                    <!-- Runtime container (kept hidden initially) -->
+                    <LinearLayout
+                        android:id="@+id/subtasks_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone" />
                 </LinearLayout>
-
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
+            </androidx.cardview.widget.CardView>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 </LinearLayout>
