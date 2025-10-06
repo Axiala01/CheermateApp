@@ -140,7 +140,7 @@
                             android:text="Work"
                             android:textAllCaps="false"
                             android:textColor="@android:color/white"
-                            android:textSize="13sp"
+                            android:textSize="12sp"
                             android:gravity="center"
                             android:clickable="true"
                             android:focusable="true" />
