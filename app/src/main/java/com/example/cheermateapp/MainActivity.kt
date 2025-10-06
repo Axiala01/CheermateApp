@@ -639,26 +639,11 @@ class MainActivity : AppCompatActivity() {
 
     // ✅ TASK ACTION HANDLERS FOR RECYCLERVIEW
     private fun onTaskClick(task: Task) {
-        // Show task details in a dialog
-        val message = buildString {
-            append("Title: ${task.Title}\n\n")
-            if (!task.Description.isNullOrBlank()) {
-                append("Description:\n${task.Description}\n\n")
-            }
-            append("Priority: ${task.Priority}\n")
-            append("Status: ${task.Status}\n")
-            if (task.DueAt != null) {
-                append("Due: ${task.getFormattedDueDateTime()}\n")
-            }
-            append("Progress: ${task.TaskProgress}%")
-        }
-
-        AlertDialog.Builder(this)
-            .setTitle("📋 Task Details")
-            .setMessage(message)
-            .setPositiveButton("OK", null)
-            .setNeutralButton("Edit") { _, _ -> onTaskEdit(task) }
-            .show()
+        // Navigate to FragmentTaskExtensionActivity to show full task details
+        val intent = Intent(this, FragmentTaskExtensionActivity::class.java)
+        intent.putExtra(FragmentTaskExtensionActivity.EXTRA_TASK_ID, task.Task_ID)
+        intent.putExtra(FragmentTaskExtensionActivity.EXTRA_USER_ID, task.User_ID)
+        startActivity(intent)
     }
 
     private fun onTaskComplete(task: Task) {
