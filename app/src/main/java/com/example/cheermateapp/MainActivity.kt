@@ -10,6 +10,7 @@ import com.example.cheermateapp.data.model.Priority.High
 import com.example.cheermateapp.data.model.Priority.Low
 import com.example.cheermateapp.data.model.Priority.Medium
 import com.example.cheermateapp.data.model.Status
+import com.example.cheermateapp.data.model.Category
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -639,26 +640,11 @@ class MainActivity : AppCompatActivity() {
 
     // ✅ TASK ACTION HANDLERS FOR RECYCLERVIEW
     private fun onTaskClick(task: Task) {
-        // Show task details in a dialog
-        val message = buildString {
-            append("Title: ${task.Title}\n\n")
-            if (!task.Description.isNullOrBlank()) {
-                append("Description:\n${task.Description}\n\n")
-            }
-            append("Priority: ${task.Priority}\n")
-            append("Status: ${task.Status}\n")
-            if (task.DueAt != null) {
-                append("Due: ${task.getFormattedDueDateTime()}\n")
-            }
-            append("Progress: ${task.TaskProgress}%")
-        }
-
-        AlertDialog.Builder(this)
-            .setTitle("📋 Task Details")
-            .setMessage(message)
-            .setPositiveButton("OK", null)
-            .setNeutralButton("Edit") { _, _ -> onTaskEdit(task) }
-            .show()
+        // Navigate to FragmentTaskExtensionActivity to show full task details
+        val intent = Intent(this, FragmentTaskExtensionActivity::class.java)
+        intent.putExtra(FragmentTaskExtensionActivity.EXTRA_TASK_ID, task.Task_ID)
+        intent.putExtra(FragmentTaskExtensionActivity.EXTRA_USER_ID, task.User_ID)
+        startActivity(intent)
     }
 
     private fun onTaskComplete(task: Task) {
@@ -690,9 +676,220 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onTaskEdit(task: Task) {
-        // Navigate to edit task screen or show edit dialog
-        Toast.makeText(this, "Edit task: ${task.Title}", Toast.LENGTH_SHORT).show()
-        // TODO: Implement edit functionality
+        // Show edit dialog with task details
+        showEditTaskDialog(task)
+    }
+    
+    private fun showEditTaskDialog(task: Task) {
+        try {
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Edit Task")
+
+            val scrollView = ScrollView(this)
+            val container = LinearLayout(this)
+            container.orientation = LinearLayout.VERTICAL
+            container.setPadding(50, 20, 50, 20)
+
+            // Task Title (pre-filled)
+            val titleInput = EditText(this)
+            titleInput.hint = "Task title"
+            titleInput.setText(task.Title)
+            titleInput.setPadding(16, 16, 16, 16)
+            container.addView(titleInput)
+
+            // Description (pre-filled)
+            val descriptionInput = EditText(this)
+            descriptionInput.hint = "Description (optional)"
+            descriptionInput.setText(task.Description ?: "")
+            descriptionInput.setPadding(16, 16, 16, 16)
+            descriptionInput.minLines = 2
+            container.addView(descriptionInput)
+
+            // Priority Spinner (pre-selected)
+            val priorityLabel = TextView(this)
+            priorityLabel.text = "Priority:"
+            priorityLabel.setPadding(0, 16, 0, 8)
+            container.addView(priorityLabel)
+
+            val prioritySpinner = Spinner(this)
+            val priorities = arrayOf("Low", "Medium", "High")
+            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, priorities)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            prioritySpinner.adapter = adapter
+
+            // Set current priority selection
+            val currentPriorityIndex = when (task.Priority) {
+                Priority.Low -> 0
+                Priority.Medium -> 1
+                Priority.High -> 2
+            }
+            prioritySpinner.setSelection(currentPriorityIndex)
+            container.addView(prioritySpinner)
+
+            // Status Spinner (pre-selected)
+            val statusLabel = TextView(this)
+            statusLabel.text = "Status:"
+            statusLabel.setPadding(0, 16, 0, 8)
+            container.addView(statusLabel)
+
+            val statusSpinner = Spinner(this)
+            val statuses = arrayOf("Pending", "InProgress", "Completed", "Cancelled")
+            val statusAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, statuses)
+            statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            statusSpinner.adapter = statusAdapter
+
+            // Set current status selection
+            val currentStatusIndex = when (task.Status) {
+                Status.Pending -> 0
+                Status.InProgress -> 1
+                Status.Completed -> 2
+                Status.Cancelled -> 3
+                Status.OverDue -> 0 // Default to Pending for OverDue
+            }
+            statusSpinner.setSelection(currentStatusIndex)
+            container.addView(statusSpinner)
+
+            // Progress Slider
+            val progressLabel = TextView(this)
+            progressLabel.text = "Progress: ${task.TaskProgress}%"
+            progressLabel.setPadding(0, 16, 0, 8)
+            container.addView(progressLabel)
+
+            val progressSeekBar = SeekBar(this)
+            progressSeekBar.max = 100
+            progressSeekBar.progress = task.TaskProgress
+            progressSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                    progressLabel.text = "Progress: $progress%"
+                }
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+            })
+            container.addView(progressSeekBar)
+
+            // Date Selection (pre-filled)
+            val dateLabel = TextView(this)
+            dateLabel.text = "Due Date:"
+            dateLabel.setPadding(0, 16, 0, 8)
+            container.addView(dateLabel)
+
+            val dateInput = EditText(this)
+            dateInput.hint = "YYYY-MM-DD"
+            dateInput.setText(task.DueAt ?: "")
+            dateInput.setPadding(16, 16, 16, 16)
+            dateInput.isFocusable = false
+            dateInput.isClickable = true
+            dateInput.setOnClickListener { showDatePicker(dateInput) }
+            container.addView(dateInput)
+
+            // Time Selection (pre-filled)
+            val timeLabel = TextView(this)
+            timeLabel.text = "Due Time:"
+            timeLabel.setPadding(0, 16, 0, 8)
+            container.addView(timeLabel)
+
+            val timeInput = EditText(this)
+            timeInput.hint = "HH:MM"
+            timeInput.setText(task.DueTime ?: "")
+            timeInput.setPadding(16, 16, 16, 16)
+            timeInput.isFocusable = false
+            timeInput.isClickable = true
+            timeInput.setOnClickListener { showTimePicker(timeInput) }
+            container.addView(timeInput)
+
+            scrollView.addView(container)
+            builder.setView(scrollView)
+
+            builder.setPositiveButton("Update Task", null)
+            builder.setNegativeButton("Cancel", null)
+
+            val dialog = builder.create()
+            dialog.show()
+
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                val title = titleInput.text.toString().trim()
+                if (title.isEmpty()) {
+                    titleInput.error = "Task title is required"
+                    titleInput.requestFocus()
+                    Toast.makeText(this@MainActivity, "⚠️ Please enter a task title", Toast.LENGTH_SHORT).show()
+                } else {
+                    val priority = prioritySpinner.selectedItem.toString()
+                    val status = statusSpinner.selectedItem.toString()
+                    val description = descriptionInput.text.toString().trim()
+                    val progress = progressSeekBar.progress
+                    val dueDate = dateInput.text.toString()
+                    val dueTime = timeInput.text.toString()
+
+                    updateTask(task, title, description, priority, status, progress, dueDate, dueTime)
+                    dialog.dismiss()
+                }
+            }
+
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Error showing edit task dialog", e)
+            Toast.makeText(this, "❌ Edit task dialog error", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun updateTask(
+        originalTask: Task,
+        title: String,
+        description: String,
+        priority: String,
+        status: String,
+        progress: Int,
+        dueDate: String,
+        dueTime: String
+    ) {
+        uiScope.launch {
+            try {
+                val db = AppDb.get(this@MainActivity)
+
+                val priorityEnum = when (priority.uppercase()) {
+                    "LOW" -> Priority.Low
+                    "HIGH" -> Priority.High
+                    else -> Priority.Medium
+                }
+
+                val statusEnum = when (status.uppercase()) {
+                    "PENDING" -> Status.Pending
+                    "INPROGRESS" -> Status.InProgress
+                    "COMPLETED" -> Status.Completed
+                    "CANCELLED" -> Status.Cancelled
+                    else -> Status.Pending
+                }
+
+                val updatedTask = originalTask.copy(
+                    Title = title,
+                    Description = if (description.isBlank()) null else description,
+                    Priority = priorityEnum,
+                    Status = statusEnum,
+                    TaskProgress = progress,
+                    DueAt = if (dueDate.isNotBlank()) dueDate else null,
+                    DueTime = if (dueTime.isNotBlank()) dueTime else null,
+                    UpdatedAt = System.currentTimeMillis()
+                )
+
+                withContext(Dispatchers.IO) {
+                    db.taskDao().update(updatedTask)
+                }
+
+                // Reload tasks
+                loadTasksFragmentData()
+                loadTaskStatistics()
+                loadRecentTasks()
+
+                Toast.makeText(
+                    this@MainActivity,
+                    "✅ Task '$title' updated successfully!",
+                    Toast.LENGTH_LONG
+                ).show()
+
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Error updating task", e)
+                Toast.makeText(this@MainActivity, "❌ Update Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun onTaskDelete(task: Task) {
@@ -1212,6 +1409,21 @@ class MainActivity : AppCompatActivity() {
             setBackgroundResource(android.R.drawable.edit_text)
         }
 
+        // Category Spinner
+        val tvCategoryLabel = TextView(this).apply {
+            text = "Category:"
+            textSize = 16f
+            setPadding(0, 20, 0, 8)
+        }
+
+        val spinnerCategory = Spinner(this).apply {
+            val categories = arrayOf("Work", "Personal", "Shopping", "Others")
+            adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_item, categories).apply {
+                setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            }
+            setSelection(0) // Default to Work
+        }
+
         // Priority Spinner
         val tvPriorityLabel = TextView(this).apply {
             text = "Priority:"
@@ -1267,12 +1479,31 @@ class MainActivity : AppCompatActivity() {
         dateTimeLayout.addView(etDueDate)
         dateTimeLayout.addView(etDueTime)
 
+        // Reminder Spinner
+        val tvReminderLabel = TextView(this).apply {
+            text = "Reminder:"
+            textSize = 16f
+            setPadding(0, 20, 0, 8)
+        }
+
+        val spinnerReminder = Spinner(this).apply {
+            val reminders = arrayOf("None", "10 minutes before", "30 minutes before", "At specific time")
+            adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_item, reminders).apply {
+                setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            }
+            setSelection(0) // Default to None
+        }
+
         // Add all views to dialog
         dialogLayout.addView(etTitle)
         dialogLayout.addView(etDescription)
+        dialogLayout.addView(tvCategoryLabel)
+        dialogLayout.addView(spinnerCategory)
         dialogLayout.addView(tvPriorityLabel)
         dialogLayout.addView(spinnerPriority)
         dialogLayout.addView(dateTimeLayout)
+        dialogLayout.addView(tvReminderLabel)
+        dialogLayout.addView(spinnerReminder)
 
         val dialog = AlertDialog.Builder(this)
             .setTitle("Add New Task")
@@ -1288,12 +1519,20 @@ class MainActivity : AppCompatActivity() {
                 val description = etDescription.text.toString().trim()
                 val dueDate = etDueDate.text.toString().trim()
                 val dueTime = etDueTime.text.toString().trim()
+                val selectedCategory = when (spinnerCategory.selectedItem.toString()) {
+                    "Work" -> com.example.cheermateapp.data.model.Category.Work
+                    "Personal" -> com.example.cheermateapp.data.model.Category.Personal
+                    "Shopping" -> com.example.cheermateapp.data.model.Category.Shopping
+                    "Others" -> com.example.cheermateapp.data.model.Category.Others
+                    else -> com.example.cheermateapp.data.model.Category.Work
+                }
                 val selectedPriority = when (spinnerPriority.selectedItem.toString()) {
                     "High" -> Priority.High
                     "Medium" -> Priority.Medium
                     "Low" -> Priority.Low
                     else -> Priority.Medium
                 }
+                val reminderOption = spinnerReminder.selectedItem.toString()
 
                 if (title.isEmpty()) {
                     Toast.makeText(this@MainActivity, "❌ Task title is required", Toast.LENGTH_SHORT).show()
@@ -1305,13 +1544,21 @@ class MainActivity : AppCompatActivity() {
                     return@setOnClickListener
                 }
 
+                // Validate reminder requires time
+                if (reminderOption != "None" && dueTime.isEmpty()) {
+                    Toast.makeText(this@MainActivity, "❌ Reminder requires a due time to be set", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+
                 // Create the task
                 createDetailedTask(
                     title = title,
                     description = if (description.isEmpty()) null else description,
                     dueDate = dueDate,
                     dueTime = if (dueTime.isEmpty()) null else dueTime,
-                    priority = selectedPriority
+                    category = selectedCategory,
+                    priority = selectedPriority,
+                    reminderOption = reminderOption
                 )
 
                 dialog.dismiss()
@@ -1396,7 +1643,9 @@ class MainActivity : AppCompatActivity() {
         description: String?,
         dueDate: String,
         dueTime: String?,
-        priority: Priority
+        category: com.example.cheermateapp.data.model.Category,
+        priority: Priority,
+        reminderOption: String
     ) {
         uiScope.launch {
             try {
@@ -1411,6 +1660,7 @@ class MainActivity : AppCompatActivity() {
                     taskId = taskId,
                     title = title,
                     description = description,
+                    category = category,
                     priority = priority,
                     dueAt = dueDate,
                     dueTime = dueTime,
@@ -1421,22 +1671,82 @@ class MainActivity : AppCompatActivity() {
                     db.taskDao().insert(newTask)
                 }
 
+                // Create reminder if requested
+                if (reminderOption != "None" && dueTime != null) {
+                    createTaskReminder(taskId, dueDate, dueTime, reminderOption)
+                }
+
                 // Refresh dashboard data
                 loadTaskStatistics()
                 loadRecentTasks()
 
                 val timeText = if (dueTime != null) " at $dueTime" else ""
+                val reminderText = if (reminderOption != "None") " (Reminder: $reminderOption)" else ""
                 Toast.makeText(
                     this@MainActivity,
-                    "✅ Task '$title' created for $dueDate$timeText!",
+                    "✅ Task '$title' created for $dueDate$timeText$reminderText!",
                     Toast.LENGTH_LONG
                 ).show()
 
-                android.util.Log.d("MainActivity", "✅ Created detailed task: $title")
+                android.util.Log.d("MainActivity", "✅ Created detailed task: $title with category: $category")
 
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error creating detailed task", e)
                 Toast.makeText(this@MainActivity, "❌ Error creating task", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    // ✅ CREATE TASK REMINDER
+    private fun createTaskReminder(
+        taskId: Int,
+        dueDate: String,
+        dueTime: String,
+        reminderOption: String
+    ) {
+        uiScope.launch {
+            try {
+                val db = AppDb.get(this@MainActivity)
+
+                // Parse due date and time
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+                val dueDateTime = dateFormat.parse("$dueDate $dueTime")
+
+                if (dueDateTime != null) {
+                    val dueTimeMillis = dueDateTime.time
+
+                    // Calculate reminder time based on option
+                    val remindAtMillis = when (reminderOption) {
+                        "10 minutes before" -> dueTimeMillis - (10 * 60 * 1000)
+                        "30 minutes before" -> dueTimeMillis - (30 * 60 * 1000)
+                        "At specific time" -> dueTimeMillis
+                        else -> dueTimeMillis
+                    }
+
+                    // Get next reminder ID
+                    val reminderId = withContext(Dispatchers.IO) {
+                        val existingReminders = db.taskReminderDao().getRemindersByTask(taskId)
+                        if (existingReminders.isEmpty()) 1 else existingReminders.maxOf { it.TaskReminder_ID } + 1
+                    }
+
+                    val reminder = com.example.cheermateapp.data.model.TaskReminder(
+                        TaskReminder_ID = reminderId,
+                        Task_ID = taskId,
+                        User_ID = userId,
+                        RemindAt = remindAtMillis,
+                        IsActive = true
+                    )
+
+                    withContext(Dispatchers.IO) {
+                        db.taskReminderDao().insert(reminder)
+                    }
+
+                    android.util.Log.d("MainActivity", "✅ Created reminder for task $taskId at $remindAtMillis")
+                }
+
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Error creating task reminder", e)
+                // Don't show error to user - reminder is optional feature
             }
         }
     }

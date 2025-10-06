@@ -97,23 +97,23 @@ class ActivityLogin : AppCompatActivity() {
 
             // Forgot password TextView click handler
             binding.forgotPassword.setOnClickListener {
-                Toast.makeText(this, "Forgot password clicked", Toast.LENGTH_SHORT).show()
                 try {
                     val intent = Intent(this, ForgotPasswordActivity::class.java)
                     startActivity(intent)
                 } catch (e: Exception) {
-                    Toast.makeText(this, "Forgot password coming soon!", Toast.LENGTH_SHORT).show()
+                    android.util.Log.e("ActivityLogin", "Error opening ForgotPasswordActivity", e)
+                    Toast.makeText(this, "Unable to open forgot password screen", Toast.LENGTH_SHORT).show()
                 }
             }
 
             // Sign up TextView click handler
             binding.signUpLine.setOnClickListener {
-                Toast.makeText(this, "Sign up clicked", Toast.LENGTH_SHORT).show()
                 try {
                     val intent = Intent(this, SignUpActivity::class.java)
                     startActivity(intent)
                 } catch (e: Exception) {
-                    Toast.makeText(this, "Sign up coming soon!", Toast.LENGTH_SHORT).show()
+                    android.util.Log.e("ActivityLogin", "Error opening SignUpActivity", e)
+                    Toast.makeText(this, "Unable to open sign up screen", Toast.LENGTH_SHORT).show()
                 }
             }
 
