@@ -2871,6 +2871,8 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         // Restart live updates when app becomes visible
         startLiveTaskUpdates()
+        // Reload user data to reflect any personality changes
+        loadUserData()
     }
 
     override fun onPause() {
