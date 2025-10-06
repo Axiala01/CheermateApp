@@ -7,6 +7,8 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
@@ -15,6 +17,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
 import com.example.cheermateapp.data.db.AppDb
 import com.example.cheermateapp.data.model.*
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -650,5 +653,259 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_task_extension, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_more -> {
+                showTaskActionsBottomSheet()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun showTaskActionsBottomSheet() {
+        val bottomSheetDialog = BottomSheetDialog(this)
+        val view = layoutInflater.inflate(R.layout.bottom_sheet_task_actions, null)
+        
+        // Set up click listeners for each action
+        view.findViewById<LinearLayout>(R.id.action_mark_completed).setOnClickListener {
+            bottomSheetDialog.dismiss()
+            markTaskAsCompleted()
+        }
+        
+        view.findViewById<LinearLayout>(R.id.action_snooze).setOnClickListener {
+            bottomSheetDialog.dismiss()
+            showSnoozeDialog()
+        }
+        
+        view.findViewById<LinearLayout>(R.id.action_wont_do).setOnClickListener {
+            bottomSheetDialog.dismiss()
+            markTaskAsWontDo()
+        }
+        
+        bottomSheetDialog.setContentView(view)
+        bottomSheetDialog.show()
+    }
+
+    private fun markTaskAsCompleted() {
+        currentTask?.let { task ->
+            AlertDialog.Builder(this)
+                .setTitle("Mark as Completed")
+                .setMessage("Are you sure you want to mark '${task.Title}' as completed?")
+                .setPositiveButton("Yes") { _, _ ->
+                    lifecycleScope.launch {
+                        try {
+                            val db = AppDb.get(this@FragmentTaskExtensionActivity)
+                            withContext(Dispatchers.IO) {
+                                db.taskDao().updateTaskStatus(
+                                    task.User_ID,
+                                    task.Task_ID,
+                                    "Completed"
+                                )
+                                db.taskDao().updateTaskProgress(task.User_ID, task.Task_ID, 100)
+                            }
+                            
+                            Toast.makeText(
+                                this@FragmentTaskExtensionActivity,
+                                "✅ Task marked as completed!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            
+                            // Reload task details to reflect changes
+                            loadTaskDetails()
+                        } catch (e: Exception) {
+                            android.util.Log.e("FragmentTaskExtensionActivity", "Error marking task as completed", e)
+                            Toast.makeText(
+                                this@FragmentTaskExtensionActivity,
+                                "Error updating task",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+    }
+
+    private fun showSnoozeDialog() {
+        val options = arrayOf("⏰ 1 hour", "⏰ 1 day", "⏰ 3 days", "⏰ 1 week", "⏰ Custom")
+        
+        AlertDialog.Builder(this)
+            .setTitle("Snooze Task")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> snoozeTask(1, Calendar.HOUR_OF_DAY)
+                    1 -> snoozeTask(1, Calendar.DAY_OF_YEAR)
+                    2 -> snoozeTask(3, Calendar.DAY_OF_YEAR)
+                    3 -> snoozeTask(7, Calendar.DAY_OF_YEAR)
+                    4 -> showCustomSnoozeDialog()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun snoozeTask(amount: Int, field: Int) {
+        currentTask?.let { task ->
+            val calendar = Calendar.getInstance()
+            calendar.add(field, amount)
+            
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val newDueDate = dateFormat.format(calendar.time)
+            
+            lifecycleScope.launch {
+                try {
+                    val db = AppDb.get(this@FragmentTaskExtensionActivity)
+                    val updatedTask = task.copy(
+                        DueAt = newDueDate,
+                        UpdatedAt = System.currentTimeMillis()
+                    )
+                    
+                    withContext(Dispatchers.IO) {
+                        db.taskDao().update(updatedTask)
+                    }
+                    
+                    currentTask = updatedTask
+                    updateDueDateButton(newDueDate)
+                    
+                    val timeText = when (field) {
+                        Calendar.HOUR_OF_DAY -> "$amount hour${if (amount != 1) "s" else ""}"
+                        else -> "$amount day${if (amount != 1) "s" else ""}"
+                    }
+                    
+                    Toast.makeText(
+                        this@FragmentTaskExtensionActivity,
+                        "⏰ Task snoozed for $timeText",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    
+                    // Update overdue status
+                    if (updatedTask.isOverdue()) {
+                        overdueRow.visibility = View.VISIBLE
+                        val overdueDays = calculateOverdueDays(updatedTask)
+                        overdueText.text = "⏰ Overdue by $overdueDays day${if (overdueDays != 1) "s" else ""}"
+                    } else {
+                        overdueRow.visibility = View.GONE
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("FragmentTaskExtensionActivity", "Error snoozing task", e)
+                    Toast.makeText(
+                        this@FragmentTaskExtensionActivity,
+                        "Error updating task",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+    }
+
+    private fun showCustomSnoozeDialog() {
+        val calendar = Calendar.getInstance()
+        
+        val datePickerDialog = DatePickerDialog(
+            this,
+            { _, year, month, dayOfMonth ->
+                val selectedCalendar = Calendar.getInstance()
+                selectedCalendar.set(year, month, dayOfMonth)
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val newDueDate = dateFormat.format(selectedCalendar.time)
+                
+                currentTask?.let { task ->
+                    lifecycleScope.launch {
+                        try {
+                            val db = AppDb.get(this@FragmentTaskExtensionActivity)
+                            val updatedTask = task.copy(
+                                DueAt = newDueDate,
+                                UpdatedAt = System.currentTimeMillis()
+                            )
+                            
+                            withContext(Dispatchers.IO) {
+                                db.taskDao().update(updatedTask)
+                            }
+                            
+                            currentTask = updatedTask
+                            updateDueDateButton(newDueDate)
+                            
+                            Toast.makeText(
+                                this@FragmentTaskExtensionActivity,
+                                "⏰ Task snoozed until $newDueDate",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            
+                            // Update overdue status
+                            if (updatedTask.isOverdue()) {
+                                overdueRow.visibility = View.VISIBLE
+                                val overdueDays = calculateOverdueDays(updatedTask)
+                                overdueText.text = "⏰ Overdue by $overdueDays day${if (overdueDays != 1) "s" else ""}"
+                            } else {
+                                overdueRow.visibility = View.GONE
+                            }
+                        } catch (e: Exception) {
+                            android.util.Log.e("FragmentTaskExtensionActivity", "Error snoozing task", e)
+                            Toast.makeText(
+                                this@FragmentTaskExtensionActivity,
+                                "Error updating task",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+        
+        // Set minimum date to today
+        datePickerDialog.datePicker.minDate = System.currentTimeMillis()
+        datePickerDialog.show()
+    }
+
+    private fun markTaskAsWontDo() {
+        currentTask?.let { task ->
+            AlertDialog.Builder(this)
+                .setTitle("Mark as Won't Do")
+                .setMessage("Are you sure you want to mark '${task.Title}' as Won't Do? This will cancel the task.")
+                .setPositiveButton("Yes") { _, _ ->
+                    lifecycleScope.launch {
+                        try {
+                            val db = AppDb.get(this@FragmentTaskExtensionActivity)
+                            withContext(Dispatchers.IO) {
+                                db.taskDao().updateTaskStatus(
+                                    task.User_ID,
+                                    task.Task_ID,
+                                    "Cancelled"
+                                )
+                            }
+                            
+                            Toast.makeText(
+                                this@FragmentTaskExtensionActivity,
+                                "❌ Task marked as Won't Do",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            
+                            // Reload task details to reflect changes
+                            loadTaskDetails()
+                        } catch (e: Exception) {
+                            android.util.Log.e("FragmentTaskExtensionActivity", "Error marking task as won't do", e)
+                            Toast.makeText(
+                                this@FragmentTaskExtensionActivity,
+                                "Error updating task",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
     }
 }
