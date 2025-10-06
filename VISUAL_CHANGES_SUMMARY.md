@@ -1,196 +1,186 @@
-# Visual Summary: CardView to LinearLayout Migration
+# Visual Changes Summary
 
-## 📸 Layout Structure Changes
+## 1. Clock Icon on Reminder Button
 
-### Task Card (task_card)
-
-#### BEFORE (CardView):
+### Before:
 ```
-┌─────────────────────────────────────┐
-│ androidx.cardview.widget.CardView   │
-│ ┌─────────────────────────────────┐ │
-│ │ LinearLayout (wrapper)          │ │
-│ │ ┌─────────────────────────────┐ │ │
-│ │ │ EditText (title)            │ │ │
-│ │ │ EditText (description)      │ │ │
-│ │ │ Button (category)           │ │ │
-│ │ │ Button (priority)           │ │ │
-│ │ │ Button (due date)           │ │ │
-│ │ │ Button (reminder)           │ │ │
-│ │ └─────────────────────────────┘ │ │
-│ └─────────────────────────────────┘ │
-└─────────────────────────────────────┘
+┌─────────────┐
+│  Reminder   │
+└─────────────┘
 ```
 
-#### AFTER (LinearLayout):
+### After:
 ```
-┌─────────────────────────────────────┐
-│ LinearLayout (task_card)            │
-│ ┌─────────────────────────────────┐ │
-│ │ EditText (title)                │ │
-│ │ EditText (description)          │ │
-│ │ Button (category)               │ │
-│ │ Button (priority)               │ │
-│ │ Button (due date)               │ │
-│ │ Button (reminder)               │ │
-│ └─────────────────────────────────┘ │
-└─────────────────────────────────────┘
+┌─────────────────┐
+│  ⏰ Reminder    │
+└─────────────────┘
 ```
 
-**Improvement:** One less nesting level! ✨
+**Impact**: Users can now immediately recognize the reminder button with the clock icon.
 
 ---
 
-### Subtask Card (subtask_card)
+## 2. Bottom Sheet Theme Awareness
 
-#### BEFORE (CardView - No Count Display):
+### Before (Fixed White Text):
 ```
-┌─────────────────────────────────────┐
-│ androidx.cardview.widget.CardView   │
-│ ┌─────────────────────────────────┐ │
-│ │ LinearLayout (wrapper)          │ │
-│ │   ┌───────────────────────────┐ │ │
-│ │   │ "Subtasks"         (no count) │ │
-│ │   ├───────────────────────────┤ │ │
-│ │   │ [Input field]    [Add]   │ │ │
-│ │   ├───────────────────────────┤ │ │
-│ │   │ (subtasks appear here)   │ │ │
-│ │   └───────────────────────────┘ │ │
-│ └─────────────────────────────────┘ │
-└─────────────────────────────────────┘
+Light Mode:                    Dark Mode:
+┌─────────────────┐           ┌─────────────────┐
+│  Task Actions   │ ← White   │  Task Actions   │ ← White
+│  ✅ Completed   │ ← White   │  ✅ Completed   │ ← White
+│  ⏰ Snooze      │ ← White   │  ⏰ Snooze      │ ← White
+│  ❌ Won't Do    │ ← White   │  ❌ Won't Do    │ ← White
+└─────────────────┘           └─────────────────┘
+     ❌ Hard to read                ✅ Readable
 ```
 
-#### AFTER (LinearLayout - With Count Display):
+### After (Theme-Aware):
 ```
-┌─────────────────────────────────────┐
-│ LinearLayout (subtask_card)         │
-│   ┌───────────────────────────────┐ │
-│   │ "Subtasks"        "3/5 items"│ │ ← NEW!
-│   ├───────────────────────────────┤ │
-│   │ [Input field]    [Add]       │ │
-│   ├───────────────────────────────┤ │
-│   │ ☑ Task 1 (strikethrough)    │ │
-│   │ ☑ Task 2 (strikethrough)    │ │
-│   │ ☑ Task 3 (strikethrough)    │ │
-│   │ ☐ Task 4                     │ │
-│   │ ☐ Task 5                     │ │
-│   └───────────────────────────────┘ │
-└─────────────────────────────────────┘
+Light Mode:                    Dark Mode:
+┌─────────────────┐           ┌─────────────────┐
+│  Task Actions   │ ← Black   │  Task Actions   │ ← White
+│  ✅ Completed   │ ← Black   │  ✅ Completed   │ ← White
+│  ⏰ Snooze      │ ← Black   │  ⏰ Snooze      │ ← White
+│  ❌ Won't Do    │ ← Black   │  ❌ Won't Do    │ ← White
+└─────────────────┘           └─────────────────┘
+     ✅ Readable                   ✅ Readable
 ```
 
-**Improvements:** 
-- One less nesting level! ✨
-- Shows completed/total count! 📊
-- Better visibility management! 👁️
+**Impact**: Text is now readable in both light and dark themes.
 
 ---
 
-## 🎨 Visual Appearance Comparison
+## 3. Category Synchronization Flow
 
-### Before (CardView attributes):
-- `app:cardCornerRadius="16dp"` → Rounded corners
-- `app:cardBackgroundColor="#33FFFFFF"` → Semi-transparent white
-- `app:cardElevation="2dp"` → Shadow effect
+### Data Flow:
+```
+┌──────────────────────────────┐
+│ FragmentTaskExtensionActivity│
+│                              │
+│ User changes category        │
+│        ↓                     │
+│ saveTask() updates DB        │
+│        ↓                     │
+│ setResult(RESULT_OK)         │
+│        ↓                     │
+│ User presses back            │
+└──────────────────────────────┘
+           ↓
+┌──────────────────────────────┐
+│ FragmentTaskActivity         │
+│                              │
+│ onResume() called            │
+│        ↓                     │
+│ loadTasks() from DB          │
+│        ↓                     │
+│ Adapter updates list         │
+│        ↓                     │
+│ tvTaskCategory shows new     │
+│ category value               │
+└──────────────────────────────┘
+```
 
-### After (LinearLayout with drawable):
-- `android:background="@drawable/bg_card_glass_hover"` → Glass effect with rounded corners
-- `android:elevation="2dp"` → Same shadow effect
-- `android:stateListAnimator="@animator/card_elevation_state"` → Interactive elevation
+### Visual Example:
+```
+Task List Before:              Extension Screen:           Task List After:
+┌──────────────┐              ┌──────────────┐            ┌──────────────┐
+│ Buy groceries│              │ Buy groceries│            │ Buy groceries│
+│ 💼 Work      │ ────────────>│              │───────────>│ 🛒 Shopping  │
+│ 🔴 High      │   Click      │ Category:    │  Update    │ 🔴 High      │
+└──────────────┘              │ [🛒 Shopping]│  & Back    └──────────────┘
+                              │              │
+                              │ [Save]       │
+                              └──────────────┘
+```
 
-**Result:** Identical visual appearance! 🎯
+**Impact**: Category changes are immediately reflected in the task list.
 
 ---
 
-## 🔄 Subtask Functionality Flow
+## 4. Calendar Theme Awareness
 
-### Adding a Subtask:
+### Before (Fixed White Text):
 ```
-User types in input field
-         ↓
-"Add" button appears
-         ↓
-User clicks "Add"
-         ↓
-Subtask saved to database
-         ↓
-List updates + count refreshes
-         ↓
-Shows "X/Y items"
+Light Mode:                    Dark Mode:
+┌─────────────────┐           ┌─────────────────┐
+│   📅 Calendar   │           │   📅 Calendar   │
+│                 │           │                 │
+│ [Calendar View] │           │ [Calendar View] │
+│                 │           │                 │
+│ "Tap a date..." │ ← White   │ "Tap a date..." │ ← White
+└─────────────────┘           └─────────────────┘
+     ❌ Hard to read               ✅ Readable
 ```
 
-### Toggling Completion:
+### After (Theme-Aware):
 ```
-User checks checkbox
-         ↓
-Strikethrough applied
-         ↓
-Database updated
-         ↓
-Count refreshes (e.g., "3/5" → "4/5")
+Light Mode:                    Dark Mode:
+┌─────────────────┐           ┌─────────────────┐
+│   📅 Calendar   │           │   📅 Calendar   │
+│                 │           │                 │
+│ [Calendar View] │           │ [Calendar View] │
+│                 │           │                 │
+│ "Tap a date..." │ ← Black   │ "Tap a date..." │ ← White
+└─────────────────┘           └─────────────────┘
+     ✅ Readable                  ✅ Readable
 ```
 
-### Deleting a Subtask:
-```
-User clicks delete icon
-         ↓
-Confirmation dialog appears
-         ↓
-User confirms
-         ↓
-Subtask removed from database
-         ↓
-List updates + count refreshes
-         ↓
-Shows "X/Y items"
-```
+**Impact**: Calendar text adapts to theme, ensuring readability in both modes.
 
 ---
 
-## 📊 Code Statistics
+## Color Resource Structure
 
-| Metric | Before | After | Change |
-|--------|--------|-------|--------|
-| XML Lines | 315 | 302 | -13 lines |
-| View Nesting | 3 levels | 2 levels | -1 level |
-| Kotlin Changes | - | +16 lines | Enhanced |
-| CardView Usage | 2 instances | 0 instances | Removed ✅ |
-| Item Count Display | ❌ No | ✅ Yes | Added ✨ |
+```
+app/src/main/res/
+├── values/
+│   └── colors.xml
+│       └── text_primary: #FF000000 (Black) ← Used in LIGHT mode
+│
+└── values-night/
+    └── colors.xml
+        └── text_primary: #FFFFFFFF (White) ← Used in DARK mode
+```
 
----
-
-## ✨ Key Visual Improvements
-
-1. **Cleaner Structure**
-   - Removed unnecessary nested LinearLayouts
-   - Flatter view hierarchy
-
-2. **Enhanced Subtask Display**
-   - Shows "X/Y items" count at top
-   - Real-time updates when toggling
-   - Better empty state handling
-
-3. **Consistent Styling**
-   - Matches activity_main.xml pattern
-   - Uses same bg_card_glass_hover drawable
-   - Same elevation and animations
-
-4. **Maintained Appearance**
-   - No visual changes from user perspective
-   - Same rounded corners
-   - Same glass effect
-   - Same shadows
+**How it works**: Android automatically picks the correct color resource based on the system theme.
 
 ---
 
-## 🎯 Result
+## Code Changes Summary
 
-The migration successfully:
-- ✅ Removes all CardView dependencies
-- ✅ Simplifies view hierarchy
-- ✅ Enhances functionality
-- ✅ Maintains visual consistency
-- ✅ Follows app design patterns
+### XML Layout Changes: 3 files
+1. `fragment_tasks_extension.xml`: 1 line (added ⏰ emoji)
+2. `bottom_sheet_task_actions.xml`: 4 lines (text color references)
 
-**User Experience:** Unchanged (or better with subtask count!)  
-**Developer Experience:** Improved with cleaner code  
-**Performance:** Better with reduced nesting  
+### Kotlin Code Changes: 2 files
+3. `FragmentTaskExtensionActivity.kt`: 8 lines (result codes)
+4. `MainActivity.kt`: 2 lines (calendar text colors)
+
+### Resource Files: 2 files
+5. `values/colors.xml`: 4 lines added (light mode colors)
+6. `values-night/colors.xml`: 6 lines (NEW FILE - dark mode colors)
+
+**Total**: 7 files modified, 25 lines changed
+
+---
+
+## Testing Matrix
+
+| Feature | Light Mode | Dark Mode | Status |
+|---------|-----------|-----------|--------|
+| Reminder icon | ⏰ visible | ⏰ visible | ✅ |
+| Bottom sheet header | Black text | White text | ✅ |
+| Bottom sheet options | Black text | White text | ✅ |
+| Calendar text | Black text | White text | ✅ |
+| Category sync | Updates list | Updates list | ✅ |
+
+---
+
+## Summary
+
+All four requirements have been implemented with minimal, surgical changes:
+- ✅ Visual improvements (clock icon)
+- ✅ Theme awareness (colors adapt automatically)
+- ✅ Data consistency (category sync)
+- ✅ Zero breaking changes
+- ✅ Follows Android best practices
