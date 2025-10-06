@@ -16,13 +16,16 @@
             android:id="@+id/toolbar"
             android:layout_width="0dp"
             android:layout_height="?attr/actionBarSize"
-            android:background="@android:color/transparent"
+            android:background="@drawable/bg_card_glass"
+            android:elevation="0dp"
+            android:theme="@style/ThemeOverlay.Material3.ActionBar"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:title="Task"
             app:titleTextColor="@android:color/white"
             app:navigationIcon="?attr/homeAsUpIndicator" />
+
 
         <!-- Overdue Status Badge -->
         <LinearLayout
