@@ -252,6 +252,8 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                         Category = categoryValues[which],
                         UpdatedAt = System.currentTimeMillis()
                     )
+                    // Update currentTask immediately to ensure it's saved in onPause
+                    currentTask = updatedTask
                     saveTask(updatedTask)
                     updateCategoryButton(categoryValues[which])
                 }
@@ -271,6 +273,8 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                         Priority = priorityValues[which],
                         UpdatedAt = System.currentTimeMillis()
                     )
+                    // Update currentTask immediately to ensure it's saved in onPause
+                    currentTask = updatedTask
                     saveTask(updatedTask)
                     updatePriorityButton(priorityValues[which])
                 }
@@ -344,6 +348,8 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                 DueAt = newDueDate,
                 UpdatedAt = System.currentTimeMillis()
             )
+            // Update currentTask immediately to ensure it's saved in onPause
+            currentTask = updatedTask
             saveTask(updatedTask)
             updateDueDateButton(newDueDate)
             
@@ -665,6 +671,8 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
             val description = etTaskDescription.text.toString().trim()
             
             if (title.isNotEmpty()) {
+                // Merge current task (which may have category/priority/date changes)
+                // with any title/description edits
                 val updatedTask = task.copy(
                     Title = title,
                     Description = description.ifEmpty { null },
@@ -799,19 +807,22 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             val newDueDate = dateFormat.format(calendar.time)
             
+            val updatedTask = task.copy(
+                DueAt = newDueDate,
+                UpdatedAt = System.currentTimeMillis()
+            )
+            
+            // Update currentTask immediately to ensure it's saved in onPause
+            currentTask = updatedTask
+            
             lifecycleScope.launch {
                 try {
                     val db = AppDb.get(this@FragmentTaskExtensionActivity)
-                    val updatedTask = task.copy(
-                        DueAt = newDueDate,
-                        UpdatedAt = System.currentTimeMillis()
-                    )
                     
                     withContext(Dispatchers.IO) {
                         db.taskDao().update(updatedTask)
                     }
                     
-                    currentTask = updatedTask
                     updateDueDateButton(newDueDate)
                     
                     val timeText = when (field) {
@@ -857,19 +868,22 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                 val newDueDate = dateFormat.format(selectedCalendar.time)
                 
                 currentTask?.let { task ->
+                    val updatedTask = task.copy(
+                        DueAt = newDueDate,
+                        UpdatedAt = System.currentTimeMillis()
+                    )
+                    
+                    // Update currentTask immediately to ensure it's saved in onPause
+                    currentTask = updatedTask
+                    
                     lifecycleScope.launch {
                         try {
                             val db = AppDb.get(this@FragmentTaskExtensionActivity)
-                            val updatedTask = task.copy(
-                                DueAt = newDueDate,
-                                UpdatedAt = System.currentTimeMillis()
-                            )
                             
                             withContext(Dispatchers.IO) {
                                 db.taskDao().update(updatedTask)
                             }
                             
-                            currentTask = updatedTask
                             updateDueDateButton(newDueDate)
                             
                             Toast.makeText(
