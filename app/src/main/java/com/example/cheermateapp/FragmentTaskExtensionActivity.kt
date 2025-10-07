@@ -21,6 +21,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.runBlocking
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -251,6 +252,8 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                         Category = categoryValues[which],
                         UpdatedAt = System.currentTimeMillis()
                     )
+                    // Update currentTask immediately to ensure it's saved in onPause
+                    currentTask = updatedTask
                     saveTask(updatedTask)
                     updateCategoryButton(categoryValues[which])
                 }
@@ -270,6 +273,8 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                         Priority = priorityValues[which],
                         UpdatedAt = System.currentTimeMillis()
                     )
+                    // Update currentTask immediately to ensure it's saved in onPause
+                    currentTask = updatedTask
                     saveTask(updatedTask)
                     updatePriorityButton(priorityValues[which])
                 }
@@ -343,6 +348,8 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                 DueAt = newDueDate,
                 UpdatedAt = System.currentTimeMillis()
             )
+            // Update currentTask immediately to ensure it's saved in onPause
+            currentTask = updatedTask
             saveTask(updatedTask)
             updateDueDateButton(newDueDate)
             
@@ -650,9 +657,42 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        saveTaskChanges()
+        // Save task changes synchronously to ensure data is persisted before returning to task list
+        runBlocking {
+            saveTaskChangesSynchronously()
+        }
         // Set result to indicate task was modified
         setResult(RESULT_OK)
+    }
+    
+    private suspend fun saveTaskChangesSynchronously() {
+        currentTask?.let { task ->
+            val title = etTaskTitle.text.toString().trim()
+            val description = etTaskDescription.text.toString().trim()
+            
+            if (title.isNotEmpty()) {
+                // Merge current task (which may have category/priority/date changes)
+                // with any title/description edits
+                val updatedTask = task.copy(
+                    Title = title,
+                    Description = description.ifEmpty { null },
+                    UpdatedAt = System.currentTimeMillis()
+                )
+                saveTaskSynchronously(updatedTask)
+            }
+        }
+    }
+    
+    private suspend fun saveTaskSynchronously(updatedTask: Task) {
+        try {
+            val db = AppDb.get(this@FragmentTaskExtensionActivity)
+            withContext(Dispatchers.IO) {
+                db.taskDao().update(updatedTask)
+            }
+            currentTask = updatedTask
+        } catch (e: Exception) {
+            android.util.Log.e("FragmentTaskExtensionActivity", "Error saving task", e)
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -767,19 +807,22 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             val newDueDate = dateFormat.format(calendar.time)
             
+            val updatedTask = task.copy(
+                DueAt = newDueDate,
+                UpdatedAt = System.currentTimeMillis()
+            )
+            
+            // Update currentTask immediately to ensure it's saved in onPause
+            currentTask = updatedTask
+            
             lifecycleScope.launch {
                 try {
                     val db = AppDb.get(this@FragmentTaskExtensionActivity)
-                    val updatedTask = task.copy(
-                        DueAt = newDueDate,
-                        UpdatedAt = System.currentTimeMillis()
-                    )
                     
                     withContext(Dispatchers.IO) {
                         db.taskDao().update(updatedTask)
                     }
                     
-                    currentTask = updatedTask
                     updateDueDateButton(newDueDate)
                     
                     val timeText = when (field) {
@@ -825,19 +868,22 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                 val newDueDate = dateFormat.format(selectedCalendar.time)
                 
                 currentTask?.let { task ->
+                    val updatedTask = task.copy(
+                        DueAt = newDueDate,
+                        UpdatedAt = System.currentTimeMillis()
+                    )
+                    
+                    // Update currentTask immediately to ensure it's saved in onPause
+                    currentTask = updatedTask
+                    
                     lifecycleScope.launch {
                         try {
                             val db = AppDb.get(this@FragmentTaskExtensionActivity)
-                            val updatedTask = task.copy(
-                                DueAt = newDueDate,
-                                UpdatedAt = System.currentTimeMillis()
-                            )
                             
                             withContext(Dispatchers.IO) {
                                 db.taskDao().update(updatedTask)
                             }
                             
-                            currentTask = updatedTask
                             updateDueDateButton(newDueDate)
                             
                             Toast.makeText(
