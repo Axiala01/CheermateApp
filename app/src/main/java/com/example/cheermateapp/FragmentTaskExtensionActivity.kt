@@ -21,6 +21,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.runBlocking
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -650,9 +651,40 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        saveTaskChanges()
+        // Save task changes synchronously to ensure data is persisted before returning to task list
+        runBlocking {
+            saveTaskChangesSynchronously()
+        }
         // Set result to indicate task was modified
         setResult(RESULT_OK)
+    }
+    
+    private suspend fun saveTaskChangesSynchronously() {
+        currentTask?.let { task ->
+            val title = etTaskTitle.text.toString().trim()
+            val description = etTaskDescription.text.toString().trim()
+            
+            if (title.isNotEmpty()) {
+                val updatedTask = task.copy(
+                    Title = title,
+                    Description = description.ifEmpty { null },
+                    UpdatedAt = System.currentTimeMillis()
+                )
+                saveTaskSynchronously(updatedTask)
+            }
+        }
+    }
+    
+    private suspend fun saveTaskSynchronously(updatedTask: Task) {
+        try {
+            val db = AppDb.get(this@FragmentTaskExtensionActivity)
+            withContext(Dispatchers.IO) {
+                db.taskDao().update(updatedTask)
+            }
+            currentTask = updatedTask
+        } catch (e: Exception) {
+            android.util.Log.e("FragmentTaskExtensionActivity", "Error saving task", e)
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
