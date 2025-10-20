@@ -318,6 +318,9 @@ class MainActivity : AppCompatActivity() {
             container?.removeAllViews()
             container?.visibility = View.GONE
             
+            // Show FAB on home screen
+            findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fabAddTask)?.visibility = View.VISIBLE
+            
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error showing home screen", e)
         }
@@ -339,6 +342,9 @@ class MainActivity : AppCompatActivity() {
 
             // Initialize task-specific functionality
             setupTasksFragment()
+
+            // Show FAB on tasks screen
+            findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fabAddTask)?.visibility = View.VISIBLE
 
             android.util.Log.d("MainActivity", "✅ Loaded Tasks Fragment")
 
@@ -364,6 +370,9 @@ class MainActivity : AppCompatActivity() {
 
             // Initialize settings-specific functionality
             setupSettingsFragment()
+
+            // Hide FAB on settings screen
+            findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fabAddTask)?.visibility = View.GONE
 
             android.util.Log.d("MainActivity", "✅ Loaded Settings Fragment")
 
