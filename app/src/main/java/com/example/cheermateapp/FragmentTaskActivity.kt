@@ -1209,142 +1209,99 @@ class FragmentTaskActivity : AppCompatActivity() {
     // ✅ CRUD OPERATION: CREATE - Add new task dialog
     private fun showAddTaskDialog() {
         try {
-            val builder = AlertDialog.Builder(this)
-            builder.setTitle("Add New Task")
-
-            val scrollView = ScrollView(this)
-            val container = LinearLayout(this)
-            container.orientation = LinearLayout.VERTICAL
-            container.setPadding(50, 20, 50, 20)
-
-            // Task Title
-            val titleInput = EditText(this)
-            titleInput.hint = "Task title"
-            titleInput.setPadding(16, 16, 16, 16)
-            container.addView(titleInput)
-
-            // Description (Optional)
-            val descriptionInput = EditText(this)
-            descriptionInput.hint = "Description (optional)"
-            descriptionInput.setPadding(16, 16, 16, 16)
-            descriptionInput.minLines = 2
-            container.addView(descriptionInput)
-
-            // Category Spinner
-            val categoryLabel = TextView(this)
-            categoryLabel.text = "Category:"
-            categoryLabel.setPadding(0, 16, 0, 8)
-            container.addView(categoryLabel)
-
-            val categorySpinner = Spinner(this)
-            val categories = arrayOf("Work", "Personal", "Shopping", "Others")
-            val categoryAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categories)
-            categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            categorySpinner.adapter = categoryAdapter
-            categorySpinner.setSelection(0) // Default to Work
-            container.addView(categorySpinner)
-
-            // Priority Spinner
-            val priorityLabel = TextView(this)
-            priorityLabel.text = "Priority:"
-            priorityLabel.setPadding(0, 16, 0, 8)
-            container.addView(priorityLabel)
-
-            val prioritySpinner = Spinner(this)
-            val priorities = arrayOf("Low", "Medium", "High")
-            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, priorities)
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            prioritySpinner.adapter = adapter
-            prioritySpinner.setSelection(1) // Default to Medium
-            container.addView(prioritySpinner)
-
-            // Date Selection
-            val dateLabel = TextView(this)
-            dateLabel.text = "Due Date:"
-            dateLabel.setPadding(0, 16, 0, 8)
-            container.addView(dateLabel)
-
-            val dateButton = Button(this)
+            // Inflate the XML layout
+            val dialogView = layoutInflater.inflate(R.layout.dialog_add_task, null)
+            
+            // Get references to all input fields
+            val etTaskTitle = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etTaskTitle)
+            val etTaskDescription = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etTaskDescription)
+            val spinnerCategory = dialogView.findViewById<Spinner>(R.id.spinnerCategory)
+            val spinnerPriority = dialogView.findViewById<Spinner>(R.id.spinnerPriority)
+            val etDueDate = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etDueDate)
+            val etDueTime = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etDueTime)
+            val spinnerReminder = dialogView.findViewById<Spinner>(R.id.spinnerReminder)
+            
+            // Set up spinners with icons using the helper
+            com.example.cheermateapp.util.TaskDialogSpinnerHelper.setupCategorySpinner(this, spinnerCategory)
+            com.example.cheermateapp.util.TaskDialogSpinnerHelper.setupPrioritySpinner(this, spinnerPriority)
+            com.example.cheermateapp.util.TaskDialogSpinnerHelper.setupReminderSpinner(this, spinnerReminder)
+            
+            // Set default due date to today
             val calendar = Calendar.getInstance()
             val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
             var selectedDate = calendar.time
-            dateButton.text = "📅 ${dateFormat.format(selectedDate)}"
-
-            dateButton.setOnClickListener {
+            etDueDate.setText(dateFormat.format(selectedDate))
+            
+            // Track selected time
+            var selectedHour = calendar.get(Calendar.HOUR_OF_DAY)
+            var selectedMinute = calendar.get(Calendar.MINUTE)
+            
+            // Set up date picker
+            etDueDate.setOnClickListener {
                 showDatePicker { year, month, day ->
                     calendar.set(year, month, day)
                     selectedDate = calendar.time
-                    dateButton.text = "📅 ${dateFormat.format(selectedDate)}"
+                    etDueDate.setText(dateFormat.format(calendar.time))
                 }
             }
-            container.addView(dateButton)
-
-            // Time Selection
-            val timeLabel = TextView(this)
-            timeLabel.text = "Due Time:"
-            timeLabel.setPadding(0, 16, 0, 8)
-            container.addView(timeLabel)
-
-            val timeButton = Button(this)
-            val timeFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
-            var selectedHour = calendar.get(Calendar.HOUR_OF_DAY)
-            var selectedMinute = calendar.get(Calendar.MINUTE)
-            timeButton.text = "🕐 ${timeFormat.format(calendar.time)}"
-
-            timeButton.setOnClickListener {
+            
+            // Set up time picker
+            etDueTime.setOnClickListener {
                 showTimePicker(selectedHour, selectedMinute) { hour, minute ->
                     selectedHour = hour
                     selectedMinute = minute
+                    val timeFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
                     calendar.set(Calendar.HOUR_OF_DAY, hour)
                     calendar.set(Calendar.MINUTE, minute)
-                    timeButton.text = "🕐 ${timeFormat.format(calendar.time)}"
+                    etDueTime.setText(timeFormat.format(calendar.time))
                 }
             }
-            container.addView(timeButton)
-
-            // Reminder Spinner
-            val reminderLabel = TextView(this)
-            reminderLabel.text = "Reminder:"
-            reminderLabel.setPadding(0, 16, 0, 8)
-            container.addView(reminderLabel)
-
-            val reminderSpinner = Spinner(this)
-            val reminders = arrayOf("None", "10 minutes before", "30 minutes before", "At specific time")
-            val reminderAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, reminders)
-            reminderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            reminderSpinner.adapter = reminderAdapter
-            reminderSpinner.setSelection(0) // Default to None
-            container.addView(reminderSpinner)
-
-            scrollView.addView(container)
-            builder.setView(scrollView)
-
+            
+            // Create and show the dialog
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Add New Task")
+            builder.setView(dialogView)
             builder.setPositiveButton("Add Task", null)
             builder.setNegativeButton("Cancel", null)
-
+            
             val dialog = builder.create()
             dialog.show()
-
+            
+            // Override positive button to prevent auto-dismiss on validation errors
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                val title = titleInput.text.toString().trim()
+                val title = etTaskTitle.text.toString().trim()
+                val description = etTaskDescription.text.toString().trim()
+                val dueDate = etDueDate.text.toString().trim()
+                val dueTime = etDueTime.text.toString().trim()
+                
+                // Get selected values from spinners using helper methods
+                val category = com.example.cheermateapp.util.TaskDialogSpinnerHelper.getSelectedCategory(spinnerCategory)
+                val priority = com.example.cheermateapp.util.TaskDialogSpinnerHelper.getSelectedPriority(spinnerPriority)
+                val reminderOption = com.example.cheermateapp.util.TaskDialogSpinnerHelper.getSelectedReminder(spinnerReminder)
+                
+                // Validation
                 if (title.isEmpty()) {
-                    titleInput.error = "Task title is required"
-                    titleInput.requestFocus()
                     Toast.makeText(this@FragmentTaskActivity, "⚠️ Please enter a task title", Toast.LENGTH_SHORT).show()
-                } else {
-                    val category = categorySpinner.selectedItem.toString()
-                    val priority = prioritySpinner.selectedItem.toString()
-                    val description = descriptionInput.text.toString().trim()
-                    val reminderOption = reminderSpinner.selectedItem.toString()
-
-                    val finalCalendar = Calendar.getInstance()
-                    finalCalendar.time = selectedDate
-                    finalCalendar.set(Calendar.HOUR_OF_DAY, selectedHour)
-                    finalCalendar.set(Calendar.MINUTE, selectedMinute)
-
-                    createNewTask(title, description, category, priority, finalCalendar.time, reminderOption)
-                    dialog.dismiss()
+                    etTaskTitle.error = "Task title is required"
+                    etTaskTitle.requestFocus()
+                    return@setOnClickListener
                 }
+                
+                if (dueDate.isEmpty()) {
+                    Toast.makeText(this@FragmentTaskActivity, "⚠️ Please select a due date", Toast.LENGTH_SHORT).show()
+                    etDueDate.error = "Due date is required"
+                    return@setOnClickListener
+                }
+                
+                // Build final datetime
+                val finalCalendar = Calendar.getInstance()
+                finalCalendar.time = selectedDate
+                finalCalendar.set(Calendar.HOUR_OF_DAY, selectedHour)
+                finalCalendar.set(Calendar.MINUTE, selectedMinute)
+                
+                // Create the task
+                createNewTask(title, description, category, priority, finalCalendar.time, reminderOption)
+                dialog.dismiss()
             }
 
         } catch (e: Exception) {
