@@ -45,10 +45,14 @@ class MainActivity : AppCompatActivity() {
     private var taskRecyclerView: RecyclerView? = null
     private var taskAdapter: TaskAdapter? = null
 
+    // ✅ Cached reference to FAB for better performance
+    private val fabAddTask: com.google.android.material.floatingactionbutton.FloatingActionButton? by lazy {
+        findViewById(R.id.fabAddTask)
+    }
+
     // ✅ Helper method to control FAB visibility
     private fun setFabVisibility(visible: Boolean) {
-        findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fabAddTask)?.visibility =
-            if (visible) View.VISIBLE else View.GONE
+        fabAddTask?.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
     // ✅ LIVE TASK UPDATE SYSTEM
