@@ -252,45 +252,42 @@ class TaskDialogExample : AppCompatActivity() {
         try {
             val db = AppDb.get(this@TaskDialogExample)
             
-            // Calculate reminder time based on option
-            val reminderMinutesBefore = when (reminderOption) {
-                "5 minutes before" -> 5
-                "15 minutes before" -> 15
-                "30 minutes before" -> 30
-                "1 hour before" -> 60
-                "1 day before" -> 1440
-                else -> 0
-            }
+            // Parse due date and time
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+            val dueDateTime = dateFormat.parse("$dueDate $dueTime")
             
-            if (reminderMinutesBefore > 0) {
-                // Parse due date and time
-                val dateTimeFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-                val dueDateTime = dateTimeFormat.parse("$dueDate $dueTime")
+            if (dueDateTime != null) {
+                val dueTimeMillis = dueDateTime.time
                 
-                if (dueDateTime != null) {
-                    // Calculate reminder time
-                    val calendar = Calendar.getInstance()
-                    calendar.time = dueDateTime
-                    calendar.add(Calendar.MINUTE, -reminderMinutesBefore)
-                    
-                    val reminderDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                    val reminderTimeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-                    
-                    val reminder = TaskReminder(
-                        Reminder_ID = 0, // Auto-generated
-                        Task_ID = taskId,
-                        ReminderDate = reminderDateFormat.format(calendar.time),
-                        ReminderTime = reminderTimeFormat.format(calendar.time),
-                        Message = "Task reminder: Due in $reminderOption",
-                        IsActive = true
-                    )
-                    
-                    withContext(Dispatchers.IO) {
-                        db.taskReminderDao().insert(reminder)
-                    }
-                    
-                    android.util.Log.d("TaskDialogExample", "Reminder created for task $taskId")
+                // Calculate reminder time based on option
+                val remindAtMillis = when (reminderOption) {
+                    "5 minutes before" -> dueTimeMillis - (5 * 60 * 1000)
+                    "15 minutes before" -> dueTimeMillis - (15 * 60 * 1000)
+                    "30 minutes before" -> dueTimeMillis - (30 * 60 * 1000)
+                    "1 hour before" -> dueTimeMillis - (60 * 60 * 1000)
+                    "1 day before" -> dueTimeMillis - (24 * 60 * 60 * 1000)
+                    else -> dueTimeMillis
                 }
+                
+                // Get next reminder ID
+                val reminderId = withContext(Dispatchers.IO) {
+                    val existingReminders = db.taskReminderDao().getRemindersByTask(taskId)
+                    if (existingReminders.isEmpty()) 1 else existingReminders.maxOf { it.TaskReminder_ID } + 1
+                }
+                
+                val reminder = TaskReminder(
+                    TaskReminder_ID = reminderId,
+                    Task_ID = taskId,
+                    User_ID = currentUserId,
+                    RemindAt = remindAtMillis,
+                    IsActive = true
+                )
+                
+                withContext(Dispatchers.IO) {
+                    db.taskReminderDao().insert(reminder)
+                }
+                
+                android.util.Log.d("TaskDialogExample", "✅ Created reminder for task $taskId at $remindAtMillis")
             }
         } catch (e: Exception) {
             android.util.Log.e("TaskDialogExample", "Error creating reminder", e)
