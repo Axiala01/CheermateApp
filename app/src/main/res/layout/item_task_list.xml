@@ -99,13 +99,16 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="6dp"
                     android:layout_weight="1"
-                    android:ellipsize="end"
                     android:fontFamily="@font/sf_pro_rounded_regular"
-                    android:gravity="end"
                     android:maxLines="1"
+                    android:background="@drawable/bg_chip_glass"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp"
+                    android:gravity="center"
                     android:text="@string/duedate"
                     android:textColor="@android:color/white"
                     android:textSize="11sp" />
+
             </LinearLayout>
         </LinearLayout>
 
