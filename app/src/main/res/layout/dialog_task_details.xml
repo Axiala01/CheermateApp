@@ -41,6 +41,32 @@
             android:textSize="14sp"
             android:visibility="gone" />
 
+        <!-- Category Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:alpha="0.7"
+                android:fontFamily="@font/sf_pro_rounded_regular"
+                android:text="Category: "
+                android:textColor="@android:color/white"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tvTaskCategory"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/sf_pro_rounded_bold"
+                android:text="📋 Work"
+                android:textColor="@android:color/white"
+                android:textSize="14sp" />
+        </LinearLayout>
+
         <!-- Priority Row -->
         <LinearLayout
             android:layout_width="match_parent"

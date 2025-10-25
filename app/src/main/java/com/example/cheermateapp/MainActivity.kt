@@ -11,6 +11,7 @@ import com.example.cheermateapp.data.model.Priority.Low
 import com.example.cheermateapp.data.model.Priority.Medium
 import com.example.cheermateapp.data.model.Status
 import com.example.cheermateapp.data.model.Category
+import com.example.cheermateapp.data.model.getDisplayText
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -2268,6 +2269,7 @@ class MainActivity : AppCompatActivity() {
             val tvTaskDescription = taskItemView.findViewById<TextView>(R.id.tvTaskDescription)
             val tvTaskPriority = taskItemView.findViewById<TextView>(R.id.tvTaskPriority)
             val tvTaskStatus = taskItemView.findViewById<TextView>(R.id.tvTaskStatus)
+            val tvTaskCategory = taskItemView.findViewById<TextView>(R.id.tvTaskCategory)
             val tvTaskDueDate = taskItemView.findViewById<TextView>(R.id.tvTaskDueDate)
             val tvTaskProgress = taskItemView.findViewById<TextView>(R.id.tvTaskProgress)
             val progressBar = taskItemView.findViewById<android.widget.ProgressBar>(R.id.progressBar)
@@ -2307,7 +2309,10 @@ class MainActivity : AppCompatActivity() {
                 com.example.cheermateapp.data.model.Status.Cancelled -> "❌ Cancelled"
             }
 
-            // 6. Progress
+            // 6. Category with icon
+            tvTaskCategory.text = task.Category.getDisplayText()
+
+            // 7. Progress
             if (tvTaskProgress != null && progressBar != null) {
                 tvTaskProgress.text = "${task.TaskProgress}%"
                 progressBar.progress = task.TaskProgress
@@ -2328,10 +2333,10 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            // 7. Due Date
+            // 8. Due Date
             tvTaskDueDate.text = "📅 Due: ${task.getFormattedDueDateTime()}"
 
-            // 8. Button States based on Task Status
+            // 9. Button States based on Task Status
             when (task.Status) {
                 com.example.cheermateapp.data.model.Status.Completed -> {
                     btnComplete.text = "✅ Completed"

@@ -835,6 +835,7 @@ class FragmentTaskActivity : AppCompatActivity() {
             val layoutPriorityIndicator = dialogView.findViewById<View>(R.id.layoutPriorityIndicator)
             val tvTaskTitle = dialogView.findViewById<TextView>(R.id.tvTaskTitle)
             val tvTaskDescription = dialogView.findViewById<TextView>(R.id.tvTaskDescription)
+            val tvTaskCategory = dialogView.findViewById<TextView>(R.id.tvTaskCategory)
             val tvTaskPriority = dialogView.findViewById<TextView>(R.id.tvTaskPriority)
             val tvTaskStatus = dialogView.findViewById<TextView>(R.id.tvTaskStatus)
             val tvTaskDueDate = dialogView.findViewById<TextView>(R.id.tvTaskDueDate)
@@ -858,6 +859,9 @@ class FragmentTaskActivity : AppCompatActivity() {
             } else {
                 tvTaskDescription.visibility = View.GONE
             }
+            
+            // Set category
+            tvTaskCategory.text = task.Category.getDisplayText()
             
             // Set priority
             tvTaskPriority.text = task.Priority.name

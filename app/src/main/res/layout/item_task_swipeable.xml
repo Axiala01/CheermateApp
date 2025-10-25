@@ -58,6 +58,17 @@
             android:gravity="end"/>
     </LinearLayout>
 
+    <!-- Category -->
+    <TextView
+        android:id="@+id/tvTaskCategory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="📋 Work"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        android:fontFamily="@font/sf_pro_rounded_bold"
+        android:layout_marginTop="8dp"/>
+
     <!-- Due Date -->
     <TextView
         android:id="@+id/tvTaskDueDate"
