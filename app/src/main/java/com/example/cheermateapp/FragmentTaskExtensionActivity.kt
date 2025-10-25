@@ -44,6 +44,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
     private lateinit var taskCard: LinearLayout
     private lateinit var etTaskTitle: EditText
     private lateinit var etTaskDescription: EditText
+    private lateinit var tvTaskStatus: TextView
     private lateinit var btnTaskCategory: TextView
     private lateinit var btnTaskPriority: TextView
     private lateinit var btnTaskDueDate: TextView
@@ -82,6 +83,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
         taskCard = findViewById(R.id.task_card)
         etTaskTitle = findViewById(R.id.et_task_title)
         etTaskDescription = findViewById(R.id.et_task_description)
+        tvTaskStatus = findViewById(R.id.tvTaskStatus)
         btnTaskCategory = findViewById(R.id.btn_task_category)
         btnTaskPriority = findViewById(R.id.btn_task_priority)
         btnTaskDueDate = findViewById(R.id.btn_task_due_date)
@@ -189,6 +191,9 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
             etTaskDescription.setText(task.Description)
         }
 
+        // Update status
+        updateTaskStatus(task.Status)
+
         // Update category button
         updateCategoryButton(task.Category)
 
@@ -222,6 +227,16 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
             Priority.High -> "🔴 High"
             Priority.Medium -> "🟡 Medium"
             Priority.Low -> "🟢 Low"
+        }
+    }
+
+    private fun updateTaskStatus(status: Status) {
+        tvTaskStatus.text = when (status) {
+            Status.Pending -> "⏳ Pending"
+            Status.InProgress -> "🔄 In Progress"
+            Status.Completed -> "✅ Completed"
+            Status.Cancelled -> "❌ Cancelled"
+            Status.OverDue -> "🔴 Overdue"
         }
     }
 
@@ -758,15 +773,24 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                                 db.taskDao().updateTaskProgress(task.User_ID, task.Task_ID, 100)
                             }
                             
+                            // Update the current task status
+                            currentTask = task.copy(
+                                Status = Status.Completed,
+                                TaskProgress = 100,
+                                UpdatedAt = System.currentTimeMillis()
+                            )
+                            
+                            // Update the status display
+                            updateTaskStatus(Status.Completed)
+                            
                             Toast.makeText(
                                 this@FragmentTaskExtensionActivity,
                                 "✅ Task marked as completed!",
                                 Toast.LENGTH_SHORT
                             ).show()
                             
-                            // Set result and finish activity to refresh caller's progress bar
+                            // Set result to notify caller that task was modified
                             setResult(RESULT_OK)
-                            finish()
                         } catch (e: Exception) {
                             android.util.Log.e("FragmentTaskExtensionActivity", "Error marking task as completed", e)
                             Toast.makeText(
@@ -939,15 +963,23 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                                 )
                             }
                             
+                            // Update the current task status
+                            currentTask = task.copy(
+                                Status = Status.Cancelled,
+                                UpdatedAt = System.currentTimeMillis()
+                            )
+                            
+                            // Update the status display
+                            updateTaskStatus(Status.Cancelled)
+                            
                             Toast.makeText(
                                 this@FragmentTaskExtensionActivity,
                                 "❌ Task marked as Won't Do",
                                 Toast.LENGTH_SHORT
                             ).show()
                             
-                            // Set result and finish activity to refresh caller's progress bar
+                            // Set result to notify caller that task was modified
                             setResult(RESULT_OK)
-                            finish()
                         } catch (e: Exception) {
                             android.util.Log.e("FragmentTaskExtensionActivity", "Error marking task as won't do", e)
                             Toast.makeText(
