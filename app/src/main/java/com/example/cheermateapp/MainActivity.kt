@@ -2705,8 +2705,9 @@ class MainActivity : AppCompatActivity() {
             calendarView.date = System.currentTimeMillis()
 
             try {
-                // ✅ STYLING (OPTIONAL)
-                calendarView.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                // ✅ STYLING - Apply theme-aware background
+                val backgroundColor = getColor(R.color.calendar_background)
+                calendarView.setBackgroundColor(backgroundColor)
 
                 // ✅ DATE SELECTION LISTENER with visual feedback
                 calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
