@@ -963,15 +963,23 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                                 )
                             }
                             
+                            // Update the current task status
+                            currentTask = task.copy(
+                                Status = Status.Cancelled,
+                                UpdatedAt = System.currentTimeMillis()
+                            )
+                            
+                            // Update the status display
+                            updateTaskStatus(Status.Cancelled)
+                            
                             Toast.makeText(
                                 this@FragmentTaskExtensionActivity,
                                 "❌ Task marked as Won't Do",
                                 Toast.LENGTH_SHORT
                             ).show()
                             
-                            // Set result and finish activity to refresh caller's progress bar
+                            // Set result to notify caller that task was modified
                             setResult(RESULT_OK)
-                            finish()
                         } catch (e: Exception) {
                             android.util.Log.e("FragmentTaskExtensionActivity", "Error marking task as won't do", e)
                             Toast.makeText(
