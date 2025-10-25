@@ -6,6 +6,7 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.example.cheermateapp.data.StaticDataRepository
 import com.example.cheermateapp.databinding.ActivityForgotPasswordBinding
 import com.example.cheermateapp.data.db.AppDb
 import com.example.cheermateapp.util.PasswordHashUtil
@@ -23,6 +24,7 @@ class ForgotPasswordActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityForgotPasswordBinding
     private val uiScope = CoroutineScope(Dispatchers.Main)
+    private lateinit var staticDataRepository: StaticDataRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +32,9 @@ class ForgotPasswordActivity : AppCompatActivity() {
         try {
             binding = ActivityForgotPasswordBinding.inflate(layoutInflater)
             setContentView(binding.root)
+
+            // Initialize repository
+            staticDataRepository = StaticDataRepository(this)
 
             setupSecurityQuestionDropdown()
             setupVerifyButton()
@@ -42,23 +47,44 @@ class ForgotPasswordActivity : AppCompatActivity() {
     }
 
     /**
-     * Set up the security question dropdown with predefined questions
+     * Set up the security question dropdown with questions from database (cached)
      */
     private fun setupSecurityQuestionDropdown() {
-        val securityQuestions = arrayOf(
-            "What was your first pet's name?",
-            "What city were you born in?",
-            "What is your mother's maiden name?",
-            "What was your first car?",
-            "What elementary school did you attend?",
-            "What is your favorite color?",
-            "What was the name of your first boss?",
-            "In what city did you meet your spouse/significant other?"
-        )
-
-        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, securityQuestions)
-        binding.etSecurityQuestion?.setAdapter(adapter)
-        binding.etSecurityQuestion?.threshold = 0
+        uiScope.launch {
+            try {
+                // Fetch security questions from repository (with caching)
+                val securityQuestions = withContext(Dispatchers.IO) {
+                    staticDataRepository.getSecurityQuestionPrompts()
+                }
+                
+                if (securityQuestions.isEmpty()) {
+                    Toast.makeText(
+                        this@ForgotPasswordActivity,
+                        "No security questions available. Please contact support.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    android.util.Log.e("ForgotPasswordActivity", "No security questions found")
+                    return@launch
+                }
+                
+                val adapter = ArrayAdapter(
+                    this@ForgotPasswordActivity,
+                    android.R.layout.simple_dropdown_item_1line,
+                    securityQuestions
+                )
+                binding.etSecurityQuestion?.setAdapter(adapter)
+                binding.etSecurityQuestion?.threshold = 0
+                
+                android.util.Log.d("ForgotPasswordActivity", "Loaded ${securityQuestions.size} security questions")
+            } catch (e: Exception) {
+                android.util.Log.e("ForgotPasswordActivity", "Error loading security questions", e)
+                Toast.makeText(
+                    this@ForgotPasswordActivity,
+                    "Error loading security questions",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
     }
 
     /**

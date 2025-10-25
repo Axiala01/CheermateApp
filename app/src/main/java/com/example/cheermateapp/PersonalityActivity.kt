@@ -6,8 +6,10 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.cheermateapp.data.StaticDataRepository
 import com.example.cheermateapp.data.db.AppDb
 import com.example.cheermateapp.data.model.Personality
+import com.example.cheermateapp.data.model.PersonalityType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -15,10 +17,15 @@ import kotlinx.coroutines.withContext
 
 class PersonalityActivity : AppCompatActivity() {
     private val uiScope = CoroutineScope(Dispatchers.Main)
+    private lateinit var staticDataRepository: StaticDataRepository
+    private var personalityTypes: List<PersonalityType> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_personality)
+
+        // Initialize repository
+        staticDataRepository = StaticDataRepository(this)
 
         // FIXED: Get as Int, not String
         val userId = intent.getIntExtra("USER_ID", -1)
@@ -33,8 +40,40 @@ class PersonalityActivity : AppCompatActivity() {
 
         Toast.makeText(this, "Select your personality", Toast.LENGTH_SHORT).show()
 
-        val saveAndGo: (Int, String, String) -> Unit = { type, name, description ->
-            Log.d("PersonalityActivity", "Saving personality: type=$type, name=$name, userId=$userId")
+        // Load personality types from database with cache
+        loadPersonalityTypes(userId)
+    }
+    
+    private fun loadPersonalityTypes(userId: Int) {
+        uiScope.launch {
+            try {
+                // Fetch personality types from repository (with caching)
+                personalityTypes = withContext(Dispatchers.IO) {
+                    staticDataRepository.getPersonalityTypes()
+                }
+                
+                if (personalityTypes.isEmpty()) {
+                    Toast.makeText(this@PersonalityActivity, "No personality types available", Toast.LENGTH_SHORT).show()
+                    finish()
+                    return@launch
+                }
+                
+                Log.d("PersonalityActivity", "Loaded ${personalityTypes.size} personality types")
+                
+                // Set up click listeners for each personality type
+                setupPersonalityButtons(userId)
+                
+            } catch (e: Exception) {
+                Log.e("PersonalityActivity", "Error loading personality types", e)
+                Toast.makeText(this@PersonalityActivity, "Error loading personality types", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+        }
+    }
+    
+    private fun setupPersonalityButtons(userId: Int) {
+        val saveAndGo: (PersonalityType) -> Unit = { personalityType ->
+            Log.d("PersonalityActivity", "Saving personality: ${personalityType.Name}, userId=$userId")
 
             // Disable buttons to prevent double-clicks
             findViewById<View>(R.id.cardKalog)?.isEnabled = false
@@ -55,9 +94,9 @@ class PersonalityActivity : AppCompatActivity() {
                         val personality = Personality(
                             Personality_ID = 0,
                             User_ID = userId, // Use Int value, not String
-                            PersonalityType = type,
-                            Name = name,
-                            Description = description
+                            PersonalityType = personalityType.Type_ID,
+                            Name = personalityType.Name,
+                            Description = personalityType.Description
                         )
                         Log.d("PersonalityActivity", "Created personality object: $personality")
 
@@ -88,21 +127,26 @@ class PersonalityActivity : AppCompatActivity() {
             }
         }
 
-        // Personality selection buttons
-        findViewById<View>(R.id.cardKalog)?.setOnClickListener {
-            saveAndGo(1, "Kalog", "The funny friend who makes everything entertaining!")
-        }
-        findViewById<View>(R.id.cardGenZ)?.setOnClickListener {
-            saveAndGo(2, "Gen Z", "Tech-savvy and trendy with the latest slang!")
-        }
-        findViewById<View>(R.id.cardSofty)?.setOnClickListener {
-            saveAndGo(3, "Softy", "Gentle and caring with a warm heart!")
-        }
-        findViewById<View>(R.id.cardGrey)?.setOnClickListener {
-            saveAndGo(4, "Grey", "Calm and balanced with steady wisdom!")
-        }
-        findViewById<View>(R.id.cardFlirty)?.setOnClickListener {
-            saveAndGo(5, "Flirty", "Playful and charming with a wink!")
+        // Map personality types to buttons dynamically
+        // Assuming Type_ID matches: 1=Kalog, 2=GenZ, 3=Softy, 4=Grey, 5=Flirty
+        val buttonMap = mapOf(
+            R.id.cardKalog to 1,
+            R.id.cardGenZ to 2,
+            R.id.cardSofty to 3,
+            R.id.cardGrey to 4,
+            R.id.cardFlirty to 5
+        )
+        
+        buttonMap.forEach { (buttonId, typeId) ->
+            val personalityType = personalityTypes.find { it.Type_ID == typeId }
+            if (personalityType != null) {
+                findViewById<View>(buttonId)?.setOnClickListener {
+                    saveAndGo(personalityType)
+                }
+            } else {
+                // Hide button if personality type not found
+                findViewById<View>(buttonId)?.visibility = View.GONE
+            }
         }
     }
 }

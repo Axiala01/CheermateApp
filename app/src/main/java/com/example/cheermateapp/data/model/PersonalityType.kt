@@ -4,11 +4,21 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "SecurityQuestion")
-data class SecurityQuestion(
-    @PrimaryKey(autoGenerate = true)
-    val SecurityQuestion_ID: Int = 0,
-    val Prompt: String,
+/**
+ * Represents a personality type definition
+ * This entity stores the available personality types that users can choose from
+ */
+@Entity(tableName = "PersonalityType")
+data class PersonalityType(
+    @PrimaryKey
+    @ColumnInfo(name = "Type_ID")
+    val Type_ID: Int,
+    
+    @ColumnInfo(name = "Name")
+    val Name: String,
+    
+    @ColumnInfo(name = "Description")
+    val Description: String,
     
     @ColumnInfo(name = "IsActive")
     val IsActive: Boolean = true,

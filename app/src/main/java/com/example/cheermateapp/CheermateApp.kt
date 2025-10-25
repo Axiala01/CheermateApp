@@ -2,9 +2,13 @@ package com.example.cheermateapp
 
 import android.app.Application
 import com.example.cheermateapp.data.db.AppDb
+import com.example.cheermateapp.util.DatabaseSeeder
 import com.example.cheermateapp.util.NotificationUtil
 import com.example.cheermateapp.util.ThemeManager
 import com.google.gson.Gson
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Application class for CheermateApp
@@ -19,6 +23,11 @@ class CheermateApp : Application() {
         
         // Initialize database
         db = AppDb.get(this)
+        
+        // Seed database with default static data in background
+        CoroutineScope(Dispatchers.IO).launch {
+            DatabaseSeeder.seedAll(this@CheermateApp)
+        }
         
         // Initialize theme
         ThemeManager.initializeTheme(this)

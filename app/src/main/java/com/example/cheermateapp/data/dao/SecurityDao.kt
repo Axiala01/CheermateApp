@@ -27,4 +27,16 @@ interface SecurityDao {
 
     @Query("SELECT * FROM UserSecurityAnswer WHERE User_ID = :userId")
     suspend fun getUserAnswers(userId: Int): List<UserSecurityAnswer>
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllQuestions(questions: List<SecurityQuestion>)
+    
+    @Query("SELECT COUNT(*) FROM SecurityQuestion")
+    suspend fun getQuestionCount(): Int
+    
+    @Update
+    suspend fun updateQuestion(question: SecurityQuestion)
+    
+    @Delete
+    suspend fun deleteQuestion(question: SecurityQuestion)
 }

@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.cheermateapp.data.StaticDataRepository
 import com.example.cheermateapp.databinding.ActivitySignUpBinding
 import com.example.cheermateapp.data.db.AppDb
 import com.example.cheermateapp.data.model.User
@@ -24,6 +25,7 @@ class SignUpActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySignUpBinding
     private val uiScope = CoroutineScope(Dispatchers.Main)
+    private lateinit var staticDataRepository: StaticDataRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +33,9 @@ class SignUpActivity : AppCompatActivity() {
         try {
             binding = ActivitySignUpBinding.inflate(layoutInflater)
             setContentView(binding.root)
+
+            // Initialize repository
+            staticDataRepository = StaticDataRepository(this)
 
             setupSecurityQuestionDropdown()
             setupSignUpButton()
@@ -44,23 +49,44 @@ class SignUpActivity : AppCompatActivity() {
     }
 
     /**
-     * Set up the security question dropdown with predefined questions
+     * Set up the security question dropdown with questions from database (cached)
      */
     private fun setupSecurityQuestionDropdown() {
-        val securityQuestions = arrayOf(
-            "What was your first pet's name?",
-            "What city were you born in?",
-            "What is your mother's maiden name?",
-            "What was your first car?",
-            "What elementary school did you attend?",
-            "What is your favorite color?",
-            "What was the name of your first boss?",
-            "In what city did you meet your spouse/significant other?"
-        )
-
-        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, securityQuestions)
-        binding.etSecurityQuestion?.setAdapter(adapter)
-        binding.etSecurityQuestion?.threshold = 0
+        uiScope.launch {
+            try {
+                // Fetch security questions from repository (with caching)
+                val securityQuestions = withContext(Dispatchers.IO) {
+                    staticDataRepository.getSecurityQuestionPrompts()
+                }
+                
+                if (securityQuestions.isEmpty()) {
+                    Toast.makeText(
+                        this@SignUpActivity,
+                        "No security questions available. Please try again later.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    android.util.Log.e("SignUpActivity", "No security questions found")
+                    return@launch
+                }
+                
+                val adapter = ArrayAdapter(
+                    this@SignUpActivity,
+                    android.R.layout.simple_dropdown_item_1line,
+                    securityQuestions
+                )
+                binding.etSecurityQuestion?.setAdapter(adapter)
+                binding.etSecurityQuestion?.threshold = 0
+                
+                android.util.Log.d("SignUpActivity", "Loaded ${securityQuestions.size} security questions")
+            } catch (e: Exception) {
+                android.util.Log.e("SignUpActivity", "Error loading security questions", e)
+                Toast.makeText(
+                    this@SignUpActivity,
+                    "Error loading security questions",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
     }
 
     /**
@@ -187,9 +213,6 @@ class SignUpActivity : AppCompatActivity() {
 
                     val newUserId = db.userDao().insert(user)
 
-                    // Ensure security questions exist in database
-                    ensureSecurityQuestionsExist(db)
-
                     // Save security answer
                     val questions = db.securityDao().getAllQuestions()
                     val questionId = questions.find { it.Prompt == securityQuestion }?.SecurityQuestion_ID
@@ -233,34 +256,6 @@ class SignUpActivity : AppCompatActivity() {
                     Toast.LENGTH_LONG
                 ).show()
                 android.util.Log.e("SignUpActivity", "Sign up error", e)
-            }
-        }
-    }
-
-    /**
-     * Ensure security questions exist in the database
-     */
-    private suspend fun ensureSecurityQuestionsExist(db: AppDb) {
-        val existingQuestions = db.securityDao().getAllQuestions()
-        
-        if (existingQuestions.isEmpty()) {
-            val predefinedQuestions = listOf(
-                "What was your first pet's name?",
-                "What city were you born in?",
-                "What is your mother's maiden name?",
-                "What was your first car?",
-                "What elementary school did you attend?",
-                "What is your favorite color?",
-                "What was the name of your first boss?",
-                "In what city did you meet your spouse/significant other?"
-            )
-
-            predefinedQuestions.forEach { prompt ->
-                val question = SecurityQuestion(
-                    SecurityQuestion_ID = 0,
-                    Prompt = prompt
-                )
-                db.securityDao().insertQuestion(question)
             }
         }
     }
