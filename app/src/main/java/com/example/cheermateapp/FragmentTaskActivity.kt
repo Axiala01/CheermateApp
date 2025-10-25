@@ -821,6 +821,7 @@ class FragmentTaskActivity : AppCompatActivity() {
             val layoutPriorityIndicator = dialogView.findViewById<View>(R.id.layoutPriorityIndicator)
             val tvTaskTitle = dialogView.findViewById<TextView>(R.id.tvTaskTitle)
             val tvTaskDescription = dialogView.findViewById<TextView>(R.id.tvTaskDescription)
+            val tvTaskCategory = dialogView.findViewById<TextView>(R.id.tvTaskCategory)
             val tvTaskPriority = dialogView.findViewById<TextView>(R.id.tvTaskPriority)
             val tvTaskStatus = dialogView.findViewById<TextView>(R.id.tvTaskStatus)
             val tvTaskDueDate = dialogView.findViewById<TextView>(R.id.tvTaskDueDate)
@@ -843,6 +844,14 @@ class FragmentTaskActivity : AppCompatActivity() {
                 tvTaskDescription.visibility = View.VISIBLE
             } else {
                 tvTaskDescription.visibility = View.GONE
+            }
+            
+            // Set category
+            tvTaskCategory.text = when (task.Category) {
+                com.example.cheermateapp.data.model.Category.Work -> "📋 Work"
+                com.example.cheermateapp.data.model.Category.Personal -> "👤 Personal"
+                com.example.cheermateapp.data.model.Category.Shopping -> "🛒 Shopping"
+                com.example.cheermateapp.data.model.Category.Others -> "📌 Others"
             }
             
             // Set priority

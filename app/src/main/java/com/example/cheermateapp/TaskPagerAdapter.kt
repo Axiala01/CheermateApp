@@ -21,6 +21,7 @@ class TaskPagerAdapter(
         val tvTaskDescription: TextView = itemView.findViewById(R.id.tvTaskDescription)
         val tvTaskPriority: TextView = itemView.findViewById(R.id.tvTaskPriority)
         val tvTaskStatus: TextView = itemView.findViewById(R.id.tvTaskStatus)
+        val tvTaskCategory: TextView = itemView.findViewById(R.id.tvTaskCategory)
         val tvTaskDueDate: TextView = itemView.findViewById(R.id.tvTaskDueDate)
     }
 
@@ -36,6 +37,14 @@ class TaskPagerAdapter(
         // Set task details
         holder.tvTaskTitle.text = task.Title
         holder.tvTaskDescription.text = task.Description ?: "No description"
+        
+        // Set category with icon
+        holder.tvTaskCategory.text = when (task.Category) {
+            com.example.cheermateapp.data.model.Category.Work -> "📋 Work"
+            com.example.cheermateapp.data.model.Category.Personal -> "👤 Personal"
+            com.example.cheermateapp.data.model.Category.Shopping -> "🛒 Shopping"
+            com.example.cheermateapp.data.model.Category.Others -> "📌 Others"
+        }
         
         // Set priority with color-coded indicator
         when (task.Priority) {
