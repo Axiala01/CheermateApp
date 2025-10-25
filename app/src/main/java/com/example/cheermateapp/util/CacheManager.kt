@@ -11,7 +11,7 @@ import java.io.IOException
  * Implements a simple cache-aside pattern with timestamp-based invalidation
  */
 object CacheManager {
-    private val gson = Gson()
+    internal val gson = Gson()
     
     /**
      * Cache metadata for tracking modifications
@@ -24,7 +24,7 @@ object CacheManager {
     /**
      * Wrapper for cached data with metadata
      */
-    private data class CachedData<T>(
+    internal data class CachedData<T>(
         val data: T,
         val metadata: CacheMetadata
     )
@@ -150,7 +150,7 @@ object CacheManager {
     /**
      * Get the cache file for a given key
      */
-    private fun getCacheFile(context: Context, cacheKey: String): File {
+    internal fun getCacheFile(context: Context, cacheKey: String): File {
         val cacheDir = File(context.cacheDir, "app_cache")
         if (!cacheDir.exists()) {
             cacheDir.mkdirs()
