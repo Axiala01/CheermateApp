@@ -30,8 +30,7 @@ class CachingSystemExample(private val context: Context) {
     suspend fun getConfigurationValues(): List<String> {
         return withContext(Dispatchers.IO) {
             // Try to get from cache first
-            val typeToken = object : TypeToken<CacheManager.CachedData<List<String>>>() {}
-            val cachedData = CacheManager.getCache(context, CACHE_KEY_EXAMPLE_DATA, typeToken, CACHE_MAX_AGE_MS)
+            val cachedData = CacheManager.getCache<List<String>>(context, CACHE_KEY_EXAMPLE_DATA, CACHE_MAX_AGE_MS)
             
             if (cachedData != null) {
                 android.util.Log.d("CachingExample", "Data loaded from cache")
@@ -65,8 +64,7 @@ class CachingSystemExample(private val context: Context) {
     suspend fun getTaskCategories(): List<TaskCategory> {
         return withContext(Dispatchers.IO) {
             val cacheKey = "task_categories"
-            val typeToken = object : TypeToken<CacheManager.CachedData<List<TaskCategory>>>() {}
-            val cachedData = CacheManager.getCache(context, cacheKey, typeToken, CACHE_MAX_AGE_MS)
+            val cachedData = CacheManager.getCache<List<TaskCategory>>(context, cacheKey, CACHE_MAX_AGE_MS)
             
             if (cachedData != null) {
                 return@withContext cachedData

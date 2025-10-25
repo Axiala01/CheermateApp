@@ -23,8 +23,8 @@ A generic utility class that handles JSON-based caching with timestamp-based inv
 // Save data to cache
 CacheManager.saveCache(context, "cache_key", data)
 
-// Retrieve cached data
-val data = CacheManager.getCache<T>(context, "cache_key", typeToken, maxAgeMs)
+// Retrieve cached data (using reified generics)
+val data = CacheManager.getCache<T>(context, "cache_key", maxAgeMs)
 
 // Invalidate specific cache
 CacheManager.invalidateCache(context, "cache_key")

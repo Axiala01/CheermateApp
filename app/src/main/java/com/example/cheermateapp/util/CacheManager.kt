@@ -33,14 +33,13 @@ object CacheManager {
      * Get cached data if it exists and is not stale
      * @param context Application context
      * @param cacheKey Unique key for this cache entry
-     * @param typeToken TypeToken for deserialization
+     * @param type Class type for deserialization
      * @param maxAgeMs Maximum age of cache in milliseconds (default 24 hours)
      * @return Cached data or null if not found or stale
      */
-    fun <T> getCache(
+    inline fun <reified T> getCache(
         context: Context,
         cacheKey: String,
-        typeToken: TypeToken<CachedData<T>>,
         maxAgeMs: Long = 24 * 60 * 60 * 1000L // 24 hours
     ): T? {
         return try {
@@ -51,7 +50,8 @@ object CacheManager {
             }
             
             val json = cacheFile.readText()
-            val cachedData: CachedData<T> = gson.fromJson(json, typeToken.type)
+            val type = object : TypeToken<CachedData<T>>() {}.type
+            val cachedData: CachedData<T> = gson.fromJson(json, type)
             
             // Check if cache is stale
             val age = System.currentTimeMillis() - cachedData.metadata.lastModified

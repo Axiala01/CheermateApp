@@ -44,8 +44,7 @@ class CacheManagerTest {
         assertTrue("Cache should be saved successfully", saved)
 
         // Retrieve cache
-        val typeToken = object : TypeToken<CacheManager.CachedData<List<String>>>() {}
-        val retrieved = CacheManager.getCache(mockContext, cacheKey, typeToken)
+        val retrieved = CacheManager.getCache<List<String>>(mockContext, cacheKey)
 
         assertNotNull("Retrieved data should not be null", retrieved)
         assertEquals("Retrieved data should match saved data", testData, retrieved)
@@ -54,9 +53,8 @@ class CacheManagerTest {
     @Test
     fun testCacheMiss() {
         val cacheKey = "non_existent_key"
-        val typeToken = object : TypeToken<CacheManager.CachedData<List<String>>>() {}
 
-        val retrieved = CacheManager.getCache<List<String>>(mockContext, cacheKey, typeToken)
+        val retrieved = CacheManager.getCache<List<String>>(mockContext, cacheKey)
         assertNull("Retrieved data should be null for non-existent cache", retrieved)
     }
 
@@ -73,8 +71,7 @@ class CacheManagerTest {
         assertTrue("Cache should be invalidated successfully", invalidated)
 
         // Try to retrieve - should return null
-        val typeToken = object : TypeToken<CacheManager.CachedData<String>>() {}
-        val retrieved = CacheManager.getCache<String>(mockContext, cacheKey, typeToken)
+        val retrieved = CacheManager.getCache<String>(mockContext, cacheKey)
         assertNull("Retrieved data should be null after invalidation", retrieved)
     }
 
@@ -89,11 +86,9 @@ class CacheManagerTest {
         // Try to get with very short max age (1ms)
         Thread.sleep(10) // Wait 10ms to ensure cache is stale
 
-        val typeToken = object : TypeToken<CacheManager.CachedData<String>>() {}
         val retrieved = CacheManager.getCache<String>(
             mockContext,
             cacheKey,
-            typeToken,
             maxAgeMs = 1L // 1 millisecond
         )
 
@@ -149,8 +144,7 @@ class CacheManagerTest {
         CacheManager.saveCache(mockContext, cacheKey, testData)
 
         // Retrieve
-        val typeToken = object : TypeToken<CacheManager.CachedData<TestData>>() {}
-        val retrieved = CacheManager.getCache<TestData>(mockContext, cacheKey, typeToken)
+        val retrieved = CacheManager.getCache<TestData>(mockContext, cacheKey)
 
         assertNotNull("Retrieved data should not be null", retrieved)
         assertEquals("ID should match", testData.id, retrieved?.id)

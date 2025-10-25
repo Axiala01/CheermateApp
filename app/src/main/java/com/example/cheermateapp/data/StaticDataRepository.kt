@@ -34,8 +34,7 @@ class StaticDataRepository(private val context: Context) {
         return withContext(Dispatchers.IO) {
             try {
                 // Try to get from cache first
-                val typeToken = object : TypeToken<CacheManager.CachedData<List<PersonalityType>>>() {}
-                val cachedData = CacheManager.getCache(context, CACHE_KEY_PERSONALITY_TYPES, typeToken, CACHE_MAX_AGE_MS)
+                val cachedData = CacheManager.getCache<List<PersonalityType>>(context, CACHE_KEY_PERSONALITY_TYPES, CACHE_MAX_AGE_MS)
                 
                 if (cachedData != null) {
                     Log.d(TAG, "Personality types loaded from cache")
@@ -68,8 +67,7 @@ class StaticDataRepository(private val context: Context) {
         return withContext(Dispatchers.IO) {
             try {
                 // Try to get from cache first
-                val typeToken = object : TypeToken<CacheManager.CachedData<List<SecurityQuestion>>>() {}
-                val cachedData = CacheManager.getCache(context, CACHE_KEY_SECURITY_QUESTIONS, typeToken, CACHE_MAX_AGE_MS)
+                val cachedData = CacheManager.getCache<List<SecurityQuestion>>(context, CACHE_KEY_SECURITY_QUESTIONS, CACHE_MAX_AGE_MS)
                 
                 if (cachedData != null) {
                     Log.d(TAG, "Security questions loaded from cache")
