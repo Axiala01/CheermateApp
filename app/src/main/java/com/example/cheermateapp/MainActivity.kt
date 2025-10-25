@@ -2033,7 +2033,8 @@ class MainActivity : AppCompatActivity() {
 
                     val today = Calendar.getInstance()
                     val todayStr = dateToString(today.time)
-                    // Get timestamp for start of today (midnight)
+                    // Get timestamp for start of today (midnight in local timezone)
+                    // This is used to compare with UpdatedAt timestamps to find tasks completed today
                     val todayMidnight = Calendar.getInstance().apply {
                         set(Calendar.HOUR_OF_DAY, 0)
                         set(Calendar.MINUTE, 0)

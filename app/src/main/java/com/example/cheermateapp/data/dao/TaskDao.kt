@@ -115,7 +115,7 @@ interface TaskDao {
         WHERE User_ID = :userId 
         AND Status = 'Completed' 
         AND DeletedAt IS NULL
-        AND date(UpdatedAt / 1000, 'unixepoch') = date(:todayTimestamp / 1000, 'unixepoch')
+        AND date(UpdatedAt / 1000, 'unixepoch', 'localtime') = date(:todayTimestamp / 1000, 'unixepoch', 'localtime')
     """)
     suspend fun getTasksCompletedTodayByUpdate(userId: Int, todayTimestamp: Long): Int
 
