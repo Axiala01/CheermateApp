@@ -6,6 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.example.cheermateapp.data.dao.PersonalityDao
+import com.example.cheermateapp.data.dao.PersonalityTypeDao
 import com.example.cheermateapp.data.dao.RecurringTaskDao
 import com.example.cheermateapp.data.dao.SecurityDao
 import com.example.cheermateapp.data.dao.SettingsDao
@@ -17,6 +18,7 @@ import com.example.cheermateapp.data.dao.TaskTemplateDao
 import com.example.cheermateapp.data.dao.UserDao
 import com.example.cheermateapp.data.model.MessageTemplate
 import com.example.cheermateapp.data.model.Personality
+import com.example.cheermateapp.data.model.PersonalityType
 import com.example.cheermateapp.data.model.RecurringTask
 import com.example.cheermateapp.data.model.SecurityQuestion
 import com.example.cheermateapp.data.model.UserSecurityAnswer
@@ -32,6 +34,7 @@ import com.google.gson.Gson
 @Database(
     entities = [
         Personality::class,
+        PersonalityType::class,
         User::class,
         Task::class,
         TaskReminder::class,
@@ -44,7 +47,7 @@ import com.google.gson.Gson
         TaskTemplate::class,
         TaskDependency::class
     ],
-    version = 15,
+    version = 16,
     exportSchema = false
 )
 @TypeConverters(AppTypeConverters::class)
@@ -56,6 +59,7 @@ abstract class AppDb : RoomDatabase() {
     abstract fun settingsDao(): SettingsDao
     abstract fun securityDao(): SecurityDao
     abstract fun personalityDao(): PersonalityDao
+    abstract fun personalityTypeDao(): PersonalityTypeDao
     abstract fun recurringTaskDao(): RecurringTaskDao
     abstract fun taskTemplateDao(): TaskTemplateDao
     abstract fun taskDependencyDao(): TaskDependencyDao

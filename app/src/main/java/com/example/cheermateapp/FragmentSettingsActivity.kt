@@ -7,6 +7,7 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
+import com.example.cheermateapp.data.StaticDataRepository
 import com.example.cheermateapp.data.db.AppDb
 import com.example.cheermateapp.data.model.Personality
 import com.example.cheermateapp.util.ThemeManager
@@ -22,6 +23,7 @@ class FragmentSettingsActivity : AppCompatActivity() {
     }
 
     private var userId: Int = 0
+    private lateinit var staticDataRepository: StaticDataRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,6 +31,9 @@ class FragmentSettingsActivity : AppCompatActivity() {
 
         // Get userId from intent
         userId = intent?.getStringExtra(EXTRA_USER_ID)?.toIntOrNull() ?: 0
+        
+        // Initialize repository
+        staticDataRepository = StaticDataRepository(this)
 
         setupToolbar()
         setupBottomNavigation()
@@ -433,25 +438,26 @@ class FragmentSettingsActivity : AppCompatActivity() {
             try {
                 val db = AppDb.get(this@FragmentSettingsActivity)
                 
-                // Define all 5 available personality types (matching PersonalityActivity)
-                val availablePersonalities = listOf(
-                    Triple(1, "Kalog", "The funny friend who makes everything entertaining!"),
-                    Triple(2, "Gen Z", "Tech-savvy and trendy with the latest slang!"),
-                    Triple(3, "Softy", "Gentle and caring with a warm heart!"),
-                    Triple(4, "Grey", "Calm and balanced with steady wisdom!"),
-                    Triple(5, "Flirty", "Playful and charming with a wink!")
-                )
+                // Fetch personality types from repository (with caching)
+                val personalityTypes = withContext(Dispatchers.IO) {
+                    staticDataRepository.getPersonalityTypes()
+                }
+                
+                if (personalityTypes.isEmpty()) {
+                    Toast.makeText(this@FragmentSettingsActivity, "No personality types available", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
                 
                 // Get current user personality
                 val currentPersonality = withContext(Dispatchers.IO) {
                     db.personalityDao().getByUser(userId)
                 }
 
-                val personalityNames = availablePersonalities.map { it.second }.toTypedArray()
+                val personalityNames = personalityTypes.map { it.Name }.toTypedArray()
                 
                 // Find the index of the current personality type
                 val checkedItem = if (currentPersonality != null) {
-                    availablePersonalities.indexOfFirst { it.first == currentPersonality.PersonalityType }
+                    personalityTypes.indexOfFirst { it.Type_ID == currentPersonality.PersonalityType }
                 } else {
                     -1  // No selection
                 }
@@ -466,8 +472,8 @@ class FragmentSettingsActivity : AppCompatActivity() {
                     }
                     .setPositiveButton("OK") { _, _ ->
                         if (selectedPersonalityIndex >= 0) {
-                            val selected = availablePersonalities[selectedPersonalityIndex]
-                            updateUserPersonalityWithType(selected.first, selected.second, selected.third)
+                            val selected = personalityTypes[selectedPersonalityIndex]
+                            updateUserPersonalityWithType(selected.Type_ID, selected.Name, selected.Description)
                         }
                     }
                     .setNegativeButton("Cancel", null)
