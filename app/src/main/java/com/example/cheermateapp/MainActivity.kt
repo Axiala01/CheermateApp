@@ -13,6 +13,7 @@ import com.example.cheermateapp.data.model.Status
 import com.example.cheermateapp.data.model.Category
 import com.example.cheermateapp.data.model.getDisplayText
 import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -61,6 +62,17 @@ class MainActivity : AppCompatActivity() {
     private var taskUpdateHandler = android.os.Handler(android.os.Looper.getMainLooper())
     private var taskUpdateRunnable: Runnable? = null
     private var isTaskUpdateActive = false
+
+    // ✅ Activity Result Launcher for task details
+    private val taskDetailLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        // When returning from task detail activity, refresh the data
+        if (result.resultCode == RESULT_OK) {
+            android.util.Log.d("MainActivity", "✅ Returned from task detail, refreshing data")
+            refreshCurrentView()
+        }
+    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -141,6 +153,30 @@ class MainActivity : AppCompatActivity() {
         isTaskUpdateActive = false
         taskUpdateRunnable?.let { taskUpdateHandler.removeCallbacks(it) }
         android.util.Log.d("MainActivity", "⏹️ Live task updates stopped")
+    }
+
+    // ✅ REFRESH CURRENT VIEW - Called when returning from task details
+    private fun refreshCurrentView() {
+        try {
+            val homeScroll = findViewById<ScrollView>(R.id.homeScroll)
+            val contentContainer = findViewById<FrameLayout>(R.id.contentContainer)
+            
+            when {
+                homeScroll?.visibility == View.VISIBLE -> {
+                    // Refresh home screen
+                    android.util.Log.d("MainActivity", "🔄 Refreshing home screen")
+                    loadTaskStatistics()
+                    loadRecentTasks()
+                }
+                contentContainer?.visibility == View.VISIBLE -> {
+                    // Refresh tasks fragment
+                    android.util.Log.d("MainActivity", "🔄 Refreshing tasks fragment")
+                    loadTasksFragmentData()
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Error refreshing current view", e)
+        }
     }
 
     // ✅ SIMPLIFIED VERSION - WITHOUT OVERDUE STATUS
@@ -665,7 +701,7 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, FragmentTaskExtensionActivity::class.java)
         intent.putExtra(FragmentTaskExtensionActivity.EXTRA_TASK_ID, task.Task_ID)
         intent.putExtra(FragmentTaskExtensionActivity.EXTRA_USER_ID, task.User_ID)
-        startActivity(intent)
+        taskDetailLauncher.launch(intent) // Use launcher instead of startActivity
     }
 
     private fun onTaskComplete(task: Task) {
