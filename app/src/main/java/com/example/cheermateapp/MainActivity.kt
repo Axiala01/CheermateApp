@@ -2033,9 +2033,18 @@ class MainActivity : AppCompatActivity() {
 
                     val today = Calendar.getInstance()
                     val todayStr = dateToString(today.time)
+                    // Get timestamp for start of today (midnight in local timezone)
+                    // This is used to compare with UpdatedAt timestamps to find tasks completed today
+                    val todayMidnight = Calendar.getInstance().apply {
+                        set(Calendar.HOUR_OF_DAY, 0)
+                        set(Calendar.MINUTE, 0)
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }.timeInMillis
 
                     val todayTasks = db.taskDao().getTodayTasksCount(userId, todayStr)
-                    val todayCompletedTasks = db.taskDao().getCompletedTodayTasksCount(userId, todayStr)
+                    // ✅ UPDATED: Count tasks that were actually completed today (based on UpdatedAt)
+                    val todayCompletedTasks = db.taskDao().getTasksCompletedTodayByUpdate(userId, todayMidnight)
                     // ✅ FIXED: Use the correct method signature
                     val overdueTasks = db.taskDao().getOverdueTasksCount(userId)
 

@@ -109,6 +109,16 @@ interface TaskDao {
     @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DueAt = :todayStr AND Status = 'Completed' AND DeletedAt IS NULL")
     suspend fun getCompletedTodayTasksCount(userId: Int, todayStr: String): Int
 
+    // ✅ NEW: Count tasks that were marked complete today (based on UpdatedAt timestamp)
+    @Query("""
+        SELECT COUNT(*) FROM Task 
+        WHERE User_ID = :userId 
+        AND Status = 'Completed' 
+        AND DeletedAt IS NULL
+        AND date(UpdatedAt / 1000, 'unixepoch', 'localtime') = date(:todayTimestamp / 1000, 'unixepoch', 'localtime')
+    """)
+    suspend fun getTasksCompletedTodayByUpdate(userId: Int, todayTimestamp: Long): Int
+
     // ✅ FIXED: Use String instead of Status enum
     @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND Status = :status AND DeletedAt IS NULL")
     suspend fun getTasksCountByStatus(userId: Int, status: String): Int
