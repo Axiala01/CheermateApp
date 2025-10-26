@@ -2,9 +2,9 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <corners android:radius="28dp"/>
 
-    <!-- Frosted grey fill (semi-transparent) -->
-    <solid android:color="#99B0B0B0"/>
+    <!-- Frosted fill (semi-transparent) -->
+    <solid android:color="?attr/glassBackgroundHover"/>
 
-    <!-- Subtle darker grey stroke -->
-    <stroke android:width="1dp" android:color="#60FFFFFF"/>
+    <!-- Subtle stroke -->
+    <stroke android:width="1dp" android:color="?attr/glassBackgroundStroke"/>
 </shape>
