@@ -87,7 +87,7 @@ Several activities had explicit theme overrides using `Theme.Material3.DayNight.
 - Prevents individual activities from auto-switching based on system theme
 - Provides consistent theming throughout the app
 
-### 3. **Wired Up Dark Mode Switch**
+### 3. **Implemented Functional Dark Mode Switch**
 
 **File: `app/src/main/java/com/example/cheermateapp/MainActivity.kt`**
 ```kotlin
