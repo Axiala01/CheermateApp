@@ -2715,8 +2715,10 @@ class MainActivity : AppCompatActivity() {
             // ✅ CREATE AND CONFIGURE CalendarView
             val calendarView = CalendarView(this)
             // ✅ FIXED: Use explicit height to prevent overlap with helper text below
-            // Container is 290dp, allocate 245dp for calendar and ~45dp for helper text
-            val calendarHeightDp = 245
+            // Container is 290dp total. We allocate space for calendar and leave room for helper text
+            val containerHeightDp = 290  // Must match layout XML calendarPlaceholder height
+            val helperTextHeightDp = 45  // Approximate height needed for helper text
+            val calendarHeightDp = containerHeightDp - helperTextHeightDp
             val calendarHeightPx = (calendarHeightDp * resources.displayMetrics.density).toInt()
             calendarView.layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
