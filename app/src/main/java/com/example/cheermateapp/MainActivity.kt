@@ -2695,7 +2695,7 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    // ✅ CALENDAR INTEGRATION (READ-ONLY PREVIEW)
+    // ✅ CALENDAR INTEGRATION (READ-ONLY PREVIEW) - FIXED VERSION
     private fun setupCalendarView() {
         android.util.Log.d("MainActivity", "🔧 setupCalendarView() called")
         try {
