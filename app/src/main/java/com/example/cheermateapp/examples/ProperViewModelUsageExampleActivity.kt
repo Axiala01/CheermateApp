@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.cheermateapp.R
 import com.example.cheermateapp.data.model.Task
 import com.example.cheermateapp.data.model.Priority
@@ -42,7 +43,7 @@ class ProperViewModelUsageExampleActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var emptyStateView: TextView
     private lateinit var btnAddTask: Button
-    private lateinit var swipeRefreshLayout: androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     
     // Sample adapter (replace with your actual adapter)
     private lateinit var taskAdapter: SimpleTaskAdapter

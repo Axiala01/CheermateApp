@@ -73,6 +73,9 @@ dependencies {
     // ViewPager2 for swipeable tasks
     implementation("androidx.viewpager2:viewpager2:1.0.0")
 
+    // SwipeRefreshLayout
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+
     testImplementation(libs.junit)
     testImplementation("org.mockito:mockito-core:5.7.0")
     testImplementation("org.mockito:mockito-inline:5.2.0")
