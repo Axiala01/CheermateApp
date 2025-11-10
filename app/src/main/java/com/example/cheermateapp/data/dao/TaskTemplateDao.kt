@@ -3,6 +3,7 @@ package com.example.cheermateapp.data.dao
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.example.cheermateapp.data.model.TaskTemplate
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TaskTemplateDao {
@@ -59,6 +60,17 @@ interface TaskTemplateDao {
     suspend fun getNextTemplateId(userId: Int): Int
 
     // ✅ BATCH OPERATIONS
+    @Transaction
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(templates: List<TaskTemplate>)
+
+    // ✅ FLOW METHODS FOR REACTIVE UPDATES
+    @Query("SELECT * FROM TaskTemplate WHERE User_ID = :userId ORDER BY UsageCount DESC, CreatedAt DESC")
+    fun getAllTemplatesFlow(userId: Int): Flow<List<TaskTemplate>>
+
+    @Query("SELECT * FROM TaskTemplate WHERE User_ID = :userId AND Template_ID = :templateId")
+    fun getTemplateByIdFlow(userId: Int, templateId: Int): Flow<TaskTemplate?>
+
+    @Query("SELECT * FROM TaskTemplate WHERE User_ID = :userId AND Category = :category ORDER BY UsageCount DESC")
+    fun getTemplatesByCategoryFlow(userId: Int, category: String): Flow<List<TaskTemplate>>
 }

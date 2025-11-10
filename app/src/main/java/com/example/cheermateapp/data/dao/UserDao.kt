@@ -2,6 +2,7 @@ package com.example.cheermateapp.data.dao
 
 import androidx.room.*
 import com.example.cheermateapp.data.model.User
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UserDao {
@@ -45,4 +46,11 @@ interface UserDao {
 
     @Query("SELECT COUNT(*) FROM User")
     suspend fun getUserCount(): Int
+
+    // ✅ FLOW METHODS FOR REACTIVE UPDATES
+    @Query("SELECT * FROM `User` WHERE User_ID = :userId LIMIT 1")
+    fun getUserByIdFlow(userId: Int): Flow<User?>
+
+    @Query("SELECT * FROM User")
+    fun getAllUsersFlow(): Flow<List<User>>
 }

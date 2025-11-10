@@ -4,6 +4,7 @@ import androidx.room.*
 import androidx.lifecycle.LiveData
 import com.example.cheermateapp.data.model.Task
 import com.example.cheermateapp.data.model.Priority
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TaskDao {
@@ -98,6 +99,22 @@ interface TaskDao {
     @Query("SELECT * FROM Task WHERE User_ID = :userId AND Status = 'Completed' AND DeletedAt IS NULL ORDER BY UpdatedAt DESC")
     fun getCompletedTasksLive(userId: Int): LiveData<List<Task>>
 
+    // ✅ FLOW METHODS FOR REACTIVE UPDATES (MODERN APPROACH)
+    @Query("SELECT * FROM Task WHERE User_ID = :userId AND DeletedAt IS NULL ORDER BY CreatedAt DESC")
+    fun getAllTasksFlow(userId: Int): Flow<List<Task>>
+
+    @Query("SELECT * FROM Task WHERE User_ID = :userId AND DueAt = :todayStr AND DeletedAt IS NULL ORDER BY DueTime ASC")
+    fun getTodayTasksFlow(userId: Int, todayStr: String): Flow<List<Task>>
+
+    @Query("SELECT * FROM Task WHERE User_ID = :userId AND Status IN ('Pending', 'InProgress') AND DeletedAt IS NULL ORDER BY DueAt ASC")
+    fun getPendingTasksFlow(userId: Int): Flow<List<Task>>
+
+    @Query("SELECT * FROM Task WHERE User_ID = :userId AND Status = 'Completed' AND DeletedAt IS NULL ORDER BY UpdatedAt DESC")
+    fun getCompletedTasksFlow(userId: Int): Flow<List<Task>>
+
+    @Query("SELECT * FROM Task WHERE User_ID = :userId AND Task_ID = :taskId")
+    fun getTaskByCompositeKeyFlow(userId: Int, taskId: Int): Flow<Task?>
+
     // ✅ COUNT QUERIES FOR ALL ACTIVITIES
     @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId")
     suspend fun getTotalTasksForUser(userId: Int): Int
@@ -171,20 +188,25 @@ interface TaskDao {
     @Query("SELECT Status FROM Task WHERE User_ID = :userId AND DeletedAt IS NULL")
     suspend fun getAllStatusForUser(userId: Int): List<String>
 
-    // ✅ BULK OPERATIONS
+    // ✅ BULK OPERATIONS (WITH @Transaction FOR ATOMICITY)
+    @Transaction
     @Insert
     suspend fun insertAll(tasks: List<Task>)
 
+    @Transaction
     @Query("UPDATE Task SET DeletedAt = :deletedAt WHERE User_ID = :userId AND Task_ID IN (:taskIds)")
     suspend fun softDeleteMultiple(userId: Int, taskIds: List<Int>, deletedAt: Long = System.currentTimeMillis())
 
+    @Transaction
     @Query("UPDATE Task SET Status = 'Completed', TaskProgress = 100, UpdatedAt = :updatedAt WHERE User_ID = :userId AND Task_ID IN (:taskIds)")
     suspend fun markMultipleCompleted(userId: Int, taskIds: List<Int>, updatedAt: Long = System.currentTimeMillis())
 
-    // ✅ DATA MANAGEMENT QUERIES
+    // ✅ DATA MANAGEMENT QUERIES (WITH @Transaction FOR SAFETY)
+    @Transaction
     @Query("DELETE FROM Task WHERE User_ID = :userId")
     suspend fun deleteAllTasksForUser(userId: Int)
 
+    @Transaction
     @Query("DELETE FROM Task")
     suspend fun deleteAllTasks()
 }

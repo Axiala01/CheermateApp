@@ -2,6 +2,7 @@ package com.example.cheermateapp.data.dao
 
 import androidx.room.*
 import com.example.cheermateapp.data.model.SubTask
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SubTaskDao {
@@ -26,4 +27,20 @@ interface SubTaskDao {
 
     @Query("SELECT COALESCE(MAX(Subtask_ID), 0) + 1 FROM SubTask WHERE Task_ID = :taskId AND User_ID = :userId")
     suspend fun getNextSubtaskId(taskId: Int, userId: Int): Int
+
+    // ✅ FLOW METHODS FOR REACTIVE UPDATES
+    @Query("SELECT * FROM SubTask WHERE Task_ID = :taskId AND User_ID = :userId ORDER BY SortOrder ASC")
+    fun getSubTasksFlow(taskId: Int, userId: Int): Flow<List<SubTask>>
+
+    @Query("SELECT * FROM SubTask WHERE Task_ID = :taskId")
+    fun getSubTasksByTaskFlow(taskId: Int): Flow<List<SubTask>>
+
+    // ✅ BATCH OPERATIONS WITH @Transaction
+    @Transaction
+    @Insert
+    suspend fun insertAll(subTasks: List<SubTask>)
+
+    @Transaction
+    @Query("DELETE FROM SubTask WHERE Task_ID = :taskId AND User_ID = :userId")
+    suspend fun deleteAllForTask(taskId: Int, userId: Int)
 }

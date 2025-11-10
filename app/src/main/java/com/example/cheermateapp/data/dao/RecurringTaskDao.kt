@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.example.cheermateapp.data.model.RecurringTask
 import com.example.cheermateapp.data.model.RecurringFrequency
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface RecurringTaskDao {
@@ -58,4 +59,14 @@ interface RecurringTaskDao {
     // ✅ GET NEXT ID
     @Query("SELECT COALESCE(MAX(RecurringTask_ID), 0) + 1 FROM RecurringTask WHERE User_ID = :userId")
     suspend fun getNextRecurringTaskId(userId: Int): Int
+
+    // ✅ FLOW METHODS FOR REACTIVE UPDATES
+    @Query("SELECT * FROM RecurringTask WHERE User_ID = :userId ORDER BY CreatedAt DESC")
+    fun getAllRecurringTasksFlow(userId: Int): Flow<List<RecurringTask>>
+
+    @Query("SELECT * FROM RecurringTask WHERE User_ID = :userId AND IsActive = 1 ORDER BY CreatedAt DESC")
+    fun getActiveRecurringTasksFlow(userId: Int): Flow<List<RecurringTask>>
+
+    @Query("SELECT * FROM RecurringTask WHERE User_ID = :userId AND RecurringTask_ID = :recurringTaskId")
+    fun getRecurringTaskByIdFlow(userId: Int, recurringTaskId: Int): Flow<RecurringTask?>
 }
