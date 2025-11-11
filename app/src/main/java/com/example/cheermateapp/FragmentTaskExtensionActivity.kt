@@ -764,20 +764,22 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                     lifecycleScope.launch {
                         try {
                             val db = AppDb.get(this@FragmentTaskExtensionActivity)
+                            val updatedAt = System.currentTimeMillis()
                             withContext(Dispatchers.IO) {
                                 db.taskDao().updateTaskStatus(
                                     task.User_ID,
                                     task.Task_ID,
-                                    "Completed"
+                                    "Completed",
+                                    updatedAt
                                 )
-                                db.taskDao().updateTaskProgress(task.User_ID, task.Task_ID, 100)
+                                db.taskDao().updateTaskProgress(task.User_ID, task.Task_ID, 100, updatedAt)
                             }
                             
                             // Update the current task status
                             currentTask = task.copy(
                                 Status = Status.Completed,
                                 TaskProgress = 100,
-                                UpdatedAt = System.currentTimeMillis()
+                                UpdatedAt = updatedAt
                             )
                             
                             // Update the status display
