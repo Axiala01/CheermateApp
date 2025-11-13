@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.example.cheermateapp.data.dao.MessageTemplateDao
 import com.example.cheermateapp.data.dao.PersonalityDao
 import com.example.cheermateapp.data.dao.PersonalityTypeDao
 import com.example.cheermateapp.data.dao.RecurringTaskDao
@@ -60,6 +61,7 @@ abstract class AppDb : RoomDatabase() {
     abstract fun securityDao(): SecurityDao
     abstract fun personalityDao(): PersonalityDao
     abstract fun personalityTypeDao(): PersonalityTypeDao
+    abstract fun messageTemplateDao(): MessageTemplateDao
     abstract fun recurringTaskDao(): RecurringTaskDao
     abstract fun taskTemplateDao(): TaskTemplateDao
     abstract fun taskDependencyDao(): TaskDependencyDao
