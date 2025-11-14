@@ -9,35 +9,33 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.cheermateapp.data.StaticDataRepository
 import com.example.cheermateapp.data.db.AppDb
 import com.example.cheermateapp.data.model.Personality
-import com.example.cheermateapp.data.model.
 import com.example.cheermateapp.data.model.PersonalityType
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-Log.e("PersonalityActivity", "USER_ID is invalid!")
+class PersonalityActivity : AppCompatActivity() {
+    private val uiScope = CoroutineScope(Dispatchers.Main)
+    private lateinit var staticDataRepository: StaticDataRepository
+    private var personalityTypes: List<PersonalityType> = emptyList()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_personality)
+
+        // Initialize repository
+        staticDataRepository = StaticDataRepository(this)
+
+        // FIXED: Get as Int, not String
+        val userId = intent.getIntExtra("USER_ID", -1)
+        Log.d("PersonalityActivity", "Received USER_ID: $userId")
+
+        if (userId == -1) {
+            Log.e("PersonalityActivity", "USER_ID is invalid!")
             Toast.makeText(this, "Invalid user ID", Toast.LENGTH_SHORT).show()
             finish()
-            returnPersonalityType
-            import kotlinx.coroutines.CoroutineScope
-                    import kotlinx.coroutines.Dispatchers
-                    import kotlinx.coroutines.launch
-                    import kotlinx.coroutines.withContext
-
-            class PersonalityActivity : AppCompatActivity() {
-                private val uiScope = CoroutineScope(Dispatchers.Main)
-                private lateinit var staticDataRepository: StaticDataRepository
-                private var personalityTypes: List<PersonalityType> = emptyList()
-
-                override fun onCreate(savedInstanceState: Bundle?) {
-                    super.onCreate(savedInstanceState)
-                    setContentView(R.layout.activity_personality)
-
-                    // Initialize repository
-                    staticDataRepository = StaticDataRepository(this)
-
-                    // FIXED: Get as Int, not String
-                    val userId = intent.getIntExtra("USER_ID", -1)
-                    Log.d("PersonalityActivity", "Received USER_ID: $userId")
-
-                    if (userId == -1) {
+            return
         }
 
         Toast.makeText(this, "Select your personality", Toast.LENGTH_SHORT).show()
