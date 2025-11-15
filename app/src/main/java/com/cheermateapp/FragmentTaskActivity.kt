@@ -335,19 +335,19 @@ class FragmentTaskActivity : AppCompatActivity() {
     // ✅ FIXED: Extension methods with proper private modifier
     private fun Task.getPriorityText(): String {
         return when (this.Priority) {
-            com.example.cheermateapp.data.model.Priority.High -> "🔴 High"
-            com.example.cheermateapp.data.model.Priority.Medium -> "🟡 Medium"
-            com.example.cheermateapp.data.model.Priority.Low -> "🟢 Low"
+            com.cheermateapp.data.model.Priority.High -> "🔴 High"
+            com.cheermateapp.data.model.Priority.Medium -> "🟡 Medium"
+            com.cheermateapp.data.model.Priority.Low -> "🟢 Low"
         }
     }
 
     private fun Task.getStatusText(): String {
         return when (this.Status) {
-            com.example.cheermateapp.data.model.Status.Pending -> "⏳ Pending"
-            com.example.cheermateapp.data.model.Status.InProgress -> "🔄 In Progress"
-            com.example.cheermateapp.data.model.Status.OverDue -> "🔴 Overdue"
-            com.example.cheermateapp.data.model.Status.Completed -> "✅ Completed"
-            com.example.cheermateapp.data.model.Status.Cancelled -> "❌ Cancelled"
+            com.cheermateapp.data.model.Status.Pending -> "⏳ Pending"
+            com.cheermateapp.data.model.Status.InProgress -> "🔄 In Progress"
+            com.cheermateapp.data.model.Status.OverDue -> "🔴 Overdue"
+            com.cheermateapp.data.model.Status.Completed -> "✅ Completed"
+            com.cheermateapp.data.model.Status.Cancelled -> "❌ Cancelled"
         }
     }
 
@@ -382,19 +382,19 @@ class FragmentTaskActivity : AppCompatActivity() {
 
     private fun Task.getStatusEmoji(): String {
         return when (this.Status) {
-            com.example.cheermateapp.data.model.Status.Pending -> "⏳"
-            com.example.cheermateapp.data.model.Status.InProgress -> "🔄"
-            com.example.cheermateapp.data.model.Status.OverDue -> "🔴"
-            com.example.cheermateapp.data.model.Status.Completed -> "✅"
-            com.example.cheermateapp.data.model.Status.Cancelled -> "❌"
+            com.cheermateapp.data.model.Status.Pending -> "⏳"
+            com.cheermateapp.data.model.Status.InProgress -> "🔄"
+            com.cheermateapp.data.model.Status.OverDue -> "🔴"
+            com.cheermateapp.data.model.Status.Completed -> "✅"
+            com.cheermateapp.data.model.Status.Cancelled -> "❌"
         }
     }
 
     private fun Task.getPriorityColor(): Int {
         return when (this.Priority) {
-            com.example.cheermateapp.data.model.Priority.High -> android.graphics.Color.RED
-            com.example.cheermateapp.data.model.Priority.Medium -> android.graphics.Color.parseColor("#FFA500") // Orange
-            com.example.cheermateapp.data.model.Priority.Low -> android.graphics.Color.GREEN
+            com.cheermateapp.data.model.Priority.High -> android.graphics.Color.RED
+            com.cheermateapp.data.model.Priority.Medium -> android.graphics.Color.parseColor("#FFA500") // Orange
+            com.cheermateapp.data.model.Priority.Low -> android.graphics.Color.GREEN
         }
     }
 
@@ -435,15 +435,15 @@ class FragmentTaskActivity : AppCompatActivity() {
     private fun Task.getSummary(): String {
         val statusEmoji = this.getStatusEmoji()
         val priorityEmoji = when (this.Priority) {
-            com.example.cheermateapp.data.model.Priority.High -> "🔴"
-            com.example.cheermateapp.data.model.Priority.Medium -> "🟡"
-            com.example.cheermateapp.data.model.Priority.Low -> "🟢"
+            com.cheermateapp.data.model.Priority.High -> "🔴"
+            com.cheermateapp.data.model.Priority.Medium -> "🟡"
+            com.cheermateapp.data.model.Priority.Low -> "🟢"
         }
         return "$statusEmoji $priorityEmoji ${this.Title}"
     }
 
     private fun Task.isOverdue(): Boolean {
-        return Status == com.example.cheermateapp.data.model.Status.OverDue
+        return Status == com.cheermateapp.data.model.Status.OverDue
     }
 
     private fun Task.isToday(): Boolean {
@@ -1272,9 +1272,9 @@ class FragmentTaskActivity : AppCompatActivity() {
             val spinnerReminder = dialogView.findViewById<Spinner>(R.id.spinnerReminder)
             
             // Set up spinners with icons using the helper
-            com.example.cheermateapp.util.TaskDialogSpinnerHelper.setupCategorySpinner(this, spinnerCategory)
-            com.example.cheermateapp.util.TaskDialogSpinnerHelper.setupPrioritySpinner(this, spinnerPriority)
-            com.example.cheermateapp.util.TaskDialogSpinnerHelper.setupReminderSpinner(this, spinnerReminder)
+            com.cheermateapp.util.TaskDialogSpinnerHelper.setupCategorySpinner(this, spinnerCategory)
+            com.cheermateapp.util.TaskDialogSpinnerHelper.setupPrioritySpinner(this, spinnerPriority)
+            com.cheermateapp.util.TaskDialogSpinnerHelper.setupReminderSpinner(this, spinnerReminder)
             
             // Set default due date to today
             val calendar = Calendar.getInstance()
@@ -1325,9 +1325,9 @@ class FragmentTaskActivity : AppCompatActivity() {
                 val dueTime = etDueTime.text.toString().trim()
                 
                 // Get selected values from spinners using helper methods
-                val category = com.example.cheermateapp.util.TaskDialogSpinnerHelper.getSelectedCategory(spinnerCategory)
-                val priority = com.example.cheermateapp.util.TaskDialogSpinnerHelper.getSelectedPriority(spinnerPriority)
-                val reminderOption = com.example.cheermateapp.util.TaskDialogSpinnerHelper.getSelectedReminder(spinnerReminder)
+                val category = com.cheermateapp.util.TaskDialogSpinnerHelper.getSelectedCategory(spinnerCategory)
+                val priority = com.cheermateapp.util.TaskDialogSpinnerHelper.getSelectedPriority(spinnerPriority)
+                val reminderOption = com.cheermateapp.util.TaskDialogSpinnerHelper.getSelectedReminder(spinnerReminder)
                 
                 // Validation
                 if (title.isEmpty()) {

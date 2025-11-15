@@ -38,7 +38,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
                 User_ID = userId,
                 Title = "Finish report",
                 Priority = Priority.Medium,
-                Status = com.example.cheermateapp.data.model.Status.Pending
+                Status = com.cheermateapp.data.model.Status.Pending
             )
         )
     }

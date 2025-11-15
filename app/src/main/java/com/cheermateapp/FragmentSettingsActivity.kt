@@ -374,7 +374,7 @@ class FragmentSettingsActivity : AppCompatActivity() {
                     }
                     2 -> {
                         // Remove picture - set to default
-                        com.example.cheermateapp.util.ProfileImageManager.deleteProfileImage(this, userId)
+                        com.cheermateapp.util.ProfileImageManager.deleteProfileImage(this, userId)
                         Toast.makeText(this, "✅ Profile picture reset to default", Toast.LENGTH_SHORT).show()
                         loadSettingsUserData() // Reload to show default
                     }

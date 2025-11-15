@@ -53,7 +53,7 @@ object AnalyticsUtil {
      */
     fun calculateAverageCompletionTime(tasks: List<Task>): Long? {
         val completedTasks = tasks.filter { 
-            it.Status == com.example.cheermateapp.data.model.Status.Completed 
+            it.Status == com.cheermateapp.data.model.Status.Completed 
         }
         
         if (completedTasks.isEmpty()) return null
@@ -84,7 +84,7 @@ object AnalyticsUtil {
         }
         
         val completedTasks = tasksInPeriod.filter { 
-            it.Status == com.example.cheermateapp.data.model.Status.Completed 
+            it.Status == com.cheermateapp.data.model.Status.Completed 
         }
         
         val completionRate = calculateCompletionRate(tasksInPeriod.size, completedTasks.size)
@@ -150,11 +150,11 @@ object AnalyticsUtil {
             }
             
             val completed = tasksForDay.count { 
-                it.Status == com.example.cheermateapp.data.model.Status.Completed 
+                it.Status == com.cheermateapp.data.model.Status.Completed 
             }
             val pending = tasksForDay.count { 
-                it.Status == com.example.cheermateapp.data.model.Status.Pending ||
-                it.Status == com.example.cheermateapp.data.model.Status.InProgress
+                it.Status == com.cheermateapp.data.model.Status.Pending ||
+                it.Status == com.cheermateapp.data.model.Status.InProgress
             }
             val overdue = tasksForDay.count { it.isOverdue() }
             
@@ -177,13 +177,13 @@ object AnalyticsUtil {
      */
     fun calculatePriorityDistribution(tasks: List<Task>): PriorityDistribution {
         val high = tasks.count { 
-            it.Priority == com.example.cheermateapp.data.model.Priority.High 
+            it.Priority == com.cheermateapp.data.model.Priority.High 
         }
         val medium = tasks.count { 
-            it.Priority == com.example.cheermateapp.data.model.Priority.Medium 
+            it.Priority == com.cheermateapp.data.model.Priority.Medium 
         }
         val low = tasks.count { 
-            it.Priority == com.example.cheermateapp.data.model.Priority.Low 
+            it.Priority == com.cheermateapp.data.model.Priority.Low 
         }
         
         return PriorityDistribution(
@@ -198,7 +198,7 @@ object AnalyticsUtil {
      */
     fun calculateCurrentStreak(tasks: List<Task>): Int {
         val completedTasks = tasks.filter { 
-            it.Status == com.example.cheermateapp.data.model.Status.Completed 
+            it.Status == com.cheermateapp.data.model.Status.Completed 
         }.sortedByDescending { it.UpdatedAt }
         
         if (completedTasks.isEmpty()) return 0

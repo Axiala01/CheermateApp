@@ -67,8 +67,8 @@ class DatabaseSchemaValidationHelperTest {
     fun `test validateEntities with specific entities`() {
         // Given
         val entities = arrayOf(
-            com.example.cheermateapp.data.model.User::class,
-            com.example.cheermateapp.data.model.Task::class
+            com.cheermateapp.data.model.User::class,
+            com.cheermateapp.data.model.Task::class
         )
 
         // When

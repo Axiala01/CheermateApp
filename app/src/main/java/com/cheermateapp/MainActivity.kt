@@ -332,9 +332,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun Task.getPriorityColor(): Int {
         return when (this.Priority) {
-            com.example.cheermateapp.data.model.Priority.High -> android.graphics.Color.RED
-            com.example.cheermateapp.data.model.Priority.Medium -> android.graphics.Color.parseColor("#FFA500") // Orange
-            com.example.cheermateapp.data.model.Priority.Low -> android.graphics.Color.GREEN
+            com.cheermateapp.data.model.Priority.High -> android.graphics.Color.RED
+            com.cheermateapp.data.model.Priority.Medium -> android.graphics.Color.parseColor("#FFA500") // Orange
+            com.cheermateapp.data.model.Priority.Low -> android.graphics.Color.GREEN
             else -> android.graphics.Color.GRAY
         }
     }
@@ -1083,18 +1083,18 @@ class MainActivity : AppCompatActivity() {
                 3 -> { // Status
                     currentTasks.sortedWith { task1, task2 ->
                         val status1 = when (task1.Status) {
-                            com.example.cheermateapp.data.model.Status.Pending -> 1
-                            com.example.cheermateapp.data.model.Status.InProgress -> 2
-                            com.example.cheermateapp.data.model.Status.OverDue -> 3  // ✅ FIXED: OverDue (capital D)
-                            com.example.cheermateapp.data.model.Status.Completed -> 4
-                            com.example.cheermateapp.data.model.Status.Cancelled -> 5
+                            com.cheermateapp.data.model.Status.Pending -> 1
+                            com.cheermateapp.data.model.Status.InProgress -> 2
+                            com.cheermateapp.data.model.Status.OverDue -> 3  // ✅ FIXED: OverDue (capital D)
+                            com.cheermateapp.data.model.Status.Completed -> 4
+                            com.cheermateapp.data.model.Status.Cancelled -> 5
                         }
                         val status2 = when (task2.Status) {
-                            com.example.cheermateapp.data.model.Status.Pending -> 1
-                            com.example.cheermateapp.data.model.Status.InProgress -> 2
-                            com.example.cheermateapp.data.model.Status.OverDue -> 3  // ✅ FIXED: OverDue (capital D)
-                            com.example.cheermateapp.data.model.Status.Completed -> 4
-                            com.example.cheermateapp.data.model.Status.Cancelled -> 5
+                            com.cheermateapp.data.model.Status.Pending -> 1
+                            com.cheermateapp.data.model.Status.InProgress -> 2
+                            com.cheermateapp.data.model.Status.OverDue -> 3  // ✅ FIXED: OverDue (capital D)
+                            com.cheermateapp.data.model.Status.Completed -> 4
+                            com.cheermateapp.data.model.Status.Cancelled -> 5
                         }
                         status1.compareTo(status2)
                     }
@@ -1223,7 +1223,7 @@ class MainActivity : AppCompatActivity() {
                             return@setPositiveButton
                         }
 
-                        if (!com.example.cheermateapp.util.InputValidationUtil.isValidUsername(newUsername)) {
+                        if (!com.cheermateapp.util.InputValidationUtil.isValidUsername(newUsername)) {
                             Toast.makeText(
                                 this@MainActivity,
                                 "Username must be 3-20 characters, letters, numbers, and underscore only",
@@ -1232,7 +1232,7 @@ class MainActivity : AppCompatActivity() {
                             return@setPositiveButton
                         }
 
-                        if (newEmail.isNotEmpty() && !com.example.cheermateapp.util.InputValidationUtil.isValidEmail(newEmail)) {
+                        if (newEmail.isNotEmpty() && !com.cheermateapp.util.InputValidationUtil.isValidEmail(newEmail)) {
                             Toast.makeText(this@MainActivity, "Invalid email format", Toast.LENGTH_SHORT).show()
                             return@setPositiveButton
                         }
@@ -1334,7 +1334,7 @@ class MainActivity : AppCompatActivity() {
                     return@setPositiveButton
                 }
 
-                if (!com.example.cheermateapp.util.InputValidationUtil.isValidPassword(newPassword)) {
+                if (!com.cheermateapp.util.InputValidationUtil.isValidPassword(newPassword)) {
                     Toast.makeText(this@MainActivity, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
@@ -1356,7 +1356,7 @@ class MainActivity : AppCompatActivity() {
                     val db = AppDb.get(this@MainActivity)
 
                     // Verify current password
-                    val isCurrentPasswordValid = com.example.cheermateapp.util.PasswordHashUtil.verifyPassword(
+                    val isCurrentPasswordValid = com.cheermateapp.util.PasswordHashUtil.verifyPassword(
                         currentPassword,
                         user.PasswordHash
                     )
@@ -1366,7 +1366,7 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     // Hash new password
-                    val newHashedPassword = com.example.cheermateapp.util.PasswordHashUtil.hashPassword(newPassword)
+                    val newHashedPassword = com.cheermateapp.util.PasswordHashUtil.hashPassword(newPassword)
 
                     // Update user
                     val updatedUser = user.copy(
@@ -1668,11 +1668,11 @@ class MainActivity : AppCompatActivity() {
                 val dueDate = etDueDate.text.toString().trim()
                 val dueTime = etDueTime.text.toString().trim()
                 val selectedCategory = when (spinnerCategory.selectedItem.toString()) {
-                    "Work" -> com.example.cheermateapp.data.model.Category.Work
-                    "Personal" -> com.example.cheermateapp.data.model.Category.Personal
-                    "Shopping" -> com.example.cheermateapp.data.model.Category.Shopping
-                    "Others" -> com.example.cheermateapp.data.model.Category.Others
-                    else -> com.example.cheermateapp.data.model.Category.Work
+                    "Work" -> com.cheermateapp.data.model.Category.Work
+                    "Personal" -> com.cheermateapp.data.model.Category.Personal
+                    "Shopping" -> com.cheermateapp.data.model.Category.Shopping
+                    "Others" -> com.cheermateapp.data.model.Category.Others
+                    else -> com.cheermateapp.data.model.Category.Work
                 }
                 val selectedPriority = when (spinnerPriority.selectedItem.toString()) {
                     "High" -> Priority.High
@@ -1800,7 +1800,7 @@ class MainActivity : AppCompatActivity() {
         description: String?,
         dueDate: String,
         dueTime: String?,
-        category: com.example.cheermateapp.data.model.Category,
+        category: com.cheermateapp.data.model.Category,
         priority: Priority,
         reminderOption: String
     ) {
@@ -1874,9 +1874,9 @@ class MainActivity : AppCompatActivity() {
 
                     // ✅ FIX: Map reminderOption to ReminderType enum
                     val reminderType = when (reminderOption) {
-                        "10 minutes before" -> com.example.cheermateapp.data.model.ReminderType.TEN_MINUTES_BEFORE
-                        "30 minutes before" -> com.example.cheermateapp.data.model.ReminderType.THIRTY_MINUTES_BEFORE
-                        "At specific time" -> com.example.cheermateapp.data.model.ReminderType.AT_SPECIFIC_TIME
+                        "10 minutes before" -> com.cheermateapp.data.model.ReminderType.TEN_MINUTES_BEFORE
+                        "30 minutes before" -> com.cheermateapp.data.model.ReminderType.THIRTY_MINUTES_BEFORE
+                        "At specific time" -> com.cheermateapp.data.model.ReminderType.AT_SPECIFIC_TIME
                         else -> null
                     }
 
@@ -1895,7 +1895,7 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     // ✅ FIX: Include ReminderType in the reminder object
-                    val reminder = com.example.cheermateapp.data.model.TaskReminder(
+                    val reminder = com.cheermateapp.data.model.TaskReminder(
                         TaskReminder_ID = reminderId,
                         Task_ID = taskId,
                         User_ID = userId,
@@ -2387,18 +2387,18 @@ class MainActivity : AppCompatActivity() {
 
             // 4. Priority with emoji
             tvTaskPriority.text = when (task.Priority) {
-                com.example.cheermateapp.data.model.Priority.High -> "🔴 High"
-                com.example.cheermateapp.data.model.Priority.Medium -> "🟡 Medium"
-                com.example.cheermateapp.data.model.Priority.Low -> "🟢 Low"
+                com.cheermateapp.data.model.Priority.High -> "🔴 High"
+                com.cheermateapp.data.model.Priority.Medium -> "🟡 Medium"
+                com.cheermateapp.data.model.Priority.Low -> "🟢 Low"
             }
 
             // 5. Status with emoji
             tvTaskStatus.text = when (task.Status) {
-                com.example.cheermateapp.data.model.Status.Pending -> "⏳ Pending"
-                com.example.cheermateapp.data.model.Status.InProgress -> "🔄 In Progress"
-                com.example.cheermateapp.data.model.Status.Completed -> "✅ Completed"
-                com.example.cheermateapp.data.model.Status.OverDue -> "🔴 Overdue"
-                com.example.cheermateapp.data.model.Status.Cancelled -> "❌ Cancelled"
+                com.cheermateapp.data.model.Status.Pending -> "⏳ Pending"
+                com.cheermateapp.data.model.Status.InProgress -> "🔄 In Progress"
+                com.cheermateapp.data.model.Status.Completed -> "✅ Completed"
+                com.cheermateapp.data.model.Status.OverDue -> "🔴 Overdue"
+                com.cheermateapp.data.model.Status.Cancelled -> "❌ Cancelled"
             }
 
             // 6. Category with icon
@@ -2410,7 +2410,7 @@ class MainActivity : AppCompatActivity() {
                 progressBar.progress = task.TaskProgress
                 
                 // Show progress bar for in-progress tasks
-                if (task.Status == com.example.cheermateapp.data.model.Status.InProgress || task.TaskProgress > 0) {
+                if (task.Status == com.cheermateapp.data.model.Status.InProgress || task.TaskProgress > 0) {
                     tvTaskProgress.visibility = View.VISIBLE
                     progressBar.visibility = View.VISIBLE
                     progressBar.parent?.let { parent ->
@@ -2430,27 +2430,27 @@ class MainActivity : AppCompatActivity() {
 
             // 9. Button States based on Task Status
             when (task.Status) {
-                com.example.cheermateapp.data.model.Status.Completed -> {
+                com.cheermateapp.data.model.Status.Completed -> {
                     btnComplete.text = "✅ Completed"
                     btnComplete.isClickable = false
                     btnComplete.alpha = 0.6f
                 }
-                com.example.cheermateapp.data.model.Status.Pending -> {
+                com.cheermateapp.data.model.Status.Pending -> {
                     btnComplete.text = "✅ Complete"
                     btnComplete.isClickable = true
                     btnComplete.alpha = 1.0f
                 }
-                com.example.cheermateapp.data.model.Status.InProgress -> {
+                com.cheermateapp.data.model.Status.InProgress -> {
                     btnComplete.text = "✅ Finish"
                     btnComplete.isClickable = true
                     btnComplete.alpha = 1.0f
                 }
-                com.example.cheermateapp.data.model.Status.OverDue -> {
+                com.cheermateapp.data.model.Status.OverDue -> {
                     btnComplete.text = "🔴 Complete"
                     btnComplete.isClickable = true
                     btnComplete.alpha = 1.0f
                 }
-                com.example.cheermateapp.data.model.Status.Cancelled -> {
+                com.cheermateapp.data.model.Status.Cancelled -> {
                     btnComplete.text = "❌ Cancelled"
                     btnComplete.isClickable = false
                     btnComplete.alpha = 0.6f
@@ -2461,8 +2461,8 @@ class MainActivity : AppCompatActivity() {
 
             // Complete Button
             btnComplete.setOnClickListener {
-                if (task.Status != com.example.cheermateapp.data.model.Status.Completed && 
-                    task.Status != com.example.cheermateapp.data.model.Status.Cancelled) {
+                if (task.Status != com.cheermateapp.data.model.Status.Completed && 
+                    task.Status != com.cheermateapp.data.model.Status.Cancelled) {
                     markTaskAsDone(task)
                 }
             }
@@ -2841,8 +2841,8 @@ class MainActivity : AppCompatActivity() {
                 if (tasksForDate.isEmpty()) {
                     textView.text = "No tasks for this date"
                 } else {
-                    val highestPriority = com.example.cheermateapp.util.CalendarDecorator.getHighestPriority(tasksForDate)
-                    val priorityDot = com.example.cheermateapp.util.CalendarDecorator.getPriorityDot(highestPriority)
+                    val highestPriority = com.cheermateapp.util.CalendarDecorator.getHighestPriority(tasksForDate)
+                    val priorityDot = com.cheermateapp.util.CalendarDecorator.getPriorityDot(highestPriority)
                     val dateFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
                     val calendar = Calendar.getInstance()
                     calendar.set(year, month, day)
@@ -2864,7 +2864,7 @@ class MainActivity : AppCompatActivity() {
                 val db = AppDb.get(this@MainActivity)
                 withContext(Dispatchers.IO) {
                     val allTasks = db.taskDao().getAllTasksForUser(userId)
-                    val taskDateMap = com.example.cheermateapp.util.CalendarDecorator.getCalendarDateInfoMap(allTasks)
+                    val taskDateMap = com.cheermateapp.util.CalendarDecorator.getCalendarDateInfoMap(allTasks)
                     
                     android.util.Log.d("MainActivity", "✅ Loaded ${taskDateMap.size} dates with tasks")
                 }
@@ -2903,8 +2903,8 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     // Get highest priority for the date
-                    val highestPriority = com.example.cheermateapp.util.CalendarDecorator.getHighestPriority(tasksForDate)
-                    val priorityIndicator = com.example.cheermateapp.util.CalendarDecorator.getPriorityDot(highestPriority)
+                    val highestPriority = com.cheermateapp.util.CalendarDecorator.getHighestPriority(tasksForDate)
+                    val priorityIndicator = com.cheermateapp.util.CalendarDecorator.getPriorityDot(highestPriority)
                     
                     val message = if (tasksForDate.size > 5) {
                         "${taskDetails.split("\n").take(5).joinToString("\n")}\n...and ${tasksForDate.size - 5} more tasks"

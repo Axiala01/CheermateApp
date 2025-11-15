@@ -165,18 +165,18 @@ class TaskDialogExample : AppCompatActivity() {
     ) {
         // Convert string values to enum types
         val categoryEnum = when (category) {
-            "Work" -> com.example.cheermateapp.data.model.Category.Work
-            "Personal" -> com.example.cheermateapp.data.model.Category.Personal
-            "Shopping" -> com.example.cheermateapp.data.model.Category.Shopping
-            "Others" -> com.example.cheermateapp.data.model.Category.Others
-            else -> com.example.cheermateapp.data.model.Category.Work
+            "Work" -> com.cheermateapp.data.model.Category.Work
+            "Personal" -> com.cheermateapp.data.model.Category.Personal
+            "Shopping" -> com.cheermateapp.data.model.Category.Shopping
+            "Others" -> com.cheermateapp.data.model.Category.Others
+            else -> com.cheermateapp.data.model.Category.Work
         }
         
         val priorityEnum = when (priority) {
-            "High" -> com.example.cheermateapp.data.model.Priority.High
-            "Medium" -> com.example.cheermateapp.data.model.Priority.Medium
-            "Low" -> com.example.cheermateapp.data.model.Priority.Low
-            else -> com.example.cheermateapp.data.model.Priority.Medium
+            "High" -> com.cheermateapp.data.model.Priority.High
+            "Medium" -> com.cheermateapp.data.model.Priority.Medium
+            "Low" -> com.cheermateapp.data.model.Priority.Low
+            else -> com.cheermateapp.data.model.Priority.Medium
         }
         
         // Build display message

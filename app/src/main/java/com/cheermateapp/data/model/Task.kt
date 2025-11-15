@@ -66,11 +66,11 @@ data class Task(
 
     // ✅ Category field
     @ColumnInfo(name = "Category")
-    val Category: com.example.cheermateapp.data.model.Category = com.example.cheermateapp.data.model.Category.Work,
+    val Category: com.cheermateapp.data.model.Category = com.cheermateapp.data.model.Category.Work,
 
     // ✅ LINE 43: This should now work with the enum defined above
     @ColumnInfo(name = "Priority")
-    val Priority: com.example.cheermateapp.data.model.Priority = com.example.cheermateapp.data.model.Priority.Medium,
+    val Priority: com.cheermateapp.data.model.Priority = com.cheermateapp.data.model.Priority.Medium,
 
     @ColumnInfo(name = "DueAt")
     val DueAt: String? = null,
@@ -79,7 +79,7 @@ data class Task(
     val DueTime: String? = null,
 
     @ColumnInfo(name = "Status")
-    val Status: com.example.cheermateapp.data.model.Status = com.example.cheermateapp.data.model.Status.Pending,
+    val Status: com.cheermateapp.data.model.Status = com.cheermateapp.data.model.Status.Pending,
 
     @ColumnInfo(name = "TaskProgress")
     val TaskProgress: Int = 0,
@@ -99,11 +99,11 @@ data class Task(
             userId: Int,
             title: String,
             description: String? = null,
-            category: com.example.cheermateapp.data.model.Category = com.example.cheermateapp.data.model.Category.Work,
-            priority: com.example.cheermateapp.data.model.Priority = com.example.cheermateapp.data.model.Priority.Medium,
+            category: com.cheermateapp.data.model.Category = com.cheermateapp.data.model.Category.Work,
+            priority: com.cheermateapp.data.model.Priority = com.cheermateapp.data.model.Priority.Medium,
             dueAt: String? = null,
             dueTime: String? = null,
-            status: com.example.cheermateapp.data.model.Status = com.example.cheermateapp.data.model.Status.Pending,
+            status: com.cheermateapp.data.model.Status = com.cheermateapp.data.model.Status.Pending,
             taskProgress: Int = 0,
             createdAt: Long = System.currentTimeMillis(),
             updatedAt: Long = System.currentTimeMillis(),
@@ -162,7 +162,7 @@ data class Task(
 
     fun isOverdue(): Boolean {
         val dueDate = getDueDate()
-        return dueDate != null && dueDate.before(Date()) && Status != com.example.cheermateapp.data.model.Status.Completed
+        return dueDate != null && dueDate.before(Date()) && Status != com.cheermateapp.data.model.Status.Completed
     }
 
     fun isToday(): Boolean {
@@ -194,48 +194,48 @@ data class Task(
 
     fun getStatusEmoji(): String {
         return when (Status) {
-            com.example.cheermateapp.data.model.Status.Completed -> "✅"
-            com.example.cheermateapp.data.model.Status.Pending -> "⏳"
-            com.example.cheermateapp.data.model.Status.InProgress -> "🔄"
-            com.example.cheermateapp.data.model.Status.Cancelled -> "❌"
-            com.example.cheermateapp.data.model.Status.OverDue -> "🔴"
+            com.cheermateapp.data.model.Status.Completed -> "✅"
+            com.cheermateapp.data.model.Status.Pending -> "⏳"
+            com.cheermateapp.data.model.Status.InProgress -> "🔄"
+            com.cheermateapp.data.model.Status.Cancelled -> "❌"
+            com.cheermateapp.data.model.Status.OverDue -> "🔴"
             else -> "⏳" // Default fallback
         }
     }
 
-    fun com.example.cheermateapp.data.model.Task.getPriorityColor(): Int {
+    fun com.cheermateapp.data.model.Task.getPriorityColor(): Int {
         return when (Priority) {
-            com.example.cheermateapp.data.model.Priority.High -> 0xFFE53E3E.toInt() // Red
-            com.example.cheermateapp.data.model.Priority.Medium -> 0xFFED8936.toInt() // Orange
-            com.example.cheermateapp.data.model.Priority.Low -> 0xFF38A169.toInt() // Green
+            com.cheermateapp.data.model.Priority.High -> 0xFFE53E3E.toInt() // Red
+            com.cheermateapp.data.model.Priority.Medium -> 0xFFED8936.toInt() // Orange
+            com.cheermateapp.data.model.Priority.Low -> 0xFF38A169.toInt() // Green
             else -> 0xFFED8936.toInt() // Default to Medium Orange
         }
     }
     fun getStatusColor(): Int {
         return when (Status) {
-            com.example.cheermateapp.data.model.Status.Pending -> 0xFFFFA500.toInt()  // Orange
-            com.example.cheermateapp.data.model.Status.InProgress -> 0xFF0066CC.toInt() // Blue
-            com.example.cheermateapp.data.model.Status.Completed -> 0xFF38A169.toInt()  // Green
-            com.example.cheermateapp.data.model.Status.Cancelled -> 0xFF808080.toInt()  // Gray
-            com.example.cheermateapp.data.model.Status.OverDue -> 0xFFE53E3E.toInt()    // Red
+            com.cheermateapp.data.model.Status.Pending -> 0xFFFFA500.toInt()  // Orange
+            com.cheermateapp.data.model.Status.InProgress -> 0xFF0066CC.toInt() // Blue
+            com.cheermateapp.data.model.Status.Completed -> 0xFF38A169.toInt()  // Green
+            com.cheermateapp.data.model.Status.Cancelled -> 0xFF808080.toInt()  // Gray
+            com.cheermateapp.data.model.Status.OverDue -> 0xFFE53E3E.toInt()    // Red
         }
     }
 
     fun getPriorityText(): String {
         return when (Priority) {
-            com.example.cheermateapp.data.model.Priority.High -> "🔴 High"
-            com.example.cheermateapp.data.model.Priority.Medium -> "🟡 Medium"
-            com.example.cheermateapp.data.model.Priority.Low -> "🟢 Low"
+            com.cheermateapp.data.model.Priority.High -> "🔴 High"
+            com.cheermateapp.data.model.Priority.Medium -> "🟡 Medium"
+            com.cheermateapp.data.model.Priority.Low -> "🟢 Low"
         }
     }
 
     fun getStatusText(): String {
         return when (Status) {
-            com.example.cheermateapp.data.model.Status.Pending -> "⏳ Pending"
-            com.example.cheermateapp.data.model.Status.InProgress -> "🔄 In Progress"
-            com.example.cheermateapp.data.model.Status.Completed -> "✅ Completed"
-            com.example.cheermateapp.data.model.Status.Cancelled -> "❌ Cancelled"
-            com.example.cheermateapp.data.model.Status.OverDue -> "🔴 Overdue"
+            com.cheermateapp.data.model.Status.Pending -> "⏳ Pending"
+            com.cheermateapp.data.model.Status.InProgress -> "🔄 In Progress"
+            com.cheermateapp.data.model.Status.Completed -> "✅ Completed"
+            com.cheermateapp.data.model.Status.Cancelled -> "❌ Cancelled"
+            com.cheermateapp.data.model.Status.OverDue -> "🔴 Overdue"
         }
     }
 }

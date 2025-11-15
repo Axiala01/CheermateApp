@@ -11,10 +11,10 @@ import java.util.*
  */
 private fun Task.getStatusEmoji(): String {
     return when (this.Status) {
-        com.example.cheermateapp.data.model.Status.Completed -> "✅"
-        com.example.cheermateapp.data.model.Status.Pending -> "⏳"
-        com.example.cheermateapp.data.model.Status.InProgress -> "🔄"
-        com.example.cheermateapp.data.model.Status.Cancelled -> "❌"
+        com.cheermateapp.data.model.Status.Completed -> "✅"
+        com.cheermateapp.data.model.Status.Pending -> "⏳"
+        com.cheermateapp.data.model.Status.InProgress -> "🔄"
+        com.cheermateapp.data.model.Status.Cancelled -> "❌"
         else -> "📝"
     }
 }
@@ -24,11 +24,11 @@ private fun Task.getStatusEmoji(): String {
  */
 fun Task.getStatusColor(): Int {
     return when (this.Status) {
-        com.example.cheermateapp.data.model.Status.Pending -> Color.parseColor("#FFA500") // Orange
-        com.example.cheermateapp.data.model.Status.InProgress -> Color.BLUE
-        com.example.cheermateapp.data.model.Status.Completed -> Color.GREEN
-        com.example.cheermateapp.data.model.Status.Cancelled -> Color.GRAY
-        com.example.cheermateapp.data.model.Status.OverDue -> Color.RED
+        com.cheermateapp.data.model.Status.Pending -> Color.parseColor("#FFA500") // Orange
+        com.cheermateapp.data.model.Status.InProgress -> Color.BLUE
+        com.cheermateapp.data.model.Status.Completed -> Color.GREEN
+        com.cheermateapp.data.model.Status.Cancelled -> Color.GRAY
+        com.cheermateapp.data.model.Status.OverDue -> Color.RED
     }
 }
 /**
@@ -36,9 +36,9 @@ fun Task.getStatusColor(): Int {
  */
 fun Task.getPriorityColor(): Int {
     return when (this.Priority) {
-        com.example.cheermateapp.data.model.Priority.High -> Color.RED
-        com.example.cheermateapp.data.model.Priority.Medium -> Color.parseColor("#FFA500") // Orange
-        com.example.cheermateapp.data.model.Priority.Low -> Color.GREEN
+        com.cheermateapp.data.model.Priority.High -> Color.RED
+        com.cheermateapp.data.model.Priority.Medium -> Color.parseColor("#FFA500") // Orange
+        com.cheermateapp.data.model.Priority.Low -> Color.GREEN
     }
 }
 
@@ -60,8 +60,8 @@ fun Task.getFormattedDueDateTime(): String {
  * Check if task is overdue based on current date/time
  */
 fun Task.isOverdue(): Boolean {
-    return this.Status == com.example.cheermateapp.data.model.Status.OverDue ||
-            (this.Status == com.example.cheermateapp.data.model.Status.Pending && isTaskOverdueByDate())
+    return this.Status == com.cheermateapp.data.model.Status.OverDue ||
+            (this.Status == com.cheermateapp.data.model.Status.Pending && isTaskOverdueByDate())
 }
 
 /**
@@ -118,9 +118,9 @@ private fun Task.isTaskOverdueByDate(): Boolean {
  */
 fun Task.getPriorityText(): String {
     return when (this.Priority) {
-        com.example.cheermateapp.data.model.Priority.High -> "🔴 High"
-        com.example.cheermateapp.data.model.Priority.Medium -> "🟡 Medium"
-        com.example.cheermateapp.data.model.Priority.Low -> "🟢 Low"
+        com.cheermateapp.data.model.Priority.High -> "🔴 High"
+        com.cheermateapp.data.model.Priority.Medium -> "🟡 Medium"
+        com.cheermateapp.data.model.Priority.Low -> "🟢 Low"
     }
 }
 
@@ -129,11 +129,11 @@ fun Task.getPriorityText(): String {
  */
 fun Task.getStatusText(): String {
     return when (this.Status) {
-        com.example.cheermateapp.data.model.Status.Pending -> "⏳ Pending"
-        com.example.cheermateapp.data.model.Status.InProgress -> "🔄 In Progress"
-        com.example.cheermateapp.data.model.Status.Completed -> "✅ Completed"
-        com.example.cheermateapp.data.model.Status.Cancelled -> "❌ Cancelled"
-        com.example.cheermateapp.data.model.Status.OverDue -> "🔴 Overdue"
+        com.cheermateapp.data.model.Status.Pending -> "⏳ Pending"
+        com.cheermateapp.data.model.Status.InProgress -> "🔄 In Progress"
+        com.cheermateapp.data.model.Status.Completed -> "✅ Completed"
+        com.cheermateapp.data.model.Status.Cancelled -> "❌ Cancelled"
+        com.cheermateapp.data.model.Status.OverDue -> "🔴 Overdue"
     }
 }
 
@@ -184,11 +184,11 @@ private fun isSameDay(cal1: Calendar, cal2: Calendar): Boolean {
  */
 fun Task.getCompletionPercentage(): Int {
     return when (this.Status) {
-        com.example.cheermateapp.data.model.Status.Completed -> 100
-        com.example.cheermateapp.data.model.Status.Pending -> this.TaskProgress
-        com.example.cheermateapp.data.model.Status.InProgress -> this.TaskProgress
-        com.example.cheermateapp.data.model.Status.OverDue -> this.TaskProgress
-        com.example.cheermateapp.data.model.Status.Cancelled -> 0
+        com.cheermateapp.data.model.Status.Completed -> 100
+        com.cheermateapp.data.model.Status.Pending -> this.TaskProgress
+        com.cheermateapp.data.model.Status.InProgress -> this.TaskProgress
+        com.cheermateapp.data.model.Status.OverDue -> this.TaskProgress
+        com.cheermateapp.data.model.Status.Cancelled -> 0
     }
 }
 
@@ -196,21 +196,21 @@ fun Task.getCompletionPercentage(): Int {
  * Check if task is completed
  */
 fun Task.isCompleted(): Boolean {
-    return this.Status == com.example.cheermateapp.data.model.Status.Completed
+    return this.Status == com.cheermateapp.data.model.Status.Completed
 }
 
 /**
  * Check if task is active (not completed or cancelled)
  */
 fun Task.isActive(): Boolean {
-    return this.Status != com.example.cheermateapp.data.model.Status.Completed && this.Status != com.example.cheermateapp.data.model.Status.Cancelled
+    return this.Status != com.cheermateapp.data.model.Status.Completed && this.Status != com.cheermateapp.data.model.Status.Cancelled
 }
 
 /**
  * Check if task is actionable (pending or in progress)
  */
 fun Task.isActionable(): Boolean {
-    return this.Status == com.example.cheermateapp.data.model.Status.Pending || this.Status == com.example.cheermateapp.data.model.Status.InProgress
+    return this.Status == com.cheermateapp.data.model.Status.Pending || this.Status == com.cheermateapp.data.model.Status.InProgress
 }
 
 /**
@@ -218,10 +218,10 @@ fun Task.isActionable(): Boolean {
  */
 fun Task.getUrgencyLevel(): Int {
     return when {
-        this.Status == com.example.cheermateapp.data.model.Status.OverDue -> 1
-        this.Status == com.example.cheermateapp.data.model.Status.Pending && this.Priority == com.example.cheermateapp.data.model.Priority.High -> 2
-        this.Status == com.example.cheermateapp.data.model.Status.InProgress -> 3
-        this.Status == com.example.cheermateapp.data.model.Status.Pending && this.Priority == com.example.cheermateapp.data.model.Priority.Medium -> 4
+        this.Status == com.cheermateapp.data.model.Status.OverDue -> 1
+        this.Status == com.cheermateapp.data.model.Status.Pending && this.Priority == com.cheermateapp.data.model.Priority.High -> 2
+        this.Status == com.cheermateapp.data.model.Status.InProgress -> 3
+        this.Status == com.cheermateapp.data.model.Status.Pending && this.Priority == com.cheermateapp.data.model.Priority.Medium -> 4
         else -> 5
     }
 }
@@ -239,9 +239,9 @@ fun Task.getProgressText(): String {
 fun Task.getSummary(): String {
     val statusEmoji = this.getStatusEmoji()
     val priorityEmoji = when (this.Priority) {
-        com.example.cheermateapp.data.model.Priority.High -> "🔴"
-        com.example.cheermateapp.data.model.Priority.Medium -> "🟡"
-        com.example.cheermateapp.data.model.Priority.Low -> "🟢"
+        com.cheermateapp.data.model.Priority.High -> "🔴"
+        com.cheermateapp.data.model.Priority.Medium -> "🟡"
+        com.cheermateapp.data.model.Priority.Low -> "🟢"
     }
 
     return "$statusEmoji $priorityEmoji ${this.Title}"
