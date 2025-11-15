@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-
+    android:background="@color/bottom_sheet_background"
     android:padding="16dp">
 
     <!-- Bottom Sheet Header -->
@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Task Actions"
-        android:textColor="@color/text_primary"
+        android:textColor="@color/bottom_sheet_text_primary"
         android:textSize="18sp"
         android:fontFamily="@font/sf_pro_rounded_bold"
         android:paddingStart="16dp"
@@ -31,6 +31,7 @@
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:layout_marginBottom="10dp"
+        android:background="@drawable/bottom_sheet_item_background"
         android:clickable="true"
         android:focusable="true">
 
@@ -47,7 +48,7 @@
             android:layout_weight="1"
             android:layout_marginStart="16dp"
             android:text="Mark as Completed"
-            android:textColor="@color/text_primary"
+            android:textColor="@color/bottom_sheet_text_primary"
             android:textSize="16sp"
             android:fontFamily="@font/sf_pro_rounded_regular" />
     </LinearLayout>
@@ -62,6 +63,7 @@
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:layout_marginBottom="10dp"
+        android:background="@drawable/bottom_sheet_item_background"
         android:clickable="true"
         android:focusable="true">
 
@@ -78,7 +80,7 @@
             android:layout_weight="1"
             android:layout_marginStart="16dp"
             android:text="Snooze"
-            android:textColor="@color/text_primary"
+            android:textColor="@color/bottom_sheet_text_primary"
             android:textSize="16sp"
             android:fontFamily="@font/sf_pro_rounded_regular" />
     </LinearLayout>
@@ -92,6 +94,7 @@
         android:gravity="center_vertical"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
+        android:background="@drawable/bottom_sheet_item_background"
         android:clickable="true"
         android:focusable="true">
 
@@ -108,7 +111,7 @@
             android:layout_weight="1"
             android:layout_marginStart="16dp"
             android:text="Won't Do"
-            android:textColor="@color/text_primary"
+            android:textColor="@color/bottom_sheet_text_primary"
             android:textSize="16sp"
             android:fontFamily="@font/sf_pro_rounded_regular" />
     </LinearLayout>
