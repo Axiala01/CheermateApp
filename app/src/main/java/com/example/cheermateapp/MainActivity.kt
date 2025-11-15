@@ -103,6 +103,9 @@ class MainActivity : AppCompatActivity() {
                 // ✅ OBSERVE TASK CHANGES FOR LIVE PROGRESS BAR UPDATES
                 observeTaskChangesForProgressBar()
 
+                // ✅ OBSERVE RECENT TASKS FOR LIVE UPDATES
+                observeRecentTasks()
+
                 showHomeScreen()
 
             } else {
@@ -167,29 +170,43 @@ class MainActivity : AppCompatActivity() {
                 
                 // Get today's date string for filtering
                 val todayStr = dateToString(Calendar.getInstance().time)
-                val todayMidnight = Calendar.getInstance().apply {
-                    set(Calendar.HOUR_OF_DAY, 0)
-                    set(Calendar.MINUTE, 0)
-                    set(Calendar.SECOND, 0)
-                    set(Calendar.MILLISECOND, 0)
-                }.timeInMillis
                 
-                // Observe completed tasks count for today
+                // ✅ FIX: Observe tasks due today and completed today (matching numerator/denominator)
                 kotlinx.coroutines.flow.combine(
                     db.taskDao().getTodayTasksCountFlow(userId, todayStr),
-                    db.taskDao().getTasksCompletedTodayByUpdateFlow(userId, todayMidnight)
+                    db.taskDao().getCompletedTodayTasksCountFlow(userId, todayStr)
                 ) { totalToday, completedToday ->
                     Pair(totalToday, completedToday)
                 }.collect { (totalToday, completedToday) ->
                     // Update progress bar on main thread
                     withContext(Dispatchers.Main) {
                         updateProgressDisplay(completedToday, totalToday)
-                        android.util.Log.d("MainActivity", "🔄 Progress bar updated live: $completedToday/$totalToday")
+                        android.util.Log.d("MainActivity", "🔄 Progress bar updated live: $completedToday/$totalToday (tasks due today)")
                     }
                 }
                 
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error observing task changes for progress bar", e)
+            }
+        }
+    }
+
+    // ✅ OBSERVE RECENT TASKS FOR LIVE UPDATES
+    private fun observeRecentTasks() {
+        lifecycleScope.launch {
+            try {
+                val db = AppDb.get(this@MainActivity)
+                
+                // Observe pending tasks (which are shown in recent tasks)
+                db.taskDao().getPendingTasksFlow(userId).collect { tasks ->
+                    withContext(Dispatchers.Main) {
+                        updateRecentTasksDisplay(tasks)
+                        android.util.Log.d("MainActivity", "🔄 Recent tasks updated live: ${tasks.size} tasks")
+                    }
+                }
+                
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Error observing recent tasks", e)
             }
         }
     }
@@ -2087,23 +2104,16 @@ class MainActivity : AppCompatActivity() {
 
                     val today = Calendar.getInstance()
                     val todayStr = dateToString(today.time)
-                    // Get timestamp for start of today (midnight in local timezone)
-                    // This is used to compare with UpdatedAt timestamps to find tasks completed today
-                    val todayMidnight = Calendar.getInstance().apply {
-                        set(Calendar.HOUR_OF_DAY, 0)
-                        set(Calendar.MINUTE, 0)
-                        set(Calendar.SECOND, 0)
-                        set(Calendar.MILLISECOND, 0)
-                    }.timeInMillis
 
+                    // ✅ FIX: Count tasks DUE today (total tasks for today's progress)
                     val todayTasks = db.taskDao().getTodayTasksCount(userId, todayStr)
-                    // ✅ UPDATED: Count tasks that were actually completed today (based on UpdatedAt)
-                    val todayCompletedTasks = db.taskDao().getTasksCompletedTodayByUpdate(userId, todayMidnight)
+                    // ✅ FIX: Count tasks DUE today AND completed (matching numerator to denominator)
+                    val todayCompletedTasks = db.taskDao().getCompletedTodayTasksCount(userId, todayStr)
                     // ✅ FIXED: Use the correct method signature
                     val overdueTasks = db.taskDao().getOverdueTasksCount(userId)
 
                     android.util.Log.d("MainActivity", "✅ Dashboard statistics - Today: $todayStr")
-                    android.util.Log.d("MainActivity", "✅ Today tasks: $todayTasks, Completed today: $todayCompletedTasks, Overdue: $overdueTasks")
+                    android.util.Log.d("MainActivity", "✅ Tasks due today: $todayTasks, Completed today (due today): $todayCompletedTasks, Overdue: $overdueTasks")
 
                     mapOf(
                         "total" to totalTasks,

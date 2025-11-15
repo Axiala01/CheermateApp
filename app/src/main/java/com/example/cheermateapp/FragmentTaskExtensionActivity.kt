@@ -396,6 +396,20 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
 
     private fun setReminder(reminderText: String) {
         btnTaskReminder.text = "⏰ $reminderText"
+        
+        // ✅ Save reminder to database
+        currentTask?.let { task ->
+            val reminderType = when (reminderText) {
+                "10 minutes before" -> ReminderType.TEN_MINUTES_BEFORE
+                "30 minutes before" -> ReminderType.THIRTY_MINUTES_BEFORE
+                else -> null
+            }
+            
+            if (reminderType != null) {
+                saveReminderToDatabase(task, reminderType)
+            }
+        }
+        
         Toast.makeText(this, "Reminder set: $reminderText", Toast.LENGTH_SHORT).show()
     }
 
@@ -410,6 +424,12 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                 calendar.set(Calendar.MINUTE, minute)
                 val timeString = timeFormat.format(calendar.time)
                 btnTaskReminder.text = "⏰ At $timeString"
+                
+                // ✅ Save reminder to database
+                currentTask?.let { task ->
+                    saveReminderToDatabase(task, ReminderType.AT_SPECIFIC_TIME, calendar.timeInMillis)
+                }
+                
                 Toast.makeText(this, "Reminder set at $timeString", Toast.LENGTH_SHORT).show()
             },
             calendar.get(Calendar.HOUR_OF_DAY),
@@ -418,6 +438,58 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
         )
         
         timePickerDialog.show()
+    }
+
+    // ✅ NEW: Save reminder to TaskReminder table
+    private fun saveReminderToDatabase(task: Task, reminderType: ReminderType, specificTime: Long? = null) {
+        lifecycleScope.launch {
+            try {
+                val db = AppDb.get(this@FragmentTaskExtensionActivity)
+                
+                withContext(Dispatchers.IO) {
+                    // Calculate reminder time based on type
+                    val remindAt = when (reminderType) {
+                        ReminderType.TEN_MINUTES_BEFORE -> {
+                            task.getDueDate()?.time?.minus(10 * 60 * 1000) ?: System.currentTimeMillis()
+                        }
+                        ReminderType.THIRTY_MINUTES_BEFORE -> {
+                            task.getDueDate()?.time?.minus(30 * 60 * 1000) ?: System.currentTimeMillis()
+                        }
+                        ReminderType.AT_SPECIFIC_TIME -> {
+                            specificTime ?: System.currentTimeMillis()
+                        }
+                    }
+                    
+                    // Get next reminder ID
+                    val nextId = db.taskReminderDao().getNextReminderIdForUser(userId)
+                    
+                    // Create new reminder
+                    val reminder = TaskReminder(
+                        TaskReminder_ID = nextId,
+                        Task_ID = task.Task_ID,
+                        User_ID = task.User_ID,
+                        RemindAt = remindAt,
+                        ReminderType = reminderType,
+                        IsActive = true,
+                        CreatedAt = System.currentTimeMillis(),
+                        UpdatedAt = System.currentTimeMillis()
+                    )
+                    
+                    // Insert reminder
+                    db.taskReminderDao().insert(reminder)
+                    
+                    android.util.Log.d("FragmentTaskExtension", "✅ Reminder saved: $reminderType at $remindAt")
+                }
+                
+            } catch (e: Exception) {
+                android.util.Log.e("FragmentTaskExtension", "Error saving reminder", e)
+                Toast.makeText(
+                    this@FragmentTaskExtensionActivity,
+                    "Error saving reminder: ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
     }
 
 

@@ -96,6 +96,9 @@ interface TaskDao {
     @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND Status = 'Completed' AND DeletedAt IS NULL")
     fun getCompletedTasksCountFlow(userId: Int): Flow<Int>
 
+    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DueAt = :todayStr AND Status = 'Completed' AND DeletedAt IS NULL")
+    fun getCompletedTodayTasksCountFlow(userId: Int, todayStr: String): Flow<Int>
+
     @Query("""
         SELECT COUNT(*) FROM Task 
         WHERE User_ID = :userId 

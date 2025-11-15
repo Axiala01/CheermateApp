@@ -32,6 +32,10 @@ interface TaskReminderDao {
     @Query("SELECT * FROM TaskReminder WHERE Task_ID = :taskId")
     fun getRemindersByTaskFlow(taskId: Int): Flow<List<TaskReminder>>
 
+    // ✅ GET NEXT REMINDER ID FOR USER
+    @Query("SELECT COALESCE(MAX(TaskReminder_ID), 0) + 1 FROM TaskReminder WHERE User_ID = :userId")
+    suspend fun getNextReminderIdForUser(userId: Int): Int
+
     // ✅ BATCH OPERATIONS WITH @Transaction
     @Transaction
     @Insert
