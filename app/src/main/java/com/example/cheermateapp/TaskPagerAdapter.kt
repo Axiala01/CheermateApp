@@ -64,11 +64,14 @@ class TaskPagerAdapter(
             Status.OverDue -> holder.tvTaskStatus.text = "🔴 Overdue"
         }
         
-        // Set due date
+        // Set due date with proper formatting
         if (task.DueAt != null) {
-            val dueText = "📅 Due: ${task.DueAt}"
-            val timeText = if (!task.DueTime.isNullOrBlank()) " at ${task.DueTime}" else ""
-            holder.tvTaskDueDate.text = "$dueText$timeText"
+            val formattedDate = task.getFormattedDueDateTime()
+            holder.tvTaskDueDate.text = if (formattedDate != null) {
+                "📅 Due: $formattedDate"
+            } else {
+                "📅 Due: ${task.DueAt}"
+            }
         } else {
             holder.tvTaskDueDate.text = "📅 No due date"
         }

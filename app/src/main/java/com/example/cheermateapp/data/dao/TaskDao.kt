@@ -54,8 +54,17 @@ interface TaskDao {
     @Query("UPDATE Task SET TaskProgress = :progress, UpdatedAt = :updatedAt WHERE User_ID = :userId AND Task_ID = :taskId")
     suspend fun updateTaskProgress(userId: Int, taskId: Int, progress: Int, updatedAt: Long = System.currentTimeMillis())
 
-    // ✅ TASK STATUS UPDATE
-    @Query("UPDATE Task SET Status = :status, UpdatedAt = :updatedAt WHERE User_ID = :userId AND Task_ID = :taskId")
+    // ✅ TASK STATUS UPDATE (also updates TaskProgress based on status)
+    @Query("""
+        UPDATE Task 
+        SET Status = :status, 
+            TaskProgress = CASE 
+                WHEN :status = 'Completed' THEN 100 
+                ELSE 0 
+            END,
+            UpdatedAt = :updatedAt 
+        WHERE User_ID = :userId AND Task_ID = :taskId
+    """)
     suspend fun updateTaskStatus(userId: Int, taskId: Int, status: String, updatedAt: Long = System.currentTimeMillis())
 
     // ✅ **MISSING METHODS IMPLEMENTED FOR FragmentTaskActivity**
