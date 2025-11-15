@@ -22,5 +22,12 @@
     <!-- Toolbar icon color for light mode - white for gradient background -->
     <color name="toolbar_icon">#FFFFFFFF</color>
 
+    <!-- Bottom Sheet & Dialog colors for Light Mode -->
+    <color name="bottom_sheet_background">#FFFFFF</color>
+    <color name="bottom_sheet_text_primary">#333333</color>
+    <color name="bottom_sheet_text_secondary">#666666</color>
+    <color name="bottom_sheet_button_background">#F5F5F5</color>
+    <color name="bottom_sheet_button_border">#DDDDDD</color>
+    <color name="bottom_sheet_ripple">#1A000000</color>
 
 </resources>
