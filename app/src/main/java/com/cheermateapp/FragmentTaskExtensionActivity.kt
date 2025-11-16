@@ -53,7 +53,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
     private lateinit var etSubtaskInput: EditText
     private lateinit var btnAddSubtask: Button
     private lateinit var subtasksContainer: ListView
-    private lateinit var subtaskAdapter: SubtaskAdapter
+    private lateinit var subtaskAdapter: SubTaskAdapter
     private lateinit var tvNoSubtasks: TextView
     private lateinit var tvItemsCount: TextView
 
@@ -97,9 +97,9 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
         tvItemsCount = findViewById(R.id.tv_items_count)
 
         // Initialize subtask adapter
-        subtaskAdapter = SubtaskAdapter(
+        subtaskAdapter = SubTaskAdapter(
             this,
-            subtasks,
+            subasks,
             onCheckChanged = { subtask, isChecked ->
                 val updatedSubtask = subtask.copy(
                     IsCompleted = isChecked,
