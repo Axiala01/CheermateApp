@@ -52,7 +52,8 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
     private lateinit var subtaskCard: LinearLayout
     private lateinit var etSubtaskInput: EditText
     private lateinit var btnAddSubtask: Button
-    private lateinit var subtasksContainer: LinearLayout
+    private lateinit var subtasksContainer: ListView
+    private lateinit var subtaskAdapter: SubtaskAdapter
     private lateinit var tvNoSubtasks: TextView
     private lateinit var tvItemsCount: TextView
 
@@ -94,6 +95,23 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
         subtasksContainer = findViewById(R.id.subtasks_container)
         tvNoSubtasks = findViewById(R.id.tv_no_subtasks)
         tvItemsCount = findViewById(R.id.tv_items_count)
+
+        // Initialize subtask adapter
+        subtaskAdapter = SubtaskAdapter(
+            this,
+            subtasks,
+            onCheckChanged = { subtask, isChecked ->
+                val updatedSubtask = subtask.copy(
+                    IsCompleted = isChecked,
+                    UpdatedAt = System.currentTimeMillis()
+                )
+                updateSubtask(updatedSubtask)
+            },
+            onDelete = { subtask ->
+                showDeleteSubtaskConfirmation(subtask)
+            }
+        )
+        subtasksContainer.adapter = subtaskAdapter
 
         // Setup toolbar
         setSupportActionBar(toolbar)
@@ -617,8 +635,6 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
     }
 
     private fun displaySubtasks() {
-        subtasksContainer.removeAllViews()
-        
         // Update items count
         val completedCount = subtasks.count { it.IsCompleted }
         tvItemsCount.text = "$completedCount/${subtasks.size} items"
@@ -629,59 +645,8 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
         } else {
             tvNoSubtasks.visibility = View.GONE
             subtasksContainer.visibility = View.VISIBLE
-            
-            subtasks.forEach { subtask ->
-                val subtaskView = createSubtaskView(subtask)
-                subtasksContainer.addView(subtaskView)
-            }
+            subtaskAdapter.notifyDataSetChanged()
         }
-    }
-
-    private fun createSubtaskView(subtask: SubTask): View {
-        val inflater = LayoutInflater.from(this)
-        val subtaskView = inflater.inflate(R.layout.item_subtask, null, false)
-        
-        val checkbox = subtaskView.findViewById<CheckBox>(R.id.cbSubTask)
-        val textView = subtaskView.findViewById<TextView>(R.id.tvSubTaskName)
-        val deleteButton = subtaskView.findViewById<ImageView>(R.id.btnDeleteSubTask)
-        
-        // Set subtask data
-        textView.text = subtask.Name
-        checkbox.isChecked = subtask.IsCompleted
-        
-        // Apply strikethrough if completed
-        if (subtask.IsCompleted) {
-            textView.paintFlags = textView.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-            textView.alpha = 0.6f
-        } else {
-            textView.paintFlags = textView.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
-            textView.alpha = 1.0f
-        }
-        
-        // Checkbox click listener
-        checkbox.setOnCheckedChangeListener { _, isChecked ->
-            val updatedSubtask = subtask.copy(
-                IsCompleted = isChecked,
-                UpdatedAt = System.currentTimeMillis()
-            )
-            updateSubtask(updatedSubtask)
-            
-            // Apply/remove strikethrough
-            if (isChecked) {
-                textView.paintFlags = textView.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-                textView.alpha = 0.6f
-            } else {
-                textView.paintFlags = textView.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
-                textView.alpha = 1.0f
-            }
-        }
-        
-        // Delete button click listener
-        deleteButton.setOnClickListener {
-            showDeleteSubtaskConfirmation(subtask)
-        }
-        
-        return subtaskView
     }
 
     private fun addSubtask() {
