@@ -8,8 +8,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingLeft="20dp"
-    android:paddingRight="20dp">
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp">
 
     <!-- Header row: Title only (add button removed, now using FAB) -->
     <LinearLayout
@@ -123,7 +123,9 @@
             android:layout_height="34dp"
             android:background="@drawable/bg_card_glass_hover"
             android:gravity="center_vertical"
-            android:paddingHorizontal="8dp">
+            android:paddingHorizontal="8dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp">
 
             <TextView
                 android:id="@+id/tabAll"
@@ -181,9 +183,9 @@
         android:id="@+id/recyclerViewTasks"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="115dp"
-        android:layout_weight="1"/>
+        android:layout_marginTop="1dp"
+        android:layout_weight="1"
+        android:layout_marginBottom="90dp"/>
 
     <!-- Empty State TextView -->
     <TextView
