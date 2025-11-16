@@ -302,7 +302,7 @@
                         android:fontFamily="@font/sf_pro_rounded_regular"
                         android:background="@drawable/bg_chip_glass"
                         android:minWidth="0dp"
-                        android:paddingTop="3dp"
+                        android:paddingTop="2dp"
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
                         android:text="Add"
@@ -316,19 +316,20 @@
                 <TextView
                     android:id="@+id/tv_no_subtasks"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="200dp"
                     android:layout_marginTop="24dp"
                     android:fontFamily="@font/sf_pro_rounded_regular"
                     android:gravity="center"
                     android:text="No subtasks yet"
                     android:textColor="@color/text_secondary_white_70"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    android:visibility="gone"/>
 
                 <!-- Runtime container (kept hidden initially) -->
                 <ListView
                     android:id="@+id/subtasks_container"
                     android:layout_width="match_parent"
-                    android:layout_height="200dp"
+                    android:layout_height="224dp"
                     android:visibility="visible"
                     android:divider="@null"
                     android:dividerHeight="0dp" />
