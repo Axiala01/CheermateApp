@@ -25,14 +25,47 @@ class ActivityLogin : AppCompatActivity() {
         try {
             binding = ActivityLoginBinding.inflate(layoutInflater)
             setContentView(binding.root)
+            
+            // Set initial state
+            binding.PasswordHash.transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
+            binding.passwordLayout.isEndIconVisible = false
+
+            binding.PasswordHash.addTextChangedListener(object : android.text.TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                override fun afterTextChanged(s: android.text.Editable?) {
+                    binding.passwordLayout.isEndIconVisible = s?.isNotEmpty() == true
+                }
+            })
+
+            binding.passwordLayout.setEndIconOnClickListener {
+                if (binding.PasswordHash.transformationMethod == null) {
+                    binding.PasswordHash.transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
+                    binding.passwordLayout.setEndIconDrawable(R.drawable.ic_visibility_off)
+                } else {
+                    binding.PasswordHash.transformationMethod = null
+                    binding.passwordLayout.setEndIconDrawable(R.drawable.ic_visibility_on)
+                }
+                binding.PasswordHash.setSelection(binding.PasswordHash.text?.length ?: 0)
+            }
 
             // Login button click handler with database validation
             binding.btnLogin.setOnClickListener {
                 val username = binding.UserID.text?.toString()?.trim().orEmpty()
                 val password = binding.PasswordHash.text?.toString()?.trim().orEmpty()
 
-                if (username.isEmpty() || password.isEmpty()) {
-                    Toast.makeText(this, "Please enter username and password", Toast.LENGTH_SHORT).show()
+                var hasError = false
+                if (username.isEmpty()) {
+                    binding.UserID.error = "Please enter username"
+                    hasError = true
+                }
+
+                if (password.isEmpty()) {
+                    Toast.makeText(this, "Please enter password", Toast.LENGTH_SHORT).show()
+                    hasError = true
+                }
+
+                if (hasError) {
                     return@setOnClickListener
                 }
 

@@ -167,24 +167,25 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val db = AppDb.get(this@MainActivity)
-                
+
                 // Get today's date string for filtering
                 val todayStr = dateToString(Calendar.getInstance().time)
-                
+
                 // ✅ FIX: Observe tasks due today and completed today (matching numerator/denominator)
                 kotlinx.coroutines.flow.combine(
                     db.taskDao().getTodayTasksCountFlow(userId, todayStr),
-                    db.taskDao().getCompletedTodayTasksCountFlow(userId, todayStr)
-                ) { totalToday, completedToday ->
-                    Pair(totalToday, completedToday)
-                }.collect { (totalToday, completedToday) ->
+                    db.taskDao().getCompletedTodayTasksCountFlow(userId, todayStr),
+                    db.taskDao().getInProgressTodayTasksCountFlow(userId, todayStr)
+                ) { totalToday, completedToday, inProgressToday ->
+                    Triple(totalToday, completedToday, inProgressToday)
+                }.collect { (totalToday, completedToday, inProgressToday) ->
                     // Update progress bar on main thread
                     withContext(Dispatchers.Main) {
-                        updateProgressDisplay(completedToday, totalToday)
-                        android.util.Log.d("MainActivity", "🔄 Progress bar updated live: $completedToday/$totalToday (tasks due today)")
+                        updateProgressDisplay(completedToday, inProgressToday, totalToday)
+                        android.util.Log.d("MainActivity", "🔄 Progress bar updated live: $completedToday/$inProgressToday/$totalToday (tasks due today)")
                     }
                 }
-                
+
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error observing task changes for progress bar", e)
             }
@@ -924,7 +925,6 @@ class MainActivity : AppCompatActivity() {
                 if (title.isEmpty()) {
                     titleInput.error = "Task title is required"
                     titleInput.requestFocus()
-                    Toast.makeText(this@MainActivity, "⚠️ Please enter a task title", Toast.LENGTH_SHORT).show()
                 } else {
                     val priority = prioritySpinner.selectedItem.toString()
                     val status = statusSpinner.selectedItem.toString()
@@ -1208,10 +1208,19 @@ class MainActivity : AppCompatActivity() {
                 etEditFirstName.setText(user.FirstName)
                 etEditLastName.setText(user.LastName)
 
-                androidx.appcompat.app.AlertDialog.Builder(this@MainActivity)
+                val dialog = androidx.appcompat.app.AlertDialog.Builder(this@MainActivity)
                     .setTitle("Edit Profile")
                     .setView(dialogView)
-                    .setPositiveButton("Save") { _, _ ->
+                    .setPositiveButton("Save", null) // Set to null. We'll override the listener later.
+                    .setNeutralButton("Change Password") { _, _ ->
+                        showChangePasswordDialog(user)
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .create()
+
+                dialog.setOnShowListener {
+                    val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                    positiveButton.setOnClickListener {
                         val newUsername = etEditUsername.text?.toString()?.trim().orEmpty()
                         val newEmail = etEditEmail.text?.toString()?.trim().orEmpty()
                         val newFirstName = etEditFirstName.text?.toString()?.trim().orEmpty()
@@ -1219,32 +1228,42 @@ class MainActivity : AppCompatActivity() {
 
                         // Validate inputs
                         if (newUsername.isEmpty()) {
-                            Toast.makeText(this@MainActivity, "Username cannot be empty", Toast.LENGTH_SHORT).show()
-                            return@setPositiveButton
+                            etEditUsername.error = "Username cannot be empty"
+                            return@setOnClickListener
                         }
 
                         if (!com.cheermateapp.util.InputValidationUtil.isValidUsername(newUsername)) {
-                            Toast.makeText(
-                                this@MainActivity,
-                                "Username must be 3-20 characters, letters, numbers, and underscore only",
-                                Toast.LENGTH_LONG
-                            ).show()
-                            return@setPositiveButton
+                            etEditUsername.error = "Username must be 3-20 characters, letters, numbers, and underscore only"
+                            return@setOnClickListener
+                        }
+                        
+                        if (newEmail.isEmpty()) {
+                            etEditEmail.error = "Email cannot be empty"
+                            return@setOnClickListener
                         }
 
-                        if (newEmail.isNotEmpty() && !com.cheermateapp.util.InputValidationUtil.isValidEmail(newEmail)) {
-                            Toast.makeText(this@MainActivity, "Invalid email format", Toast.LENGTH_SHORT).show()
-                            return@setPositiveButton
+                        if (!com.cheermateapp.util.InputValidationUtil.isValidEmail(newEmail)) {
+                            etEditEmail.error = "Invalid email format"
+                            return@setOnClickListener
+                        }
+                        
+                        if (newFirstName.isEmpty()) {
+                            etEditFirstName.error = "First name cannot be empty"
+                            return@setOnClickListener
+                        }
+
+                        if (newLastName.isEmpty()) {
+                            etEditLastName.error = "Last name cannot be empty"
+                            return@setOnClickListener
                         }
 
                         // Save changes
                         saveProfileChanges(user, newUsername, newEmail, newFirstName, newLastName)
+                        dialog.dismiss() // Dismiss dialog only when validation passes
                     }
-                    .setNeutralButton("Change Password") { _, _ ->
-                        showChangePasswordDialog(user)
-                    }
-                    .setNegativeButton("Cancel", null)
-                    .show()
+                }
+                
+                dialog.show()
 
             } catch (e: Exception) {
                 android.util.Log.e("MainActivity", "Error showing profile edit dialog", e)
@@ -1263,6 +1282,11 @@ class MainActivity : AppCompatActivity() {
         newFirstName: String,
         newLastName: String
     ) {
+        if (newFirstName.isBlank() || newLastName.isBlank()) {
+            Toast.makeText(this, "First and last name cannot be empty", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         uiScope.launch {
             try {
                 withContext(Dispatchers.IO) {
@@ -1312,13 +1336,87 @@ class MainActivity : AppCompatActivity() {
     private fun showChangePasswordDialog(user: User) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_change_password, null)
         val etCurrentPassword = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etCurrentPassword)
+        val tilCurrentPassword = dialogView.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.tilCurrentPassword)
         val etNewPassword = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etNewPassword)
+        val tilNewPassword = dialogView.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.tilNewPassword)
         val etConfirmPassword = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etConfirmPassword)
+        val tilConfirmPassword = dialogView.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.tilConfirmPassword)
 
-        androidx.appcompat.app.AlertDialog.Builder(this@MainActivity)
+        // Set initial state
+        etCurrentPassword.transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
+        tilCurrentPassword.isEndIconVisible = false
+        etNewPassword.transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
+        tilNewPassword.isEndIconVisible = false
+        etConfirmPassword.transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
+        tilConfirmPassword.isEndIconVisible = false
+
+        etCurrentPassword.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                tilCurrentPassword.isEndIconVisible = s?.isNotEmpty() == true
+            }
+        })
+
+        tilCurrentPassword.setEndIconOnClickListener {
+            if (etCurrentPassword.transformationMethod == null) {
+                etCurrentPassword.transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
+                tilCurrentPassword.setEndIconDrawable(R.drawable.ic_visibility_off)
+            } else {
+                etCurrentPassword.transformationMethod = null
+                tilCurrentPassword.setEndIconDrawable(R.drawable.ic_visibility_on)
+            }
+            etCurrentPassword.setSelection(etCurrentPassword.text?.length ?: 0)
+        }
+
+        etNewPassword.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                tilNewPassword.isEndIconVisible = s?.isNotEmpty() == true
+            }
+        })
+
+        tilNewPassword.setEndIconOnClickListener {
+            if (etNewPassword.transformationMethod == null) {
+                etNewPassword.transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
+                tilNewPassword.setEndIconDrawable(R.drawable.ic_visibility_off)
+            } else {
+                etNewPassword.transformationMethod = null
+                tilNewPassword.setEndIconDrawable(R.drawable.ic_visibility_on)
+            }
+            etNewPassword.setSelection(etNewPassword.text?.length ?: 0)
+        }
+
+        etConfirmPassword.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                tilConfirmPassword.isEndIconVisible = s?.isNotEmpty() == true
+            }
+        })
+
+        tilConfirmPassword.setEndIconOnClickListener {
+            if (etConfirmPassword.transformationMethod == null) {
+                etConfirmPassword.transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
+                tilConfirmPassword.setEndIconDrawable(R.drawable.ic_visibility_off)
+            } else {
+                etConfirmPassword.transformationMethod = null
+                tilConfirmPassword.setEndIconDrawable(R.drawable.ic_visibility_on)
+            }
+            etConfirmPassword.setSelection(etConfirmPassword.text?.length ?: 0)
+        }
+
+        val dialog = androidx.appcompat.app.AlertDialog.Builder(this@MainActivity)
             .setTitle("Change Password")
             .setView(dialogView)
-            .setPositiveButton("Change") { _, _ ->
+            .setPositiveButton("Change", null)
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        dialog.setOnShowListener {
+            val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            positiveButton.setOnClickListener {
                 val currentPassword = etCurrentPassword.text?.toString()?.trim().orEmpty()
                 val newPassword = etNewPassword.text?.toString()?.trim().orEmpty()
                 val confirmPassword = etConfirmPassword.text?.toString()?.trim().orEmpty()
@@ -1326,24 +1424,25 @@ class MainActivity : AppCompatActivity() {
                 // Validate inputs
                 if (currentPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
                     Toast.makeText(this@MainActivity, "Please fill in all fields", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
+                    return@setOnClickListener
                 }
 
                 if (newPassword != confirmPassword) {
                     Toast.makeText(this@MainActivity, "New passwords do not match", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
+                    return@setOnClickListener
                 }
 
                 if (!com.cheermateapp.util.InputValidationUtil.isValidPassword(newPassword)) {
                     Toast.makeText(this@MainActivity, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
+                    return@setOnClickListener
                 }
 
                 // Change password
                 changePassword(user, currentPassword, newPassword)
+                dialog.dismiss()
             }
-            .setNegativeButton("Cancel", null)
-            .show()
+        }
+        dialog.show()
     }
 
     /**
@@ -1683,12 +1782,12 @@ class MainActivity : AppCompatActivity() {
                 val reminderOption = spinnerReminder.selectedItem.toString()
 
                 if (title.isEmpty()) {
-                    Toast.makeText(this@MainActivity, "❌ Task title is required", Toast.LENGTH_SHORT).show()
+                    etTitle.error = "❌ Task title is required"
                     return@setOnClickListener
                 }
 
                 if (dueDate.isEmpty()) {
-                    Toast.makeText(this@MainActivity, "❌ Due date is required", Toast.LENGTH_SHORT).show()
+                    etDueDate.error = "❌ Due date is required"
                     return@setOnClickListener
                 }
 
@@ -2128,24 +2227,26 @@ class MainActivity : AppCompatActivity() {
                     val todayTasks = db.taskDao().getTodayTasksCount(userId, todayStr)
                     // ✅ FIX: Count tasks DUE today AND completed (matching numerator to denominator)
                     val todayCompletedTasks = db.taskDao().getCompletedTodayTasksCount(userId, todayStr)
+                    val todayInProgressTasks = db.taskDao().getInProgressTodayTasksCount(userId, todayStr)
                     // ✅ FIXED: Use the correct method signature
                     val overdueTasks = db.taskDao().getOverdueTasksCount(userId)
 
                     android.util.Log.d("MainActivity", "✅ Dashboard statistics - Today: $todayStr")
-                    android.util.Log.d("MainActivity", "✅ Tasks due today: $todayTasks, Completed today (due today): $todayCompletedTasks, Overdue: $overdueTasks")
+                    android.util.Log.d("MainActivity", "✅ Tasks due today: $todayTasks, Completed today (due today): $todayCompletedTasks, In Progress today: $todayInProgressTasks, Overdue: $overdueTasks")
 
                     mapOf(
                         "total" to totalTasks,
                         "completed" to completedTasks,
                         "today" to todayTasks,
                         "todayCompleted" to todayCompletedTasks,
+                        "todayInProgress" to todayInProgressTasks,
                         "overdue" to overdueTasks
                     )
                 }
 
                 updateStatisticsDisplay(stats)
                 // ✅ Update progress bar with today's tasks progress
-                updateProgressDisplay(stats["todayCompleted"] ?: 0, stats["today"] ?: 0)
+                updateProgressDisplay(stats["todayCompleted"] ?: 0, stats["todayInProgress"] ?: 0, stats["today"] ?: 0)
 
                 android.util.Log.d("MainActivity", "✅ Dashboard statistics loaded")
 
@@ -2191,42 +2292,50 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateProgressDisplay(completed: Int, total: Int) {
+    private fun updateProgressDisplay(completed: Int, inProgress: Int, total: Int) {
         try {
             val progressSubtitle = findViewById<TextView>(R.id.progressSubtitle)
             val progressPercent = findViewById<TextView>(R.id.progressPercent)
-            val progressFill = findViewById<View>(R.id.progressFill)
+            val progressCompleted = findViewById<View>(R.id.progressCompleted)
+            val progressInProgress = findViewById<View>(R.id.progressInProgress)
 
             val percentage = if (total > 0) (completed * 100) / total else 0
+            val inProgressPercentage = if (total > 0) (inProgress * 100) / total else 0
 
             progressSubtitle?.text = "$completed of $total tasks completed today"
             progressPercent?.text = "$percentage%"
 
             // ✅ Update progress bar weight to reflect percentage
-            // The progress fill should take up percentage of the bar, remainder takes the rest
-            progressFill?.layoutParams?.let { params ->
+            progressCompleted?.layoutParams?.let { params ->
                 if (params is LinearLayout.LayoutParams) {
-                    // Weight should be the percentage (0-100)
                     params.weight = percentage.toFloat()
-                    progressFill.layoutParams = params
-                    
-                    // Update the remainder weight
-                    val progressBar = progressFill.parent as? LinearLayout
-                    if (progressBar != null && progressBar.childCount > 1) {
-                        val remainder = progressBar.getChildAt(1)
-                        remainder?.layoutParams?.let { remParams ->
-                            if (remParams is LinearLayout.LayoutParams) {
-                                remParams.weight = (100 - percentage).toFloat()
-                                remainder.layoutParams = remParams
-                            }
-                        }
-                        // ✅ Request layout update to force redraw
-                        progressBar.requestLayout()
-                    }
+                    progressCompleted.layoutParams = params
                 }
             }
 
-            android.util.Log.d("MainActivity", "✅ Progress updated: $percentage% ($completed/$total)")
+            progressInProgress?.layoutParams?.let { params ->
+                if (params is LinearLayout.LayoutParams) {
+                    params.weight = inProgressPercentage.toFloat()
+                    progressInProgress.layoutParams = params
+                }
+            }
+
+            // Update the remainder weight
+            val progressBar = progressCompleted?.parent as? LinearLayout
+            if (progressBar != null && progressBar.childCount > 2) {
+                val remainder = progressBar.getChildAt(2)
+                remainder?.layoutParams?.let { remParams ->
+                    if (remParams is LinearLayout.LayoutParams) {
+                        remParams.weight = (100 - percentage - inProgressPercentage).toFloat()
+                        remainder.layoutParams = remParams
+                    }
+                }
+                // ✅ Request layout update to force redraw
+                progressBar.requestLayout()
+            }
+
+
+            android.util.Log.d("MainActivity", "✅ Progress updated: $percentage% completed, $inProgressPercentage% in progress ($completed/$inProgress/$total)")
 
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error updating progress display", e)

@@ -92,7 +92,10 @@
             app:boxStrokeColor="#FFFFFFFF"
             app:boxStrokeWidth="1dp"
             app:boxStrokeWidthFocused="2dp"
-            app:endIconMode="password_toggle">
+            app:endIconMode="custom"
+            app:endIconDrawable="@drawable/ic_visibility_off"
+            app:endIconTint="@color/white"
+            app:endIconContentDescription="Show password">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/PasswordHash"

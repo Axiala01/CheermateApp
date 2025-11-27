@@ -69,6 +69,7 @@
     <string name="duedate">DueDate</string>
     <string name="_0_of_0_tasks_completed">0 of 0 tasks completed</string>
     <string name="recent_tasks">Recent Tasks</string>
+    <string name="already_have_an_account_login_now">Already have an account? Login Now</string>
 
 
 </resources>

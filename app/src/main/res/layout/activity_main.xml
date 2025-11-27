@@ -417,11 +417,18 @@
                     android:orientation="horizontal">
 
                     <View
-                        android:id="@+id/progressFill"
+                        android:id="@+id/progressCompleted"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="0"
                         android:background="#A686F5FF" />
+
+                    <View
+                        android:id="@+id/progressInProgress"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0"
+                        android:background="#FFC107" />
 
                     <!-- remainder (transparent spacer) -->
                     <View

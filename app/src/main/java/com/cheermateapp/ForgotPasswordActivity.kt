@@ -114,27 +114,26 @@ class ForgotPasswordActivity : AppCompatActivity() {
      * Validate user inputs
      */
     private fun validateInputs(username: String, securityQuestion: String, securityAnswer: String): Boolean {
+        var hasError = false
         if (username.isEmpty()) {
-            Toast.makeText(this, "Please enter your username", Toast.LENGTH_SHORT).show()
-            return false
-        }
-
-        if (!InputValidationUtil.isValidUsername(username)) {
-            Toast.makeText(this, "Invalid username format", Toast.LENGTH_SHORT).show()
-            return false
+            binding.etUsername?.error = "Please enter your username"
+            hasError = true
+        } else if (!InputValidationUtil.isValidUsername(username)) {
+            binding.etUsername?.error = "Invalid username format"
+            hasError = true
         }
 
         if (securityQuestion.isEmpty()) {
             Toast.makeText(this, "Please select a security question", Toast.LENGTH_SHORT).show()
-            return false
+            hasError = true
         }
 
         if (securityAnswer.length < 2) {
-            Toast.makeText(this, "Security answer must be at least 2 characters", Toast.LENGTH_SHORT).show()
-            return false
+            binding.etSecurityAnswer?.error = "Security answer must be at least 2 characters"
+            hasError = true
         }
 
-        return true
+        return !hasError
     }
 
     /**
@@ -204,36 +203,89 @@ class ForgotPasswordActivity : AppCompatActivity() {
     private fun showPasswordResetDialog(username: String) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_reset_password, null)
         val etNewPassword = dialogView.findViewById<TextInputEditText>(R.id.etNewPassword)
+        val tilNewPassword = dialogView.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.tilNewPassword)
         val etConfirmPassword = dialogView.findViewById<TextInputEditText>(R.id.etConfirmPassword)
+        val tilConfirmPassword = dialogView.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.tilConfirmPassword)
 
-        AlertDialog.Builder(this)
+        // Set initial state
+        etNewPassword.transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
+        tilNewPassword.isEndIconVisible = false
+        etConfirmPassword.transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
+        tilConfirmPassword.isEndIconVisible = false
+
+        etNewPassword.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                tilNewPassword.isEndIconVisible = s?.isNotEmpty() == true
+            }
+        })
+
+        tilNewPassword.setEndIconOnClickListener {
+            if (etNewPassword.transformationMethod == null) {
+                etNewPassword.transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
+                tilNewPassword.setEndIconDrawable(R.drawable.ic_visibility_off)
+            } else {
+                etNewPassword.transformationMethod = null
+                tilNewPassword.setEndIconDrawable(R.drawable.ic_visibility_on)
+            }
+            etNewPassword.setSelection(etNewPassword.text?.length ?: 0)
+        }
+
+        etConfirmPassword.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                tilConfirmPassword.isEndIconVisible = s?.isNotEmpty() == true
+            }
+        })
+
+        tilConfirmPassword.setEndIconOnClickListener {
+            if (etConfirmPassword.transformationMethod == null) {
+                etConfirmPassword.transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
+                tilConfirmPassword.setEndIconDrawable(R.drawable.ic_visibility_off)
+            } else {
+                etConfirmPassword.transformationMethod = null
+                tilConfirmPassword.setEndIconDrawable(R.drawable.ic_visibility_on)
+            }
+            etConfirmPassword.setSelection(etConfirmPassword.text?.length ?: 0)
+        }
+
+        val dialog = AlertDialog.Builder(this)
             .setTitle("Reset Password")
             .setMessage("Enter your new password")
             .setView(dialogView)
-            .setPositiveButton("Reset") { _, _ ->
+            .setPositiveButton("Reset", null)
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        dialog.setOnShowListener {
+            val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            positiveButton.setOnClickListener {
                 val newPassword = etNewPassword.text?.toString()?.trim().orEmpty()
                 val confirmPassword = etConfirmPassword.text?.toString()?.trim().orEmpty()
 
                 if (newPassword.isEmpty() || confirmPassword.isEmpty()) {
                     Toast.makeText(this, "Please fill in both password fields", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
+                    return@setOnClickListener
                 }
 
                 if (newPassword != confirmPassword) {
                     Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
+                    return@setOnClickListener
                 }
 
                 if (!InputValidationUtil.isValidPassword(newPassword)) {
                     Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
+                    return@setOnClickListener
                 }
 
                 // Reset the password
                 resetPassword(username, newPassword)
+                dialog.dismiss()
             }
-            .setNegativeButton("Cancel", null)
-            .show()
+        }
+        dialog.show()
     }
 
     /**

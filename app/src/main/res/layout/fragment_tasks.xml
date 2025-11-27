@@ -43,7 +43,7 @@
         android:textColor="@color/text_secondary_white_70"
         android:textSize="12sp" />
 
-    <!-- Daily Progress Card -->
+    
 
     <!-- Search + sort glass card -->
     <LinearLayout

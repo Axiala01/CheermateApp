@@ -52,7 +52,7 @@ class FragmentTaskActivity : AppCompatActivity() {
     // Progress card elements
     private var progressSubtitle: TextView? = null
     private var progressPercent: TextView? = null
-    private var progressFill: View? = null
+    private var progressCompleted: View? = null
 
     private var currentFilter = FilterType.ALL
     private var userId: Int = 0
@@ -170,7 +170,7 @@ class FragmentTaskActivity : AppCompatActivity() {
             // Progress card elements (optional - may not exist in all layouts)
             progressSubtitle = findViewById(R.id.progressSubtitle)
             progressPercent = findViewById(R.id.progressPercent)
-            progressFill = findViewById(R.id.progressFill)
+            progressCompleted = findViewById(R.id.progressCompleted)
 
             // Setup RecyclerView
             recyclerViewTasks.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
@@ -664,7 +664,8 @@ class FragmentTaskActivity : AppCompatActivity() {
                         "all" to db.taskDao().getAllTasksCount(userId),
                         "today" to db.taskDao().getTodayTasksCount(userId, todayStr),
                         "pending" to db.taskDao().getPendingTasksCount(userId),
-                        "done" to db.taskDao().getCompletedTasksCount(userId)
+                        "done" to db.taskDao().getCompletedTasksCount(userId),
+                        "inProgress" to db.taskDao().getInProgressTasksCount(userId)
                     )
                 }
 
@@ -675,9 +676,9 @@ class FragmentTaskActivity : AppCompatActivity() {
 
                 val totalTasks = counts["all"] ?: 0
                 tvTasksSub.text = "$totalTasks total tasks"
-                
+
                 // ✅ Update progress card
-                updateProgressCard(counts["done"] ?: 0, counts["all"] ?: 0)
+                updateProgressCard(counts["done"] ?: 0, counts["inProgress"] ?: 0, counts["all"] ?: 0)
 
             } catch (e: Exception) {
                 android.util.Log.e("FragmentTaskActivity", "Error updating tab counts", e)
@@ -686,36 +687,47 @@ class FragmentTaskActivity : AppCompatActivity() {
     }
     
     // ✅ NEW: Update progress card with completion percentage
-    private fun updateProgressCard(completed: Int, total: Int) {
+    private fun updateProgressCard(completed: Int, inProgress: Int, total: Int) {
         try {
             val percentage = if (total > 0) (completed * 100) / total else 0
-            
+            val inProgressPercentage = if (total > 0) (inProgress * 100) / total else 0
+
             progressSubtitle?.text = "$completed of $total tasks completed"
             progressPercent?.text = "$percentage%"
-            
+
+            val progressCompleted = findViewById<View>(R.id.progressCompleted)
+            val progressInProgress = findViewById<View>(R.id.progressInProgress)
+
             // Update progress bar fill using weight
-            progressFill?.layoutParams?.let { params ->
+            progressCompleted?.layoutParams?.let { params ->
                 if (params is LinearLayout.LayoutParams) {
                     params.weight = percentage.coerceAtLeast(0).toFloat()
-                    progressFill?.layoutParams = params
-                    
-                    // Update the remainder weight
-                    val progressBar = progressFill?.parent as? LinearLayout
-                    if (progressBar != null && progressBar.childCount > 1) {
-                        val remainder = progressBar.getChildAt(1)
-                        remainder?.layoutParams?.let { remParams ->
-                            if (remParams is LinearLayout.LayoutParams) {
-                                remParams.weight = (100 - percentage).toFloat()
-                                remainder.layoutParams = remParams
-                            }
-                        }
-                        // ✅ Request layout update to force redraw
-                        progressBar.requestLayout()
-                    }
+                    progressCompleted.layoutParams = params
                 }
             }
-            
-            android.util.Log.d("FragmentTaskActivity", "✅ Progress updated: $percentage% ($completed/$total)")
+
+            progressInProgress?.layoutParams?.let { params ->
+                if (params is LinearLayout.LayoutParams) {
+                    params.weight = inProgressPercentage.coerceAtLeast(0).toFloat()
+                    progressInProgress.layoutParams = params
+                }
+            }
+
+            // Update the remainder weight
+            val progressBar = progressCompleted?.parent as? LinearLayout
+            if (progressBar != null && progressBar.childCount > 2) {
+                val remainder = progressBar.getChildAt(2)
+                remainder?.layoutParams?.let { remParams ->
+                    if (remParams is LinearLayout.LayoutParams) {
+                        remParams.weight = (100 - percentage - inProgressPercentage).toFloat()
+                        remainder.layoutParams = remParams
+                    }
+                }
+                // ✅ Request layout update to force redraw
+                progressBar.requestLayout()
+            }
+
+            android.util.Log.d("FragmentTaskActivity", "✅ Progress updated: $percentage% completed, $inProgressPercentage% in progress ($completed/$inProgress/$total)")
         } catch (e: Exception) {
             android.util.Log.e("FragmentTaskActivity", "Error updating progress card", e)
         }
@@ -726,21 +738,22 @@ class FragmentTaskActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val db = AppDb.get(this@FragmentTaskActivity)
-                
+
                 // Observe all tasks and completed tasks count
                 kotlinx.coroutines.flow.combine(
                     db.taskDao().getAllTasksCountFlow(userId),
-                    db.taskDao().getCompletedTasksCountFlow(userId)
-                ) { total, completed ->
-                    Pair(total, completed)
-                }.collect { (total, completed) ->
+                    db.taskDao().getCompletedTasksCountFlow(userId),
+                    db.taskDao().getInProgressTasksCountFlow(userId)
+                ) { total, completed, inProgress ->
+                    Triple(total, completed, inProgress)
+                }.collect { (total, completed, inProgress) ->
                     // Update progress bar on main thread
                     withContext(Dispatchers.Main) {
-                        updateProgressCard(completed, total)
-                        android.util.Log.d("FragmentTaskActivity", "🔄 Progress bar updated live: $completed/$total")
+                        updateProgressCard(completed, inProgress, total)
+                        android.util.Log.d("FragmentTaskActivity", "🔄 Progress bar updated live: $completed/$inProgress/$total")
                     }
                 }
-                
+
             } catch (e: Exception) {
                 android.util.Log.e("FragmentTaskActivity", "Error observing task changes for progress bar", e)
             }

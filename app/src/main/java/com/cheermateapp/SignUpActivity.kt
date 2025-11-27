@@ -34,6 +34,29 @@ class SignUpActivity : AppCompatActivity() {
             binding = ActivitySignUpBinding.inflate(layoutInflater)
             setContentView(binding.root)
 
+            // Set initial state
+            binding.etPassword.transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
+            binding.tilPassword.isEndIconVisible = false
+
+            binding.etPassword.addTextChangedListener(object : android.text.TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                override fun afterTextChanged(s: android.text.Editable?) {
+                    binding.tilPassword.isEndIconVisible = s?.isNotEmpty() == true
+                }
+            })
+
+            binding.tilPassword.setEndIconOnClickListener {
+                if (binding.etPassword.transformationMethod == null) {
+                    binding.etPassword.transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
+                    binding.tilPassword.setEndIconDrawable(R.drawable.ic_visibility_off)
+                } else {
+                    binding.etPassword.transformationMethod = null
+                    binding.tilPassword.setEndIconDrawable(R.drawable.ic_visibility_on)
+                }
+                binding.etPassword.setSelection(binding.etPassword.text?.length ?: 0)
+            }
+
             // Initialize repository
             staticDataRepository = StaticDataRepository(this)
 
@@ -94,14 +117,15 @@ class SignUpActivity : AppCompatActivity() {
      */
     private fun setupSignUpButton() {
         binding.btnSignUp.setOnClickListener {
-            val fullName = binding.etFullName?.text?.toString()?.trim().orEmpty()
+            val firstName = binding.etFirstName?.text?.toString()?.trim().orEmpty()
+            val lastName = binding.etLastName?.text?.toString()?.trim().orEmpty()
             val username = binding.etUsername?.text?.toString()?.trim().orEmpty()
             val password = binding.etPassword?.text?.toString()?.trim().orEmpty()
             val securityQuestion = binding.etSecurityQuestion?.text?.toString()?.trim().orEmpty()
             val securityAnswer = binding.etSecurityAnswer?.text?.toString()?.trim().orEmpty()
 
             // Validate all inputs
-            if (!validateInputs(fullName, username, password, securityQuestion, securityAnswer)) {
+            if (!validateInputs(firstName, lastName, username, password, securityQuestion, securityAnswer)) {
                 return@setOnClickListener
             }
 
@@ -110,7 +134,7 @@ class SignUpActivity : AppCompatActivity() {
             binding.btnSignUp.text = "Creating Account..."
 
             // Create user account
-            createUserAccount(fullName, username, password, securityQuestion, securityAnswer)
+            createUserAccount(firstName, lastName, username, password, securityQuestion, securityAnswer)
         }
     }
 
@@ -118,64 +142,59 @@ class SignUpActivity : AppCompatActivity() {
      * Validate all user inputs
      */
     private fun validateInputs(
-        fullName: String,
+        firstName: String,
+        lastName: String,
         username: String,
         password: String,
         securityQuestion: String,
         securityAnswer: String
     ): Boolean {
-        // Validate full name
-        if (fullName.isEmpty()) {
-            Toast.makeText(this, "Please enter your full name", Toast.LENGTH_SHORT).show()
-            return false
+        var hasError = false
+        if (firstName.isEmpty()) {
+            binding.etFirstName?.error = "Please enter your first name"
+            hasError = true
         }
 
-        // Validate username
+        if (lastName.isEmpty()) {
+            binding.etLastName?.error = "Please enter your last name"
+            hasError = true
+        }
+
         if (username.isEmpty()) {
-            Toast.makeText(this, "Please enter a username", Toast.LENGTH_SHORT).show()
-            return false
+            binding.etUsername?.error = "Please enter a username"
+            hasError = true
+        } else if (!InputValidationUtil.isValidUsername(username)) {
+            binding.etUsername?.error = "Username must be 3-20 characters, letters, numbers, and underscore only"
+            hasError = true
+        } else if (InputValidationUtil.containsSQLInjectionPattern(username)) {
+            binding.etUsername?.error = "Invalid characters in username"
+            hasError = true
         }
 
-        if (!InputValidationUtil.isValidUsername(username)) {
-            Toast.makeText(
-                this,
-                "Username must be 3-20 characters, letters, numbers, and underscore only",
-                Toast.LENGTH_LONG
-            ).show()
-            return false
-        }
-
-        // Check for SQL injection patterns
-        if (InputValidationUtil.containsSQLInjectionPattern(username)) {
-            Toast.makeText(this, "Invalid characters in username", Toast.LENGTH_SHORT).show()
-            return false
-        }
-
-        // Validate password
         if (!InputValidationUtil.isValidPassword(password)) {
             Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
-            return false
+            hasError = true
         }
 
-        // Validate security question and answer
         if (securityQuestion.isEmpty()) {
             Toast.makeText(this, "Please select a security question", Toast.LENGTH_SHORT).show()
-            return false
+            hasError = true
         }
 
         if (securityAnswer.length < 2) {
-            Toast.makeText(this, "Security answer must be at least 2 characters", Toast.LENGTH_SHORT).show()
-            return false
+            binding.etSecurityAnswer?.error = "Security answer must be at least 2 characters"
+            hasError = true
         }
 
-        return true
+        return !hasError
     }
 
     /**
      * Create user account with hashed password and security answer
      */
     private fun createUserAccount(
-        fullName: String,
+        firstName: String,
+        lastName: String,
         username: String,
         password: String,
         securityQuestion: String,
@@ -191,10 +210,6 @@ class SignUpActivity : AppCompatActivity() {
                     if (existingUser != null) {
                         return@withContext -1L // Username exists
                     }
-
-                    // Split full name into first and last name
-                    val firstName = fullName.substringBefore(' ').ifEmpty { fullName }
-                    val lastName = fullName.substringAfter(' ', missingDelimiterValue = "")
 
                     // Hash the password using PBKDF2-HMAC-SHA256
                     val hashedPassword = PasswordHashUtil.hashPassword(password)

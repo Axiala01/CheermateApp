@@ -95,6 +95,12 @@ interface TaskDao {
     @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND Status = 'Completed' AND DeletedAt IS NULL")
     suspend fun getCompletedTasksCount(userId: Int): Int
 
+    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND Status = 'InProgress' AND DeletedAt IS NULL")
+    suspend fun getInProgressTasksCount(userId: Int): Int
+
+    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND Status = 'InProgress' AND DeletedAt IS NULL")
+    fun getInProgressTasksCountFlow(userId: Int): Flow<Int>
+
     // ✅ FLOW COUNT QUERIES FOR LIVE UPDATES
     @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DeletedAt IS NULL")
     fun getAllTasksCountFlow(userId: Int): Flow<Int>
@@ -156,6 +162,12 @@ interface TaskDao {
 
     @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DueAt = :todayStr AND Status = 'Completed' AND DeletedAt IS NULL")
     suspend fun getCompletedTodayTasksCount(userId: Int, todayStr: String): Int
+
+    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DueAt = :todayStr AND Status = 'InProgress' AND DeletedAt IS NULL")
+    suspend fun getInProgressTodayTasksCount(userId: Int, todayStr: String): Int
+
+    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DueAt = :todayStr AND Status = 'InProgress' AND DeletedAt IS NULL")
+    fun getInProgressTodayTasksCountFlow(userId: Int, todayStr: String): Flow<Int>
 
     // ✅ NEW: Count tasks that were marked complete today (based on UpdatedAt timestamp)
     @Query("""

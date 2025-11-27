@@ -5,6 +5,8 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.cheermateapp.data.dao.MessageTemplateDao
 import com.cheermateapp.data.dao.PersonalityDao
 import com.cheermateapp.data.dao.RecurringTaskDao
@@ -45,7 +47,7 @@ import com.google.gson.Gson
         TaskTemplate::class,
         TaskDependency::class
     ],
-    version = 19,
+    version = 20,
     exportSchema = false
 )
 @TypeConverters(AppTypeConverters::class)
@@ -72,6 +74,45 @@ abstract class AppDb : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_19_20 = object : Migration(19, 20) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Create new table with NOT NULL constraints
+                database.execSQL("""
+                    CREATE TABLE User_new (
+                        User_ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        Username TEXT NOT NULL,
+                        Email TEXT NOT NULL,
+                        PasswordHash TEXT NOT NULL,
+                        FirstName TEXT NOT NULL DEFAULT '',
+                        LastName TEXT NOT NULL DEFAULT '',
+                        Birthdate TEXT,
+                        Personality_ID INTEGER,
+                        CreatedAt INTEGER NOT NULL,
+                        UpdatedAt INTEGER NOT NULL,
+                        DeletedAt INTEGER
+                    )
+                """)
+
+                // Copy data from old table to new table, coalescing null names to empty strings
+                database.execSQL("""
+                    INSERT INTO User_new (User_ID, Username, Email, PasswordHash, FirstName, LastName, Birthdate, Personality_ID, CreatedAt, UpdatedAt, DeletedAt)
+                    SELECT User_ID, Username, Email, PasswordHash, COALESCE(FirstName, ''), COALESCE(LastName, ''), Birthdate, Personality_ID, CreatedAt, UpdatedAt, DeletedAt FROM User
+                """)
+
+                // Drop old table
+                database.execSQL("DROP TABLE User")
+
+                // Rename new table to old table name
+                database.execSQL("ALTER TABLE User_new RENAME TO User")
+
+                // Re-create indexes from original schema
+                database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_User_Username ON User(Username)")
+                database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_User_Email ON User(Email)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_User_Personality_ID ON User(Personality_ID)")
+            }
+        }
+
+
         private fun buildDatabase(appContext: Context): AppDb {
             val gson = Gson()
             return Room.databaseBuilder(
@@ -79,10 +120,8 @@ abstract class AppDb : RoomDatabase() {
                 AppDb::class.java,
                 "cheermate_database"
             )
-                // Uses ProvidedTypeConverter to supply Gson at runtime
                 .addTypeConverter(AppTypeConverters(gson))
-                // Consider replacing with proper migrations in production
-                .fallbackToDestructiveMigration()
+                .addMigrations(MIGRATION_19_20)
                 .build()
         }
     }

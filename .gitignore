@@ -82,5 +82,6 @@ lint/outputs/
 lint/tmp/
 # lint/reports/
 
-# Gradle version catalogs - ignore local changes
-gradle/libs.versions.toml
+
+# Gemini related files
+GEMINI.md
