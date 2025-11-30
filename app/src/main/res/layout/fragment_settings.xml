@@ -280,7 +280,7 @@
                 android:layout_width="22dp"
                 android:layout_height="22dp"
                 android:src="@android:drawable/ic_menu_day"
-                app:tint="@color/text_primary" />
+                app:tint="@color/white" />
 
             <LinearLayout
                 android:layout_width="0dp"
