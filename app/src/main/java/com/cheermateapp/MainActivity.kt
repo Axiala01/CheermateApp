@@ -1615,9 +1615,6 @@ class MainActivity : AppCompatActivity() {
                 ToastManager.showToast(this, "📅 Select a date to see tasks!", Toast.LENGTH_SHORT)
             }
 
-            findViewById<TextView>(R.id.quickAddChip)?.setOnClickListener {
-                showQuickAddTaskDialog()
-            }
 
             findViewById<View>(R.id.cardPersonality)?.setOnClickListener {
                 navigateToSettings() // Navigate to settings instead of handling here
