@@ -389,6 +389,9 @@ class MainActivity : AppCompatActivity() {
                 isClickable = true
                 bringToFront()
             }
+            // Refresh home statistics and progress when showing Home
+            loadTaskStatistics()
+            startObserveTaskChangesForProgressBar()
             
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error showing home screen", e)
