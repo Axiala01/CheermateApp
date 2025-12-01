@@ -90,6 +90,11 @@ class MainActivity : AppCompatActivity() {
     private var tasksRootView: View? = null
     private var settingsRootView: View? = null
 
+    // Container under CalendarView for selected-day tasks
+    private var calendarTasksContainer: LinearLayout? = null
+    private var selectedCalendarDateStr: String? = null
+    private var calendarTasksObserverJob: kotlinx.coroutines.Job? = null
+
     // ✅ RecyclerView and TaskAdapter for fragment_tasks
     private var taskRecyclerView: RecyclerView? = null
     private var taskAdapter: TaskAdapter? = null
@@ -137,6 +142,10 @@ class MainActivity : AppCompatActivity() {
                 setupGreeting()
                 setupBottomNavigation()
 
+                // Set FAB icon tint to white for good contrast
+                findViewById<FloatingActionButton>(R.id.fabAddTask)?.imageTintList =
+                    android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE)
+
                 // Restore Settings tab immediately after nav setup if theme toggle caused recreation
                 kotlin.runCatching {
                     val prefs = getSharedPreferences("cheermate_theme_prefs", MODE_PRIVATE)
@@ -157,7 +166,6 @@ class MainActivity : AppCompatActivity() {
                 findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNav)?.let { nav ->
                     if (nav.selectedItemId == R.id.nav_home) {
                         setupHomeScreenInteractions()
-                        setupCalendarView()
                         // Load dashboard data
                         loadUserData()
                         loadTaskStatistics()
@@ -192,7 +200,7 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Critical error in onCreate", e)
             ToastManager.showToast(this, "Loading dashboard...", Toast.LENGTH_SHORT)
-            createFallbackLayout()
+            finish()
         }
     }
 
@@ -374,9 +382,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun showHomeScreen() {
         try {
-            // Ensure calendar view is initialized when showing Home
-            setupCalendarView()
-
             findViewById<ScrollView>(R.id.homeScroll)?.visibility = View.VISIBLE
             val container = findViewById<FrameLayout>(R.id.contentContainer)
             container?.visibility = View.GONE
@@ -1615,6 +1620,31 @@ class MainActivity : AppCompatActivity() {
                 setOnClickListener { showQuickAddTaskDialog() }
             }
 
+            // Calendar date selection -> show tasks under calendar
+            findViewById<CalendarView>(R.id.calendarView)?.let { cv ->
+                ensureCalendarTasksContainer()
+                val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+                val initialDateStr = sdf.format(java.util.Date(cv.date))
+                selectedCalendarDateStr = initialDateStr
+                updateCalendarSelectedTasks(initialDateStr)
+                startObserveCalendarSelectedTasks(initialDateStr)
+                cv.setOnDateChangeListener { _, year, month, dayOfMonth ->
+                    val cal = java.util.Calendar.getInstance().apply {
+                        set(java.util.Calendar.YEAR, year)
+                        set(java.util.Calendar.MONTH, month)
+                        set(java.util.Calendar.DAY_OF_MONTH, dayOfMonth)
+                        set(java.util.Calendar.HOUR_OF_DAY, 0)
+                        set(java.util.Calendar.MINUTE, 0)
+                        set(java.util.Calendar.SECOND, 0)
+                        set(java.util.Calendar.MILLISECOND, 0)
+                    }
+                    val newDateStr = sdf.format(cal.time)
+                    selectedCalendarDateStr = newDateStr
+                    updateCalendarSelectedTasks(newDateStr)
+                    startObserveCalendarSelectedTasks(newDateStr)
+                }
+            }
+
             findViewById<View>(R.id.cardCalendar)?.setOnClickListener {
                 ToastManager.showToast(this, "📅 Select a date to see tasks!", Toast.LENGTH_SHORT)
             }
@@ -1639,6 +1669,136 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error setting up home interactions", e)
         }
+    }
+
+    private fun ensureCalendarTasksContainer() {
+        if (calendarTasksContainer != null) return
+        try {
+            val cardCalendar = findViewById<LinearLayout>(R.id.cardCalendar) ?: return
+            // Find CalendarView index to insert after
+            val index = (0 until cardCalendar.childCount).firstOrNull { i ->
+                cardCalendar.getChildAt(i) is CalendarView
+            } ?: return
+            val container = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                // Match card inner horizontal padding (20dp left/right)
+                setPadding(20, 8, 20, 8)
+                gravity = android.view.Gravity.CENTER_HORIZONTAL
+            }
+            // Insert right after CalendarView
+            cardCalendar.addView(container, index + 1)
+            calendarTasksContainer = container
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Failed to add calendar tasks container", e)
+        }
+    }
+
+    private fun updateCalendarSelectedTasks(dateStr: String) {
+        uiScope.launch {
+            try {
+                ensureCalendarTasksContainer()
+                val container = calendarTasksContainer ?: return@launch
+                container.removeAllViews()
+
+                val db = AppDb.get(this@MainActivity)
+                val tasksForDate = withContext(Dispatchers.IO) {
+                    db.taskDao().getTodayTasks(userId, dateStr)
+                }
+
+                // Build a single centered preview row rendered in the same spot for both cases
+                val dateLabel = try {
+                    val inFmt = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+                    val outFmt = java.text.SimpleDateFormat("MMM dd", java.util.Locale.getDefault())
+                    (inFmt.parse(dateStr)?.let { outFmt.format(it) } ?: dateStr).lowercase()
+                } catch (_: Exception) { dateStr.lowercase() }
+
+                val row = LinearLayout(this@MainActivity).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    val lp = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                    lp.setMargins(0, (6 * resources.displayMetrics.density).toInt(), 0, 0)
+                    layoutParams = lp
+                    setPadding(0, (4 * resources.displayMetrics.density).toInt(), 0, 0)
+                    gravity = android.view.Gravity.CENTER_VERTICAL
+                }
+
+                // Priority emoji indicator when tasks exist (hidden if none)
+                val icon = TextView(this@MainActivity).apply {
+                    val lp = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                    lp.rightMargin = (10 * resources.displayMetrics.density).toInt()
+                    layoutParams = lp
+                    textSize = 14f
+                    visibility = View.GONE
+                }
+
+                val info = TextView(this@MainActivity).apply {
+                    val line = if (tasksForDate.isEmpty()) {
+                        "no tasks in this date"
+                    } else {
+                        "${tasksForDate.size} task(s) - tap to view"
+                    }
+                    text = line
+                    setTextColor(android.graphics.Color.WHITE)
+                    textSize = 12f
+                    setAllCaps(true)
+                }
+
+                if (tasksForDate.isNotEmpty()) {
+                    val highest = when {
+                        tasksForDate.any { it.Priority == Priority.High } -> Priority.High
+                        tasksForDate.any { it.Priority == Priority.Medium } -> Priority.Medium
+                        else -> Priority.Low
+                    }
+                    icon.text = when (highest) {
+                        Priority.High -> "🔴"
+                        Priority.Medium -> "🟡"
+                        Priority.Low -> "🟢"
+                    }
+                    icon.visibility = View.VISIBLE
+                }
+
+                row.removeAllViews()
+                row.addView(icon)
+                row.addView(info)
+                row.setOnClickListener(
+                    if (tasksForDate.isNotEmpty()) {
+                        View.OnClickListener {
+                            findViewById<BottomNavigationView>(R.id.bottomNav)?.selectedItemId = R.id.nav_tasks
+                        }
+                    } else null
+                )
+
+                container.removeAllViews()
+                container.addView(row)
+
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Error updating calendar selected tasks", e)
+            }
+        }
+    }
+
+    private fun startObserveCalendarSelectedTasks(dateStr: String) {
+        calendarTasksObserverJob?.cancel()
+        calendarTasksObserverJob = lifecycleScope.launch {
+            try {
+                val db = AppDb.get(this@MainActivity)
+                db.taskDao().getTodayTasksFlow(userId, dateStr).collect {
+                    if (selectedCalendarDateStr == dateStr) updateCalendarSelectedTasks(dateStr)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Error observing calendar tasks", e)
+            }
+        }
+    }
+
+    private fun stopObserveCalendarSelectedTasks() {
+        calendarTasksObserverJob?.cancel()
+        calendarTasksObserverJob = null
     }
 
     // ✅ ENHANCED ADD TASK DIALOG (PROGRAMMATIC VERSION - NO LAYOUT FILE NEEDED)
@@ -2371,6 +2531,10 @@ class MainActivity : AppCompatActivity() {
         try {
             val recentTasksContainer = findViewById<LinearLayout>(R.id.cardRecent)
 
+            // Use white text for dark glass cards for better contrast
+            val textColor = android.graphics.Color.WHITE
+            android.util.Log.d("MainActivity", "🎨 Recent Tasks: Using white text color for contrast: #${Integer.toHexString(textColor)}")
+
             if (recentTasksContainer != null && recentTasksContainer.childCount > 1) {
                 val contentArea = recentTasksContainer.getChildAt(1) as? LinearLayout
                 contentArea?.removeAllViews()
@@ -2379,7 +2543,7 @@ class MainActivity : AppCompatActivity() {
                     val emptyText = TextView(this)
                     emptyText.text = "🎉 No pending tasks!\nTap + to create your first task!"
                     emptyText.textSize = 14f
-                    emptyText.setTextColor(resources.getColor(android.R.color.white))
+                    emptyText.setTextColor(textColor)
                     emptyText.gravity = android.view.Gravity.CENTER
                     emptyText.setPadding(20, 30, 20, 30)
                     contentArea?.addView(emptyText)
@@ -2408,7 +2572,7 @@ class MainActivity : AppCompatActivity() {
                         val swipeHeader = TextView(this)
                         swipeHeader.text = "📋 Next Task (swipe to navigate)"
                         swipeHeader.textSize = 14f
-                        swipeHeader.setTextColor(android.graphics.Color.WHITE)
+                        swipeHeader.setTextColor(textColor)
                         swipeHeader.setTypeface(null, android.graphics.Typeface.BOLD)
                         swipeHeader.gravity = android.view.Gravity.CENTER
                         swipeHeader.setPadding(8, 8, 8, 8)
@@ -2427,7 +2591,7 @@ class MainActivity : AppCompatActivity() {
                         val adapter = TaskPagerAdapter(
                             activeTasks,
                             onCompleteClick = { task -> markTaskAsDone(task) },
-                            onEditClick = { task -> showTaskQuickActions(task) },
+                            onEditClick = { task -> showEditTaskDialog(task) },
                             onDeleteClick = { task -> deleteTask(task) }
                         )
                         viewPager.adapter = adapter
@@ -2438,7 +2602,7 @@ class MainActivity : AppCompatActivity() {
                         counterText.id = View.generateViewId()
                         counterText.text = "1 / ${activeTasks.size}"
                         counterText.textSize = 14f
-                        counterText.setTextColor(android.graphics.Color.WHITE)
+                        counterText.setTextColor(textColor)
                         counterText.setTypeface(null, android.graphics.Typeface.BOLD)
                         counterText.gravity = android.view.Gravity.CENTER
                         counterText.setPadding(8, 8, 8, 8)
@@ -2581,7 +2745,7 @@ class MainActivity : AppCompatActivity() {
 
             // Edit Button
             btnEdit.setOnClickListener {
-                showTaskQuickActions(task)
+                showEditTaskDialog(task)
             }
 
             // Delete Button
@@ -2704,29 +2868,6 @@ class MainActivity : AppCompatActivity() {
                 navigateToTasks()
             }
             .setNegativeButton("Close", null)
-            .show()
-    }
-
-    // ✅ TASK QUICK ACTIONS
-    private fun showTaskQuickActions(task: Task) {
-        val actions = arrayOf(
-            "✅ Mark as Done",
-            "🔄 Mark as Pending",
-            "🗑️ Delete Task",
-            "✏️ Edit Task"
-        )
-
-        AlertDialog.Builder(this)
-            .setTitle("Quick Actions: ${task.Title}")
-            .setItems(actions) { _, which ->
-                when (which) {
-                    0 -> markTaskAsDone(task)
-                    1 -> markTaskAsPending(task)
-                    2 -> deleteTask(task)
-                    3 -> navigateToTasks()
-                }
-            }
-            .setNegativeButton("Cancel", null)
             .show()
     }
 
@@ -2854,286 +2995,6 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    // ✅ CALENDAR INTEGRATION (READ-ONLY PREVIEW) - FIXED VERSION
-    private fun setupCalendarView() {
-        android.util.Log.d("MainActivity", "🔧 setupCalendarView() called")
-        try {
-            val calendarPlaceholder = findViewById<LinearLayout>(R.id.calendarPlaceholder)
-            android.util.Log.d("MainActivity", "📅 calendarPlaceholder found: ${calendarPlaceholder != null}")
-
-            if (calendarPlaceholder == null) {
-                android.util.Log.e("MainActivity", "❌ calendarPlaceholder is NULL!")
-                return
-            }
-
-            // ✅ CLEAR ALL EXISTING VIEWS (INCLUDING THE DEFAULT TextView)
-            calendarPlaceholder.removeAllViews()
-
-            android.util.Log.d("MainActivity", "✅ Cleared existing calendar content")
-
-            // ✅ CREATE AND CONFIGURE CalendarView with theme-aware styling
-            // Create CalendarView with a themed context to ensure proper text colors
-            // Ignore system uiMode; theme controlled by app settings
-            // Create a ContextThemeWrapper with the appropriate CalendarView style
-            val themedContext = android.view.ContextThemeWrapper(this, R.style.CalendarViewStyle)
-            val calendarView = CalendarView(themedContext)
-            // ✅ FIXED: Use fixed height instead of weight to ensure all dates are visible
-            val calendarHeight = (300 * resources.displayMetrics.density).toInt() // 300dp
-            calendarView.layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                calendarHeight
-            )
-
-            // ✅ CREATE A HELPER TEXT VIEW for showing date task info
-            val dateInfoTextView = TextView(this)
-            dateInfoTextView.layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            dateInfoTextView.apply {
-                setPadding(16, 4, 16, 4) // Reduced padding to save space
-                textSize = 11f // Slightly smaller text
-                setTextColor(context.getColor(android.R.color.white))
-                gravity = android.view.Gravity.CENTER
-                text = "Tap a date to view tasks"
-                fontFeatureSettings = "smcp" // Small caps
-            }
-
-            // ✅ CONFIGURE CALENDAR SETTINGS
-            calendarView.firstDayOfWeek = Calendar.MONDAY
-            calendarView.date = System.currentTimeMillis()
-
-            try {
-                // ✅ STYLING - Apply theme-aware background and text colors
-                calendarView.setBackgroundColor(this@MainActivity.getColor(R.color.calendar_background))
-                changeCalendarViewHeaderTextColor(calendarView, android.R.color.white)
-                
-                // ✅ Apply theme-aware text colors to CalendarView
-                // Note: CalendarView text colors are controlled by the app theme
-                // but we ensure the background is theme-aware
-
-                // ✅ DATE SELECTION LISTENER with visual feedback
-                calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
-                    // Show loading indicator
-                    dateInfoTextView.text = "Loading tasks..."
-                    
-                    // Update helper text with task info
-                    updateDateInfoText(dateInfoTextView, year, month, dayOfMonth, findViewById(R.id.bottomNav))
-                    
-                    android.util.Log.d("MainActivity", "📅 Date selected: $dayOfMonth/${month + 1}/$year")
-                }
-
-                android.util.Log.d("MainActivity", "✅ Calendar styling and listener applied")
-
-            } catch (e: Exception) {
-                android.util.Log.e("MainActivity", "⚠️ Error applying calendar styling", e)
-            }
-
-            // ✅ ADD CALENDAR AND HELPER TEXT TO CONTAINER
-            calendarPlaceholder.addView(calendarView)
-            calendarPlaceholder.addView(dateInfoTextView)
-
-            // ✅ Load task dates for current month to show info
-            loadTaskDatesForCurrentMonth()
-
-            android.util.Log.d("MainActivity", "✅ Calendar added to placeholder")
-
-        } catch (e: Exception) {
-            android.util.Log.e("MainActivity", "❌ Error setting up calendar", e)
-            setupFallbackCalendar()
-        }
-    }
-    
-    // ✅ NEW: Update date info text with task count and priority
-    private fun updateDateInfoText(textView: TextView, year: Int, month: Int, day: Int, bottomNav: BottomNavigationView?) {
-        uiScope.launch {
-            try {
-                val db = AppDb.get(this@MainActivity)
-                val tasksForDate: List<Task> = withContext(Dispatchers.IO) {
-                    val calendar = Calendar.getInstance()
-                    calendar.set(year, month, day)
-                    val dateStr = dateToString(calendar.time)
-                    db.taskDao().getTodayTasks(userId, dateStr)
-                }
-                
-                if (tasksForDate.isEmpty()) {
-                    textView.text = "No tasks for this date"
-                    textView.isClickable = false
-                    textView.setOnClickListener(null)
-                    textView.alpha = 0.6f // Indicate it's not clickable
-                } else {
-                    val highestPriority = com.cheermateapp.util.CalendarDecorator.getHighestPriority(tasksForDate)
-                    val priorityDot = com.cheermateapp.util.CalendarDecorator.getPriorityDot(highestPriority)
-                    val dateFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
-                    val calendar = Calendar.getInstance()
-                    calendar.set(year, month, day)
-                    val formattedDate = dateFormat.format(calendar.time)
-                    
-                    textView.text = "$priorityDot $formattedDate: ${tasksForDate.size} task(s) - Tap to view"
-                    textView.isClickable = true
-                    textView.alpha = 1.0f // Restore full opacity
-                    textView.setOnClickListener {
-                        navigateToTasks()
-                        bottomNav?.selectedItemId = R.id.nav_tasks
-                    }
-                }
-            } catch (e: Exception) {
-                android.util.Log.e("MainActivity", "Error updating date info text", e)
-                textView.text = "Error loading task info"
-                textView.isClickable = false
-                textView.setOnClickListener(null)
-                textView.alpha = 0.6f
-            }
-        }
-    }
-    
-    // ✅ NEW: Load task dates for current month to prepare data
-    private fun loadTaskDatesForCurrentMonth() {
-        uiScope.launch {
-            try {
-                val db = AppDb.get(this@MainActivity)
-                withContext(Dispatchers.IO) {
-                    val allTasks = db.taskDao().getAllTasksForUser(userId)
-                    val taskDateMap = com.cheermateapp.util.CalendarDecorator.getCalendarDateInfoMap(allTasks)
-                    
-                    android.util.Log.d("MainActivity", "✅ Loaded ${taskDateMap.size} dates with tasks")
-                }
-            } catch (e: Exception) {
-                android.util.Log.e("MainActivity", "Error loading task dates", e)
-            }
-        }
-    }
-
-    private fun showTasksForDate(year: Int, month: Int, day: Int) {
-        uiScope.launch {
-            try {
-                val db = AppDb.get(this@MainActivity)
-                val tasksForDate: List<Task> = withContext(Dispatchers.IO) {
-                    val calendar = Calendar.getInstance()
-                    calendar.set(year, month, day)
-                    val dateStr = dateToString(calendar.time)
-
-                    db.taskDao().getTodayTasks(userId, dateStr)
-                }
-
-                val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-                val calendar = Calendar.getInstance()
-                calendar.set(year, month, day)
-                val formattedDate = dateFormat.format(calendar.time)
-
-                if (tasksForDate.isNotEmpty()) {
-                    // ✅ ENHANCED: Show tasks with priority colored dots
-                    val taskDetails = tasksForDate.joinToString("\n") { task ->
-                        val priorityDot = when (task.Priority) {
-                            Priority.High -> "🔴"
-                            Priority.Medium -> "🟠"
-                            Priority.Low -> "🟢"
-                        }
-                        "$priorityDot ${task.Title}"
-                    }
-
-                    // Get highest priority for the date
-                    val highestPriority = com.cheermateapp.util.CalendarDecorator.getHighestPriority(tasksForDate)
-                    val priorityIndicator = com.cheermateapp.util.CalendarDecorator.getPriorityDot(highestPriority)
-                    
-                    val message = if (tasksForDate.size > 5) {
-                        "${taskDetails.split("\n").take(5).joinToString("\n")}\n...and ${tasksForDate.size - 5} more tasks"
-                    } else {
-                        taskDetails
-                    }
-
-                    AlertDialog.Builder(this@MainActivity)
-                        .setTitle("$priorityIndicator Tasks for $formattedDate")
-                        .setMessage(message)
-                        .setPositiveButton("View All") { _, _ ->
-                            // Use bottom navigation selection so state & highlight stay in sync
-                            val bottomNav = findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNav)
-                            if (bottomNav != null) {
-                                bottomNav.selectedItemId = R.id.nav_tasks
-                            } else {
-                                navigateToTasks()
-                            }
-                        }
-                        .setNegativeButton("Close", null)
-                        .show()
-                } else {
-                    ToastManager.showToast(this@MainActivity, "No tasks for $formattedDate", Toast.LENGTH_SHORT)
-                }
-
-                android.util.Log.d("MainActivity", "Loaded ${tasksForDate.size} tasks for: $formattedDate")
-
-            } catch (e: Exception) {
-                android.util.Log.e("MainActivity", "Error loading tasks for date", e)
-            }
-        }
-    }
-
-    private fun setupFallbackCalendar() {
-        try {
-            android.util.Log.d("MainActivity", "⚠️ Setting up fallback calendar")
-
-            val calendarPlaceholder = findViewById<LinearLayout>(R.id.calendarPlaceholder)
-            calendarPlaceholder?.removeAllViews()
-
-            val fallbackText = TextView(this)
-            fallbackText.text = "📅 Calendar View\nTap dates to see tasks"
-            fallbackText.gravity = android.view.Gravity.CENTER
-            fallbackText.setPadding(20, 40, 20, 40)
-            fallbackText.setTextColor(getColor(android.R.color.white))
-            fallbackText.textSize = 16f
-
-            calendarPlaceholder?.addView(fallbackText)
-
-            android.util.Log.d("MainActivity", "✅ Fallback calendar setup complete")
-        } catch (e: Exception) {
-            android.util.Log.e("MainActivity", "❌ Error setting up fallback calendar", e)
-        }
-    }
-
-    private fun createFallbackLayout() {
-        try {
-            val layout = android.widget.LinearLayout(this).apply {
-                orientation = android.widget.LinearLayout.VERTICAL
-                setPadding(50, 50, 50, 50)
-            }
-
-            val welcomeText = TextView(this).apply {
-                text = "🎉 CheerMate Dashboard 🎉"
-                textSize = 24f
-                setPadding(0, 0, 0, 30)
-            }
-
-            val userText = TextView(this).apply {
-                text = "Welcome! Dashboard is loading...\nUser ID: $userId"
-                textSize = 18f
-                setPadding(0, 0, 0, 20)
-            }
-
-            val actionButton = Button(this).apply {
-                text = "Go to Tasks"
-                setOnClickListener { navigateToTasks() }
-            }
-
-            layout.addView(welcomeText)
-            layout.addView(userText)
-            layout.addView(actionButton)
-            setContentView(layout)
-
-            ToastManager.showToast(this, "Dashboard loaded in fallback mode", Toast.LENGTH_LONG)
-
-        } catch (e: Exception) {
-            android.util.Log.e("MainActivity", "Fallback layout failed", e)
-            ToastManager.showToast(this, "Critical error - redirecting to login", Toast.LENGTH_LONG)
-
-            try {
-                startActivity(Intent(this, ActivityLogin::class.java))
-                finish()
-            } catch (ex: Exception) {
-                android.util.Log.e("MainActivity", "Failed to redirect to login", ex)
-            }
-        }
-    }
-
     // ✅ HELPER METHODS
     private fun dateToString(date: Date): String {
         val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -3173,99 +3034,40 @@ class MainActivity : AppCompatActivity() {
     }
 
     // ✅ OBSERVE TASK CHANGES FOR LIVE PROGRESS BAR UPDATES ON HOME SCREEN
-    private var progressBarObserverJob: kotlinx.coroutines.Job? = null
-    private fun startObserveTaskChangesForProgressBar() {
-        progressBarObserverJob?.cancel()
-        progressBarObserverJob = lifecycleScope.launch {
-            try {
-                val db = AppDb.get(this@MainActivity)
-
-                val today = Calendar.getInstance()
-                val todayStr = dateToString(today.time)
-
-                // Observe today total, completed, and in-progress tasks
-                kotlinx.coroutines.flow.combine(
-                    db.taskDao().getTodayTasksCountFlow(userId, todayStr),
-                    db.taskDao().getCompletedTodayTasksCountFlow(userId, todayStr),
-                    db.taskDao().getInProgressTodayTasksCountFlow(userId, todayStr)
-                ) { totalToday, completedToday, inProgressToday ->
-                    Triple(totalToday, completedToday, inProgressToday)
-                }.collect { (totalToday, completedToday, inProgressToday) ->
-                    // Update UI on main thread
-                    withContext(Dispatchers.Main) {
-                        updateProgressDisplay(completedToday, inProgressToday, totalToday)
-                        android.util.Log.d(
-                            "MainActivity",
-                            "🔄 Live progress updated: completed=$completedToday, inProgress=$inProgressToday, total=$totalToday"
-                        )
-                    }
-                }
-            } catch (e: Exception) {
-                android.util.Log.e("MainActivity", "Error observing task changes for progress bar", e)
-            }
-        }
-    }
-    private fun stopObserveTaskChangesForProgressBar() {
-        progressBarObserverJob?.cancel()
-        progressBarObserverJob = null
-    }
-
-    /**
-     * Changes the header text color of a CalendarView programmatically.
-     * This method attempts to target both the month/year display and the weekday labels.
-     *
-     * IMPORTANT: This approach relies on the internal view hierarchy of CalendarView,
-     * which is not part of the public API and can change across Android versions or device manufacturers.
-     * Use with caution.
-     *
-     * @param calendarView The CalendarView instance to modify.
-     * @param colorResId The resource ID of the desired color (e.g., R.color.white).
-     */
-    private fun changeCalendarViewHeaderTextColor(calendarView: CalendarView, colorResId: Int) {
-        val desiredColor = ContextCompat.getColor(calendarView.context, colorResId)
-
-        // CalendarView's direct child is typically a LinearLayout containing all its internal parts.
-        val mainLinearLayout = calendarView.getChildAt(0) as? ViewGroup
-
-        mainLinearLayout?.let {
-            // Iterate through the children of the main LinearLayout
-            for (i in 0 until it.childCount) {
-                val child = it.getChildAt(i)
-
-                // --- Target the Month/Year Header Text ---
-                if (child is ViewGroup) {
-                    for (j in 0 until child.childCount) {
-                        val grandChild = child.getChildAt(j)
-                        if (grandChild is TextView) {
-                            val text = grandChild.text.toString()
-                            // Heuristic: Check if the text contains a 4-digit number (for the year)
-                            // and is longer than a single character (to exclude single-letter weekday initials).
-                            // This is an educated guess and might need adjustment based on Android version.
-                            if (text.contains(Regex("\\d{4}")) && text.length > 2) {
-                                grandChild.setTextColor(desiredColor)
-                            }
+        private var progressBarObserverJob: kotlinx.coroutines.Job? = null
+        private fun startObserveTaskChangesForProgressBar() {
+            progressBarObserverJob?.cancel()
+            progressBarObserverJob = lifecycleScope.launch {
+                try {
+                    val db = AppDb.get(this@MainActivity)
+    
+                    val today = Calendar.getInstance()
+                    val todayStr = dateToString(today.time)
+    
+                    // Observe today total, completed, and in-progress tasks
+                    kotlinx.coroutines.flow.combine(
+                        db.taskDao().getTodayTasksCountFlow(userId, todayStr),
+                        db.taskDao().getCompletedTodayTasksCountFlow(userId, todayStr),
+                        db.taskDao().getInProgressTodayTasksCountFlow(userId, todayStr)
+                    ) { totalToday, completedToday, inProgressToday ->
+                        Triple(totalToday, completedToday, inProgressToday)
+                    }.collect { (totalToday, completedToday, inProgressToday) ->
+                        // Update UI on main thread
+                        withContext(Dispatchers.Main) {
+                            updateProgressDisplay(completedToday, inProgressToday, totalToday)
+                            android.util.Log.d(
+                                "MainActivity",
+                                "🔄 Live progress updated: completed=$completedToday, inProgress=$inProgressToday, total=$totalToday"
+                            )
                         }
                     }
-                }
-
-                // --- Target the Weekday Labels (e.g., S, M, T, W, T, F, S) ---
-                if (child is ViewGroup && child.childCount == 7) {
-                    // Verify that all children in this ViewGroup are indeed TextViews
-                    var allChildrenAreTextViews = true
-                    for (j in 0 until child.childCount) {
-                        if (child.getChildAt(j) !is TextView) {
-                            allChildrenAreTextViews = false
-                            break
-                        }
-                    }
-                    if (allChildrenAreTextViews) {
-                        // This is very likely the row of weekday headers
-                        for (j in 0 until child.childCount) {
-                            (child.getChildAt(j) as TextView).setTextColor(desiredColor)
-                        }
-                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("MainActivity", "Error observing task changes for progress bar", e)
                 }
             }
         }
+        private fun stopObserveTaskChangesForProgressBar() {
+            progressBarObserverJob?.cancel()
+            progressBarObserverJob = null
+        }
     }
-}

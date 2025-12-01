@@ -232,7 +232,7 @@
             <ImageView
                 android:layout_width="22dp"
                 android:layout_height="22dp"
-                android:src="@android:drawable/ic_menu_compass"
+                android:src="@drawable/ic_magic_wand"
                 app:tint="@android:color/white" />
 
             <LinearLayout
@@ -279,7 +279,7 @@
             <ImageView
                 android:layout_width="22dp"
                 android:layout_height="22dp"
-                android:src="@android:drawable/ic_menu_day"
+                android:src="@drawable/ic_moon"
                 app:tint="@color/white" />
 
             <LinearLayout

@@ -122,42 +122,25 @@
                         android:textColor="@android:color/white"
                         android:textSize="14sp" />
 
-                    <TextView
-                        android:id="@+id/quickAddChip"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_chip_glass"
-                        android:fontFamily="@font/sf_pro_rounded_bold"
-                        android:paddingLeft="10dp"
-                        android:paddingTop="4dp"
-                        android:paddingRight="10dp"
-                        android:paddingBottom="4dp"
-                        android:text="@string/tap_to_add"
-                        android:textColor="@android:color/white"
-                        android:textSize="12sp" />
+
                 </LinearLayout>
 
-                <!-- Calendar placeholder - ENHANCED VERSION -->
+                <!-- A proper, theme-aware CalendarView -->
 
-                <!-- Legend row (Done | Pending | Overdue) -->
-                <LinearLayout
-                    android:id="@+id/calendarPlaceholder"
+
+                <CalendarView
+                    android:id="@+id/calendarView"
                     android:layout_width="match_parent"
-                    android:layout_height="340dp"
+                    android:layout_height="300dp"
                     android:layout_marginLeft="20dp"
                     android:layout_marginRight="20dp"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="130dp"
-                        android:fontFamily="@font/sf_pro_rounded_bold"
-                        android:text="@string/calendar"
-                        android:textColor="@android:color/white"
-                        android:textSize="20sp" />
-                </LinearLayout>
+                    android:dateTextAppearance="@style/CalendarView.Date"
+                    android:focusedMonthDateColor="@android:color/white"
+                    android:theme="@style/AppTheme.Calendar"
+                    android:unfocusedMonthDateColor="@color/text_secondary_white_70"
+                    android:weekDayTextAppearance="@style/CalendarView.WeekDay"
+                    android:weekNumberColor="@android:color/transparent"
+                    android:weekSeparatorLineColor="@android:color/transparent" />
 
                 <LinearLayout
                     android:layout_width="match_parent"

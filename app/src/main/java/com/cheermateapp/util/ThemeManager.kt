@@ -23,10 +23,9 @@ object ThemeManager {
     /**
      * Get current theme mode
      */
-        fun getThemeMode(context: Context): String {
-            return getPreferences(context).getString(KEY_THEME_MODE, THEME_LIGHT) ?: THEME_LIGHT
-        }
-    
+            fun getThemeMode(context: Context): String {
+                return getPreferences(context).getString(KEY_THEME_MODE, THEME_SYSTEM) ?: THEME_SYSTEM
+            }    
         /**
          * Apply theme based on mode
          */

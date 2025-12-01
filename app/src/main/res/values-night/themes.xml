@@ -7,7 +7,6 @@
         <!-- Switch styling for dark mode -->
         <item name="colorControlActivated">#8B6FFF</item>
         <item name="colorSwitchThumbNormal">#666666</item>
-        <item name="android:colorForeground">@android:color/white</item>
         
         <!-- Bottom sheet background -->
         <item name="bottomSheetDialogTheme">@style/ThemeOverlay.App.BottomSheetDialog</item>

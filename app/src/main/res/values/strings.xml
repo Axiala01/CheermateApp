@@ -84,6 +84,7 @@
     <string name="app_settings">App Settings</string>
     <string name="your_personality">Your Personality</string>
     <string name="personality">Personality</string>
+    <string name="forgot_password">Forgot Password</string>
 
 
 </resources>
