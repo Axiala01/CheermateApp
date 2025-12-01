@@ -389,8 +389,9 @@ class MainActivity : AppCompatActivity() {
                 isClickable = true
                 bringToFront()
             }
-            // Refresh home statistics and progress when showing Home
+            // Refresh home statistics, recent tasks, and progress when showing Home
             loadTaskStatistics()
+            loadRecentTasks()
             startObserveTaskChangesForProgressBar()
             
         } catch (e: Exception) {
