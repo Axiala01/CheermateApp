@@ -24,8 +24,13 @@
     </style>
 
     <style name="CustomMaterialCalendarStyle" parent="Widget.MaterialComponents.MaterialCalendar">
+        <item name="dayStyle">@style/CustomDayDefault</item>
         <item name="daySelectedStyle">@style/CustomDaySelected</item>
         <item name="dayTodayStyle">@style/CustomDayToday</item>
+    </style>
+
+    <style name="CustomDayDefault" parent="Widget.MaterialComponents.MaterialCalendar.Day">
+        <item name="itemTextColor">@android:color/white</item>
     </style>
 
     <style name="CustomDaySelected" parent="Widget.MaterialComponents.MaterialCalendar.Day.Selected">
