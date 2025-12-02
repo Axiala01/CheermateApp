@@ -3,8 +3,13 @@ package com.cheermateapp.ui.tasks
 import androidx.lifecycle.ViewModel
 import com.cheermateapp.data.db.AppDb
 import com.cheermateapp.data.model.Task
-import kotlinx.coroutines.flow.*
-import java.util.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class TasksViewModel(private val db: AppDb, private val userId: Int) : ViewModel() {
 
@@ -35,7 +40,7 @@ class TasksViewModel(private val db: AppDb, private val userId: Int) : ViewModel
     }
 
     private fun dateToString(date: Date): String {
-        val format = java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         return format.format(date)
     }
 }
