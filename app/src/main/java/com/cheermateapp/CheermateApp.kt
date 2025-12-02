@@ -5,6 +5,7 @@ import com.cheermateapp.data.db.AppDb
 import com.cheermateapp.util.DatabaseSeeder
 import com.cheermateapp.util.NotificationUtil
 import com.cheermateapp.util.ThemeManager
+import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

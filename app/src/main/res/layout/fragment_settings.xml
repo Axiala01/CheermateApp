@@ -25,7 +25,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/sf_pro_rounded_bold"
-                android:text="@string/label_settings"
+                android:text="Settings"
                 android:textColor="@android:color/white"
                 android:textSize="18sp" />
 
@@ -43,7 +43,7 @@
             android:layout_height="match_parent"
             android:fontFamily="@font/sf_pro_rounded_regular"
 
-            android:text="@string/label_settings_subtitle"
+            android:text="Customize your CheerMate experience"
             android:textColor="@color/text_secondary_white_70"
             android:textSize="12sp" />
 
@@ -82,7 +82,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/sf_pro_rounded_bold"
-                        android:text="@string/user"
+                        android:text="User"
                         android:textColor="@android:color/white"
                         android:textSize="14sp" />
 
@@ -91,7 +91,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/sf_pro_rounded_regular"
-                        android:text="@string/label_user_email_placeholder"
+                        android:text="user@example.com"
                         android:textColor="@color/text_secondary_white_70"
                         android:textSize="12sp" />
                 </LinearLayout>
@@ -111,7 +111,7 @@
                 android:background="@drawable/bg_chip_glass"
                 android:paddingHorizontal="10dp"
                 android:paddingVertical="4dp"
-                android:text="@string/your_personality"
+                android:text="Your Personality"
                 android:textColor="@android:color/white"
                 android:textSize="11sp" />
         </LinearLayout>
@@ -154,7 +154,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/label_total_tasks"
+                        android:text="Total Tasks"
                         android:textColor="@color/text_secondary_white_70"
                         android:textSize="12sp" />
                 </LinearLayout>
@@ -178,7 +178,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/label_completed"
+                        android:text="Completed"
                         android:textColor="@color/text_secondary_white_70"
                         android:textSize="12sp" />
                 </LinearLayout>
@@ -202,7 +202,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/label_success_rate"
+                        android:text="Success Rate"
                         android:textColor="@color/text_secondary_white_70"
                         android:textSize="12sp" />
                 </LinearLayout>
@@ -214,7 +214,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="@string/label_personalization"
+            android:text="Personalization"
             android:textColor="@color/text_secondary_white_70"
             android:layout_marginStart="10dp"
             android:textSize="12sp" />
@@ -351,7 +351,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sf_pro_rounded_bold"
-                    android:text="@string/label_notifications"
+                    android:text="Notifications"
                     android:textColor="@android:color/white"
                     android:textSize="14sp" />
 

@@ -95,7 +95,7 @@
             app:endIconMode="custom"
             app:endIconDrawable="@drawable/ic_visibility_off"
             app:endIconTint="@color/white"
-            app:endIconContentDescription="@string/cd_show_password">
+            app:endIconContentDescription="Show password">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/PasswordHash"
