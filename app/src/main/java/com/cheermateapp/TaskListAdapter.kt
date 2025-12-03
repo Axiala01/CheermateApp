@@ -80,15 +80,19 @@ class TaskListAdapter(
         holder.tvStatus.text = "${task.getStatusEmoji()} ${task.Status.name}"
 
         // Set due date (shortened format for list)
-        if (task.DueAt != null) {
+        if (task.Status == com.cheermateapp.data.model.Status.Completed) {
+            holder.tvDueDate.visibility = View.GONE
+        } else if (task.DueAt != null) {
             try {
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                 val date = dateFormat.parse(task.DueAt)
                 val shortFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
                 holder.tvDueDate.text = "📅 ${shortFormat.format(date)}"
+                holder.tvDueDate.setTextColor(0xFFE53E3E.toInt()) // Red
                 holder.tvDueDate.visibility = View.VISIBLE
             } catch (e: Exception) {
                 holder.tvDueDate.text = "📅 ${task.DueAt}"
+                holder.tvDueDate.setTextColor(0xFFE53E3E.toInt()) // Red
                 holder.tvDueDate.visibility = View.VISIBLE
             }
         } else {

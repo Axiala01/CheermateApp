@@ -83,6 +83,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var progressSubtitle: TextView
     private lateinit var progressPercent: TextView
 
+    private lateinit var tabAll: TextView
+    private lateinit var tabToday: TextView
+    private lateinit var tabPending: TextView
+    private lateinit var tabDone: TextView
+    private lateinit var tvTasksSub: TextView
+
+
     private var isTasksScreenInitialized: Boolean = false
     private var isSettingsScreenInitialized: Boolean = false
     private var isHomeInteractionSetup: Boolean = false
@@ -253,8 +260,20 @@ class MainActivity : AppCompatActivity() {
             val dueTime = task.DueTime
 
             val calendar = Calendar.getInstance()
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            val parsedDate = dateFormat.parse(dueDate)
+            
+            val parsedDate: Date? = try {
+                // Try parsing the primary format first
+                SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(dueDate)
+            } catch (e: java.text.ParseException) {
+                try {
+                    // If it fails, try parsing the alternative format
+                    SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).parse(dueDate)
+                } catch (e2: java.text.ParseException) {
+                    // If both fail, log the error and return false
+                    android.util.Log.e("isTaskOverdue", "Could not parse date: '$dueDate'", e2)
+                    null
+                }
+            }
 
             if (parsedDate != null) {
                 calendar.time = parsedDate
@@ -517,15 +536,15 @@ class MainActivity : AppCompatActivity() {
             }
 
             // Initialize all task fragment components
-            val tvTasksTitle = findViewById<TextView>(R.id.tvTasksTitle)
-            val tvTasksSub = findViewById<TextView>(R.id.tvTasksSub)
+            findViewById<TextView>(R.id.tvTasksTitle)
+            tvTasksSub = checkNotNull(findViewById(R.id.tvTasksSub)) { "TextView with id tvTasksSub not found" }
             val etSearch = findViewById<EditText>(R.id.etSearch)
             val btnSort = findViewById<TextView>(R.id.btnSort)
             val chipFound = findViewById<TextView>(R.id.chipFound)
-            val tabAll = findViewById<TextView>(R.id.tabAll)
-            val tabToday = findViewById<TextView>(R.id.tabToday)
-            val tabPending = findViewById<TextView>(R.id.tabPending)
-            val tabDone = findViewById<TextView>(R.id.tabDone)
+            tabAll = checkNotNull(findViewById(R.id.tabAll)) { "TextView with id tabAll not found" }
+            tabToday = checkNotNull(findViewById(R.id.tabToday)) { "TextView with id tabToday not found" }
+            tabPending = checkNotNull(findViewById(R.id.tabPending)) { "TextView with id tabPending not found" }
+            tabDone = checkNotNull(findViewById(R.id.tabDone)) { "TextView with id tabDone not found" }
             val tvEmptyState = findViewById<TextView>(R.id.tvEmptyState)
             
             // ✅ Initialize RecyclerView and TaskAdapter
@@ -535,7 +554,7 @@ class MainActivity : AppCompatActivity() {
             taskAdapter = TaskAdapter(
                 tasks = mutableListOf(),
                 onTaskClick = { task -> onTaskClick(task) },
-                onTaskComplete = { task -> onTaskComplete(task) },
+                onTaskComplete = { task -> onTaskDone(task) },
                 onTaskEdit = { task -> onTaskEdit(task) },
                 onTaskDelete = { task -> onTaskDelete(task) }
             )
@@ -610,23 +629,23 @@ class MainActivity : AppCompatActivity() {
         
         lifecycleScope.launch {
             tasksViewModel.allTasksCount.collectLatest {
-                findViewById<TextView>(R.id.tabAll)?.text = "All ($it)"
-                findViewById<TextView>(R.id.tvTasksSub)?.text = "$it total tasks"
+                tabAll.text = "All ($it)"
+                tvTasksSub.text = "$it total tasks"
             }
         }
         lifecycleScope.launch {
             tasksViewModel.todayTasksCount.collectLatest {
-                findViewById<TextView>(R.id.tabToday)?.text = "Today ($it)"
+                tabToday.text = "Today ($it)"
             }
         }
         lifecycleScope.launch {
             tasksViewModel.pendingTasksCount.collectLatest {
-                findViewById<TextView>(R.id.tabPending)?.text = "Pending ($it)"
+                tabPending.text = "Pending ($it)"
             }
         }
         lifecycleScope.launch {
             tasksViewModel.completedTasksCount.collectLatest {
-                findViewById<TextView>(R.id.tabDone)?.text = "Done ($it)"
+                tabDone.text = "Done ($it)"
             }
         }
     }
@@ -765,7 +784,7 @@ class MainActivity : AppCompatActivity() {
         taskDetailLauncher.launch(intent) // Use launcher instead of startActivity
     }
 
-    private fun onTaskComplete(task: Task) {
+    private fun onTaskDone(task: Task) {
         uiScope.launch {
             try {
                 val db = AppDb.get(this@MainActivity)
@@ -773,16 +792,13 @@ class MainActivity : AppCompatActivity() {
                     Status = Status.Completed,
                     TaskProgress = 100
                 )
-                
                 withContext(Dispatchers.IO) {
                     db.taskDao().update(updatedTask)
                 }
-                
-                ToastManager.showToast(this@MainActivity, "✅ Task completed!", Toast.LENGTH_SHORT)
-                
+                ToastManager.showToast(this@MainActivity, "✅ Task marked as done!", Toast.LENGTH_SHORT)
             } catch (e: Exception) {
-                android.util.Log.e("MainActivity", "Error completing task", e)
-                ToastManager.showToast(this@MainActivity, "Failed to complete task", Toast.LENGTH_SHORT)
+                android.util.Log.e("MainActivity", "Error marking task as done", e)
+                ToastManager.showToast(this@MainActivity, "Failed to update task", Toast.LENGTH_SHORT)
             }
         }
     }
@@ -1869,7 +1885,7 @@ class MainActivity : AppCompatActivity() {
 
             // Set default due date to today
             val calendar = Calendar.getInstance()
-            val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             etDueDate.setText(dateFormat.format(calendar.time))
             
             // Set up date and time pickers
@@ -2053,6 +2069,7 @@ class MainActivity : AppCompatActivity() {
         priority: Priority,
         reminderOption: String
     ) {
+        android.util.Log.d("MainActivity", "Creating task with due date: '$dueDate'")
         uiScope.launch {
             try {
                 val db = AppDb.get(this@MainActivity)
@@ -2401,7 +2418,7 @@ class MainActivity : AppCompatActivity() {
 
                 updateStatisticsDisplay(stats)
                 // ✅ Update progress bar with today's tasks progress
-                updateProgressDisplay(stats["todayCompleted"] ?: 0, stats["todayInProgress"] ?: 0, stats["today"] ?: 0)
+                // updateProgressDisplay(stats["todayCompleted"] ?: 0, stats["todayInProgress"] ?: 0, stats["today"] ?: 0)
 
                 android.util.Log.d("MainActivity", "✅ Dashboard statistics loaded")
 
@@ -2452,7 +2469,11 @@ class MainActivity : AppCompatActivity() {
             val percentage = if (total > 0) (completed * 100) / total else 0
             val inProgressPercentage = if (total > 0) (inProgress * 100) / total else 0
 
-            progressSubtitle.text = "$completed of $total tasks completed today"
+            var subtitle = "$completed of $total tasks completed today"
+            if (inProgress > 0) {
+                subtitle += " ($inProgress in progress)"
+            }
+            progressSubtitle.text = subtitle
             progressPercent.text = "$percentage%"
 
             // ✅ Update progress bar weight to reflect percentage
@@ -2571,7 +2592,7 @@ class MainActivity : AppCompatActivity() {
                         // Set up adapter with callbacks
                         val adapter = TaskPagerAdapter(
                             activeTasks,
-                            onCompleteClick = { task -> markTaskAsDone(task) },
+                            onCompleteClick = { task -> onTaskDone(task) },
                             onEditClick = { task -> showEditTaskDialog(task) },
                             onDeleteClick = { task -> deleteTask(task) }
                         )
@@ -2683,7 +2704,13 @@ class MainActivity : AppCompatActivity() {
             }
 
             // 8. Due Date
-            tvTaskDueDate.text = "📅 Due: ${task.getFormattedDueDateTime()}"
+            if (task.Status == com.cheermateapp.data.model.Status.Completed) {
+                tvTaskDueDate.visibility = View.GONE
+            } else {
+                tvTaskDueDate.visibility = View.VISIBLE
+                tvTaskDueDate.text = "📅 Due: ${task.getFormattedDueDateTime()}"
+                tvTaskDueDate.setTextColor(0xFFE53E3E.toInt()) // Red
+            }
 
             // 9. Button States based on Task Status
             when (task.Status) {
@@ -2720,7 +2747,7 @@ class MainActivity : AppCompatActivity() {
             btnComplete.setOnClickListener {
                 if (task.Status != com.cheermateapp.data.model.Status.Completed && 
                     task.Status != com.cheermateapp.data.model.Status.Cancelled) {
-                    markTaskAsDone(task)
+                    onTaskDone(task)
                 }
             }
 
@@ -2843,7 +2870,7 @@ class MainActivity : AppCompatActivity() {
             .setTitle("Task Details")
             .setMessage(message)
             .setPositiveButton("Mark as Done") { _, _ ->
-                markTaskAsDone(task)
+                onTaskDone(task)
             }
             .setNeutralButton("Edit") { _, _ ->
                 navigateToTasks()
@@ -2851,107 +2878,6 @@ class MainActivity : AppCompatActivity() {
             .setNegativeButton("Close", null)
             .show()
     }
-
-    // ✅ TASK ACTION METHODS - KEEP ONLY THESE VERSIONS
-    private fun markTaskAsDone(task: Task) {
-        uiScope.launch {
-            try {
-                val db = AppDb.get(this@MainActivity)
-                withContext(Dispatchers.IO) {
-                    db.taskDao().updateTaskStatus(
-                        task.User_ID,
-                        task.Task_ID,
-                        "Completed"
-                    )
-                    // Also update progress to 100%
-                    db.taskDao().updateTaskProgress(task.User_ID, task.Task_ID, 100)
-                }
-
-                ToastManager.showToast(this@MainActivity, "✅ Task '${task.Title}' marked as done!", Toast.LENGTH_SHORT)
-
-                // Refresh dashboard stats and progress bar
-                loadTaskStatistics()
-                loadRecentTasks()
-            } catch (e: Exception) {
-                android.util.Log.e("MainActivity", "Error marking task as done", e)
-                ToastManager.showToast(this@MainActivity, "❌ Error updating task", Toast.LENGTH_SHORT)
-            }
-        }
-    }
-
-    private fun performDeleteTask(task: Task) {
-        uiScope.launch {
-            try {
-                val db = AppDb.get(this@MainActivity)
-                withContext(Dispatchers.IO) {
-                    // Use soft delete instead of hard delete
-                    db.taskDao().softDelete(task.User_ID, task.Task_ID)
-                }
-
-                ToastManager.showToast(this@MainActivity, "🗑️ Task '${task.Title}' deleted!", Toast.LENGTH_SHORT)
-
-                // Refresh dashboard stats and progress bar
-                loadTaskStatistics()
-                loadRecentTasks()
-            } catch (e: Exception) {
-                android.util.Log.e("MainActivity", "Error deleting task", e)
-                ToastManager.showToast(this@MainActivity, "❌ Error deleting task", Toast.LENGTH_SHORT)
-            }
-        }
-    }
-
-    // ✅ ADDITIONAL HELPER METHODS
-    private fun markTaskAsInProgress(task: Task) {
-        uiScope.launch {
-            try {
-                val db = AppDb.get(this@MainActivity)
-                withContext(Dispatchers.IO) {
-                    db.taskDao().updateTaskStatus(
-                        task.User_ID,
-                        task.Task_ID,
-                        "InProgress"
-                    )
-                }
-
-                ToastManager.showToast(this@MainActivity, "🔄 Task '${task.Title}' is in progress!", Toast.LENGTH_SHORT)
-
-                // Refresh dashboard stats and progress bar
-                loadTaskStatistics()
-                loadRecentTasks()
-            } catch (e: Exception) {
-                android.util.Log.e("MainActivity", "Error marking task as in progress", e)
-                ToastManager.showToast(this@MainActivity, "❌ Error updating task", Toast.LENGTH_SHORT)
-            }
-        }
-    }
-
-
-    // ✅ USE THIS CORRECT VERSION INSTEAD
-    private fun markTaskAsPending(task: Task) {
-        uiScope.launch {
-            try {
-                val db = AppDb.get(this@MainActivity)
-                withContext(Dispatchers.IO) {
-                    // ✅ FIXED: Use database DAO method instead of direct assignment
-                    db.taskDao().updateTaskStatus(
-                        task.User_ID,
-                        task.Task_ID,
-                        "Pending"
-                    )
-                }
-
-                ToastManager.showToast(this@MainActivity, "⏳ Task '${task.Title}' marked as pending!", Toast.LENGTH_SHORT)
-
-                // Refresh dashboard stats and progress bar
-                loadTaskStatistics()
-                loadRecentTasks()
-            } catch (e: Exception) {
-                android.util.Log.e("MainActivity", "Error marking task as pending", e)
-                ToastManager.showToast(this@MainActivity, "❌ Error updating task", Toast.LENGTH_SHORT)
-            }
-        }
-    }
-
 
     private fun deleteTask(task: Task) {
         AlertDialog.Builder(this)

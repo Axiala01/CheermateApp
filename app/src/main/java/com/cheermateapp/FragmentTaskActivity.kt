@@ -360,14 +360,20 @@ class FragmentTaskActivity : AppCompatActivity() {
             if (DueAt != null) {
                 val dateStr = DueAt
                 val timeStr = DueTime
+
+                val parsedDate: Date? = try {
+                    SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(dateStr)
+                } catch (e: java.text.ParseException) {
+                    try {
+                        SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).parse(dateStr)
+                    } catch (e2: java.text.ParseException) {
+                        null
+                    }
+                }
                 
-                // Parse and format the date
-                val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                 val outputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-                val date = inputFormat.parse(dateStr)
-                val formattedDate = if (date != null) outputFormat.format(date) else dateStr
+                val formattedDate = if (parsedDate != null) outputFormat.format(parsedDate) else dateStr
                 
-                // Format time if available
                 val formattedTime = if (!timeStr.isNullOrBlank() && timeStr != "00:00") {
                     " at $timeStr"
                 } else {
@@ -932,6 +938,7 @@ class FragmentTaskActivity : AppCompatActivity() {
             
             // Set due date
             tvTaskDueDate.text = task.getFormattedDueDateTime()
+            tvTaskDueDate.setTextColor(0xFFE53E3E.toInt()) // Red
             
             // Create dialog
             val dialog = AlertDialog.Builder(this)

@@ -61,19 +61,15 @@ class TaskAdapter(
         holder.tvPriority.text = task.getPriorityText()
 
         // Set due date
-        if (task.DueAt != null) {
+        if (task.Status == Status.Completed) {
+            holder.tvDueDate.visibility = View.GONE
+        } else if (task.DueAt != null) {
             val dueText = formatDueDate(task)
             holder.tvDueDate.text = dueText
             holder.tvDueDate.visibility = View.VISIBLE
 
-            // Highlight overdue tasks
-            if (task.isOverdue()) {
-                holder.tvDueDate.setTextColor(0xFFE53E3E.toInt()) // Red
-            } else if (task.isToday()) {
-                holder.tvDueDate.setTextColor(0xFFED8936.toInt()) // Orange
-            } else {
-                holder.tvDueDate.setTextColor(0x99FFFFFF.toInt()) // Light gray
-            }
+            // Set all due date text to red
+            holder.tvDueDate.setTextColor(0xFFE53E3E.toInt()) // Red
         } else {
             holder.tvDueDate.visibility = View.GONE
         }
@@ -96,9 +92,11 @@ class TaskAdapter(
 
         // Update button states for completed tasks
         if (task.Status == Status.Completed) {
+            (holder.btnComplete as? TextView)?.text = "✅ Done"
             holder.btnComplete?.alpha = 0.3f
             holder.btnComplete?.isEnabled = false
         } else {
+            (holder.btnComplete as? TextView)?.text = "Done"
             holder.btnComplete?.alpha = 1.0f
             holder.btnComplete?.isEnabled = true
         }

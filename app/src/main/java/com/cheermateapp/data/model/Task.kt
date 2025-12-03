@@ -139,17 +139,26 @@ data class Task(
             return format.format(date)
         }
 
-        fun stringToDate(dateStr: String, timeStr: String?): Date {
+        fun stringToDate(dateStr: String, timeStr: String?): Date? {
+            val dateTimeStr = if (timeStr != null) {
+                "$dateStr $timeStr"
+            } else {
+                "$dateStr 00:00:00"
+            }
+            
             return try {
-                val dateTimeStr = if (timeStr != null) {
-                    "$dateStr $timeStr"
-                } else {
-                    "$dateStr 00:00:00"
-                }
+                // Try canonical format first
                 val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-                format.parse(dateTimeStr) ?: Date()
+                format.parse(dateTimeStr)
             } catch (e: Exception) {
-                Date()
+                try {
+                    // Try legacy format
+                    val format = SimpleDateFormat("MMM dd, yyyy HH:mm:ss", Locale.getDefault())
+                    format.parse(dateTimeStr)
+                } catch (e2: Exception) {
+                    // Both failed
+                    null
+                }
             }
         }
     }

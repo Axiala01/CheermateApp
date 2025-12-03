@@ -55,15 +55,21 @@ class TaskPagerAdapter(
         }
         
         // Set due date with proper formatting
-        if (task.DueAt != null) {
+        if (task.Status == Status.Completed) {
+            holder.tvTaskDueDate.visibility = View.GONE
+        } else if (task.DueAt != null) {
+            holder.tvTaskDueDate.visibility = View.VISIBLE
             val formattedDate = task.getFormattedDueDateTime()
             holder.tvTaskDueDate.text = if (formattedDate != null) {
                 "📅 Due: $formattedDate"
             } else {
                 "📅 Due: ${task.DueAt}"
             }
+            holder.tvTaskDueDate.setTextColor(0xFFE53E3E.toInt()) // Red
         } else {
+            holder.tvTaskDueDate.visibility = View.VISIBLE
             holder.tvTaskDueDate.text = "📅 No due date"
+            holder.tvTaskDueDate.setTextColor(0xFFE53E3E.toInt()) // Red
         }
     }
 
