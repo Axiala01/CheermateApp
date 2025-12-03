@@ -48,7 +48,7 @@ class MessageTemplateRepository(context: Context) {
      * @return The message text, or a default message if none found
      */
     suspend fun getMessageText(personalityId: Int, category: String): String {
-        return getMessageByPersonalityAndCategory(personalityId, category)?.TextTemplate
+        return getMessageByPersonalityAndCategory(personalityId, category)?.MessageText
             ?: getDefaultMessage(category)
     }
     

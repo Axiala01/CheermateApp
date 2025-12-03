@@ -27,5 +27,5 @@ data class MessageTemplate(
     val Template_ID: Int = 0,
     val Personality_ID: Int, // 1=Kalog, 2=Gen Z, 3=Softy, 4=Grey, 5=Flirty
     val Category: String, // "motivation", "task_work", "task_personal", "task_shopping", "task_others"
-    val TextTemplate: String
+    val MessageText: String
 )
