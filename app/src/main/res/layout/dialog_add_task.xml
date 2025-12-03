@@ -184,7 +184,8 @@
             <EditText
                 android:id="@+id/etDueDate"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
                 android:background="@android:color/transparent"
                 android:hint="Select date"
                 android:focusable="false"
@@ -197,7 +198,9 @@
                 android:fontFamily="@font/sf_pro_rounded_regular"
                 android:drawableStart="@drawable/ic_calendar_24dp"
                 android:drawablePadding="8dp"
-                android:gravity="center_vertical" />
+                android:gravity="center_vertical"
+                android:maxLines="2"
+                android:ellipsize="none" />
 
         </FrameLayout>
 
