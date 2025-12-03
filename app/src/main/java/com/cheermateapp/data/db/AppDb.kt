@@ -41,7 +41,7 @@ import com.google.gson.Gson
         MessageTemplate::class,
         TaskDependency::class
     ],
-    version = 22,
+    version = 23,
     exportSchema = false
 )
 @TypeConverters(AppTypeConverters::class)
@@ -143,6 +143,12 @@ abstract class AppDb : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_22_23 = object : Migration(22, 23) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE MessageTemplate RENAME COLUMN TextTemplate TO MessageText")
+            }
+        }
+
 
         private fun buildDatabase(appContext: Context): AppDb {
             val gson = Gson()
@@ -152,7 +158,7 @@ abstract class AppDb : RoomDatabase() {
                 "cheermate_database"
             )
                 .addTypeConverter(AppTypeConverters(gson))
-                .addMigrations(MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22)
+                .addMigrations(MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23)
                 .build()
         }
     }
