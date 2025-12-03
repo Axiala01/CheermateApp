@@ -1,149 +1,294 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="20dp"
-    android:background="@drawable/dialog_rounded_background">
+    android:orientation="vertical"
+    android:background="@drawable/dialog_rounded_background"
+    android:padding="16dp"
+    android:layout_gravity="center">
 
-    <LinearLayout
+    <!-- Dialog Title -->
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:text="Create New Task"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="?android:attr/textColorPrimary"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"
+        android:fontFamily="@font/sf_pro_rounded_bold" />
 
-        <!-- Task Title (Required) -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:hint="Task Title *"
-            app:errorEnabled="true">
+    <!-- Task Title Section -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Task Title"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="?android:attr/textColorPrimary"
+        android:layout_marginBottom="4dp"
+        android:fontFamily="@font/sf_pro_rounded_bold" />
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etTaskTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textCapSentences"
-                android:maxLines="1" />
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_spinner_filled"
+        android:layout_marginBottom="12dp">
 
-        </com.google.android.material.textfield.TextInputLayout>
+                    <EditText
+                        android:id="@+id/etTaskTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:hint="Enter task title"
+                        android:inputType="textCapSentences"
+                        android:maxLines="1"
+                        android:maxLength="100"
+                        android:padding="12dp"
+                        android:textSize="14sp"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:textColorHint="?android:attr/textColorSecondary"
+                        android:fontFamily="@font/sf_pro_rounded_regular" />
+    </FrameLayout>
 
-        <!-- Task Description (Optional) -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:hint="Description (Optional)">
+    <!-- Task Description Section -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Description (Optional)"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="?android:attr/textColorPrimary"
+        android:layout_marginBottom="4dp"
+        android:fontFamily="@font/sf_pro_rounded_bold" />
 
-            <com.google.android.material.textfield.TextInputEditText
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_spinner_filled"
+        android:layout_marginBottom="12dp">
+
+            <EditText
                 android:id="@+id/etTaskDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textMultiLine"
-                android:lines="3"
-                android:maxLines="5" />
+                android:maxLines="5"
+                android:background="@android:color/transparent"
+                android:hint="Add detailed description..."
+                android:inputType="textMultiLine|textCapSentences"
+                android:maxLength="500"
+                android:gravity="top|start"
+                android:padding="12dp"
+                android:textSize="14sp"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textColorHint="?android:attr/textColorSecondary"
+                android:fontFamily="@font/sf_pro_rounded_regular" />
+    </FrameLayout>
 
-        </com.google.android.material.textfield.TextInputLayout>
+    <!-- Category and Priority Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="12dp">
 
-        <!-- Category Selection -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="Category"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <Spinner
-            android:id="@+id/spinnerCategory"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Priority Selection -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="Priority"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <Spinner
-            android:id="@+id/spinnerPriority"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Date and Time Row -->
+        <!-- Category -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="2">
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:orientation="vertical">
 
-            <!-- Due Date -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="0dp"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
-                android:hint="Due Date *"
-                app:errorEnabled="true">
+                android:text="Category"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="?android:attr/textColorPrimary"
+                android:layout_marginBottom="4dp"
+                android:fontFamily="@font/sf_pro_rounded_bold" />
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etDueDate"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:focusable="false"
-                    android:inputType="none" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Due Time -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:hint="Due Time (Optional)">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etDueTime"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:focusable="false"
-                    android:inputType="none" />
-
-            </com.google.android.material.textfield.TextInputLayout>
+            <Spinner
+                android:id="@+id/spinnerCategory"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:background="@drawable/bg_spinner_filled"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:popupBackground="?android:attr/windowBackground"
+                android:textColor="?android:attr/textColorPrimary"/>
 
         </LinearLayout>
 
-        <!-- Reminder Selection -->
-        <TextView
-            android:layout_width="wrap_content"
+        <!-- Priority -->
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="8dp"
-            android:text="Reminder"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:orientation="vertical">
 
-        <Spinner
-            android:id="@+id/spinnerReminder"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginBottom="16dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Priority"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="?android:attr/textColorPrimary"
+                android:layout_marginBottom="4dp"
+                android:fontFamily="@font/sf_pro_rounded_bold" />
 
-        <!-- Helper Text -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="* Required fields\nTap date/time fields to select"
-            android:textColor="@android:color/darker_gray"
-            android:textSize="12sp" />
+            <Spinner
+                android:id="@+id/spinnerPriority"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:background="@drawable/bg_spinner_filled"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:popupBackground="?android:attr/windowBackground"
+                android:textColor="?android:attr/textColorPrimary"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 
-</ScrollView>
+    <!-- Due Date Section -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Due Date"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="?android:attr/textColorPrimary"
+        android:layout_marginBottom="4dp"
+        android:fontFamily="@font/sf_pro_rounded_bold" />
+
+    <!-- Date and Time Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="12dp">
+
+        <!-- Due Date -->
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/bg_spinner_filled">
+
+            <EditText
+                android:id="@+id/etDueDate"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@android:color/transparent"
+                android:hint="Select date"
+                android:focusable="false"
+                android:clickable="true"
+                android:inputType="none"
+                android:padding="12dp"
+                android:textSize="14sp"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textColorHint="?android:attr/textColorSecondary"
+                android:fontFamily="@font/sf_pro_rounded_regular"
+                android:drawableStart="@drawable/ic_calendar_24dp"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical" />
+
+        </FrameLayout>
+
+        <!-- Due Time -->
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:background="@drawable/bg_spinner_filled">
+
+            <EditText
+                android:id="@+id/etDueTime"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@android:color/transparent"
+                android:hint="Select time"
+                android:focusable="false"
+                android:clickable="true"
+                android:inputType="none"
+                android:padding="12dp"
+                android:textSize="14sp"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textColorHint="?android:attr/textColorSecondary"
+                android:fontFamily="@font/sf_pro_rounded_regular"
+                android:drawableStart="@drawable/ic_access_time_24dp"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical" />
+
+        </FrameLayout>
+
+    </LinearLayout>
+
+    <!-- Reminder Section -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Reminder"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="?android:attr/textColorPrimary"
+        android:layout_marginBottom="4dp"
+        android:fontFamily="@font/sf_pro_rounded_bold" />
+
+    <Spinner
+        android:id="@+id/spinnerReminder"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/bg_spinner_filled"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:popupBackground="?android:attr/windowBackground"
+        android:textColor="?android:attr/textColorPrimary"/>
+
+    <!-- Helper Text -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="* Required fields"
+        android:textSize="12sp"
+        android:textColor="?android:attr/textColorSecondary"
+        android:fontFamily="@font/sf_pro_rounded_regular"
+        android:lineSpacingExtra="2dp"
+        android:layout_marginBottom="24dp" />
+
+    <!-- Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end">
+
+        <Button
+            android:id="@+id/btnCancelTask"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:background="?android:attr/selectableItemBackground"
+            android:textColor="?android:attr/textColorPrimary"
+            android:layout_marginEnd="8dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"/>
+
+                    <Button
+                        android:id="@+id/btnCreateTask"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Create Task"
+                        android:background="@drawable/bg_rounded_primary_button"
+                        android:textColor="@color/btn_create_task_text_color" />
+    </LinearLayout>
+
+</LinearLayout>

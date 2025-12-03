@@ -29,7 +29,23 @@
     <color name="bottom_sheet_button_background">#F5F5F5</color>
     <color name="bottom_sheet_button_border">#DDDDDD</color>
     <color name="bottom_sheet_ripple">#1A000000</color>
+    
+    <!-- Light Mode Task Dialog Colors -->
+    <color name="dialog_background">#FFFFFF</color>
+    <color name="dialog_surface">#F8F9FA</color>
+    <color name="dialog_text_primary">#212121</color>
+    <color name="dialog_text_secondary">#424242</color>
+    <color name="dialog_text_hint">#757575</color>
+    <color name="dialog_text_error">#D32F2F</color>
+    <color name="dialog_input_background">#F5F5F5</color>
+    <color name="dialog_input_border">#9E9E9E</color>
+    <color name="dialog_input_border_focused">#00B4D8</color>
+    <color name="dialog_label_text">#424242</color>
+    <color name="dialog_required_asterisk">#D32F2F</color>
+    <color name="dialog_helper_text">#757575</color>
 
     <color name="calendar_placeholder_text_color">#FFFFFFFF</color>
+    <color name="spinner_text_color">#FF000000</color>
+    <color name="btn_create_task_text_color">#FFFFFFFF</color>
 
 </resources>

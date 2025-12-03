@@ -1836,187 +1836,128 @@ class MainActivity : AppCompatActivity() {
         calendarTasksObserverJob = null
     }
 
-    // ✅ ENHANCED ADD TASK DIALOG (PROGRAMMATIC VERSION - NO LAYOUT FILE NEEDED)
+    // ✅ ENHANCED ADD TASK DIALOG (NOW USING XML LAYOUT!)
     private fun showQuickAddTaskDialog() {
-        val dialogLayout = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(60, 40, 60, 20)
-        }
+        android.util.Log.d("DIALOG_DEBUG", "===== MAIN ACTIVITY DIALOG CALLED =====")
+        android.util.Log.d("DIALOG_DEBUG", "Method: showQuickAddTaskDialog() in MainActivity")
+        android.util.Log.d("DIALOG_DEBUG", "NOW USING XML LAYOUT: dialog_add_task.xml")
+        android.util.Log.d("DIALOG_DEBUG", "This will match the designer preview!")
+        
+        try {
+            // Inflate the enhanced XML layout
+            val dialogView = layoutInflater.inflate(R.layout.dialog_add_task, null)
+            android.util.Log.d("DIALOG_DEBUG", "XML layout inflated successfully")
+            
+            // Get references to the XML components
+            val etTaskTitle = dialogView.findViewById<EditText>(R.id.etTaskTitle)
+            val etTaskDescription = dialogView.findViewById<EditText>(R.id.etTaskDescription)
+            val spinnerCategory = dialogView.findViewById<Spinner>(R.id.spinnerCategory)
+            val spinnerPriority = dialogView.findViewById<Spinner>(R.id.spinnerPriority)
+            val etDueDate = dialogView.findViewById<EditText>(R.id.etDueDate)
+            val etDueTime = dialogView.findViewById<EditText>(R.id.etDueTime)
+            val spinnerReminder = dialogView.findViewById<Spinner>(R.id.spinnerReminder)
+            
+            // Set up spinners with icons using the helper
+            com.cheermateapp.util.TaskDialogSpinnerHelper.setupCategorySpinner(this, spinnerCategory)
+            com.cheermateapp.util.TaskDialogSpinnerHelper.setupPrioritySpinner(this, spinnerPriority)
+            com.cheermateapp.util.TaskDialogSpinnerHelper.setupReminderSpinner(this, spinnerReminder)
 
-        // Title Input
-        val etTitle = EditText(this).apply {
-            hint = "Task Title (Required)"
-            inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
-            setPadding(20, 20, 20, 20)
-            setBackgroundResource(android.R.drawable.edit_text)
-        }
+            // Set default due date to today
+            val calendar = Calendar.getInstance()
+            val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+            etDueDate.setText(dateFormat.format(calendar.time))
+            
+            // Set up date and time pickers
+            etDueDate.setOnClickListener { showDatePicker(etDueDate) }
+            etDueTime.setOnClickListener { showTimePicker(etDueTime) }
+            
+            // Get references to buttons inside the custom layout
+            val btnCreateTask = dialogView.findViewById<Button>(R.id.btnCreateTask)
+            val btnCancelTask = dialogView.findViewById<Button>(R.id.btnCancelTask)
 
-        // Description Input
-        val etDescription = EditText(this).apply {
-            hint = "Description (Optional)"
-            inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE
-            maxLines = 3
-            setPadding(20, 20, 20, 20)
-            setBackgroundResource(android.R.drawable.edit_text)
-        }
+            // Create and show the dialog
+            android.util.Log.d("DIALOG_DEBUG", "Creating AlertDialog with XML layout")
+            val builder = AlertDialog.Builder(this)
+            builder.setView(dialogView)
+            // We no longer set positive/negative buttons here, as they are inside the layout.
 
-        // Category Spinner
-        val tvCategoryLabel = TextView(this).apply {
-            text = "Category:"
-            textSize = 16f
-            setPadding(0, 20, 0, 8)
-        }
+            val dialog = builder.create()
+            dialog.setCanceledOnTouchOutside(false)
+            dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
-        val spinnerCategory = Spinner(this).apply {
-            val categories = arrayOf("Work", "Personal", "Shopping", "Others")
-            adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_item, categories).apply {
-                setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            }
-            setSelection(0) // Default to Work
-        }
-
-        // Priority Spinner
-        val tvPriorityLabel = TextView(this).apply {
-            text = "Priority:"
-            textSize = 16f
-            setPadding(0, 20, 0, 8)
-        }
-
-        val spinnerPriority = Spinner(this).apply {
-            val priorities = arrayOf("Low", "Medium", "High")
-            adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_item, priorities).apply {
-                setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            }
-            setSelection(1) // Default to Medium
-        }
-
-        // Date and Time Layout
-        val dateTimeLayout = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            setPadding(0, 20, 0, 0)
-        }
-
-        val etDueDate = EditText(this).apply {
-            hint = "Due Date (Required)"
-            isFocusable = false
-            isClickable = true
-            setPadding(20, 20, 20, 20)
-            setBackgroundResource(android.R.drawable.edit_text)
-            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
-                setMargins(0, 0, 10, 0)
+            // Set click listener for the "Cancel" button inside the dialog
+            btnCancelTask.setOnClickListener {
+                dialog.dismiss()
             }
 
-            // Set today as default
-            val today = Calendar.getInstance()
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            setText(dateFormat.format(today.time))
-
-            setOnClickListener { showDatePicker(this) }
-        }
-
-        val etDueTime = EditText(this).apply {
-            hint = "Due Time (Optional)"
-            isFocusable = false
-            isClickable = true
-            setPadding(20, 20, 20, 20)
-            setBackgroundResource(android.R.drawable.edit_text)
-            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
-                setMargins(10, 0, 0, 0)
-            }
-
-            setOnClickListener { showTimePicker(this) }
-        }
-
-        dateTimeLayout.addView(etDueDate)
-        dateTimeLayout.addView(etDueTime)
-
-        // Reminder Spinner
-        val tvReminderLabel = TextView(this).apply {
-            text = "Reminder:"
-            textSize = 16f
-            setPadding(0, 20, 0, 8)
-        }
-
-        val spinnerReminder = Spinner(this).apply {
-            val reminders = arrayOf("None", "10 minutes before", "30 minutes before", "At specific time")
-            adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_item, reminders).apply {
-                setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            }
-            setSelection(0) // Default to None
-        }
-
-        // Add all views to dialog
-        dialogLayout.addView(etTitle)
-        dialogLayout.addView(etDescription)
-        dialogLayout.addView(tvCategoryLabel)
-        dialogLayout.addView(spinnerCategory)
-        dialogLayout.addView(tvPriorityLabel)
-        dialogLayout.addView(spinnerPriority)
-        dialogLayout.addView(dateTimeLayout)
-        dialogLayout.addView(tvReminderLabel)
-        dialogLayout.addView(spinnerReminder)
-
-        val dialog = AlertDialog.Builder(this)
-            .setTitle("Add New Task")
-            .setView(dialogLayout)
-            .setPositiveButton("Create Task", null)
-            .setNegativeButton("Cancel", null)
-            .create()
-
-        dialog.setOnShowListener {
-            val createButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-            createButton.setOnClickListener {
-                val title = etTitle.text.toString().trim()
-                val description = etDescription.text.toString().trim()
+            // Set click listener for the "Create Task" button inside the dialog
+            btnCreateTask.setOnClickListener {
+                val title = etTaskTitle.text.toString().trim()
+                val description = etTaskDescription.text.toString().trim()
                 val dueDate = etDueDate.text.toString().trim()
                 val dueTime = etDueTime.text.toString().trim()
-                val selectedCategory = when (spinnerCategory.selectedItem.toString()) {
+                
+                // Get selected values from spinners and convert to proper types
+                val categoryString = com.cheermateapp.util.TaskDialogSpinnerHelper.getSelectedCategory(spinnerCategory)
+                val priorityString = com.cheermateapp.util.TaskDialogSpinnerHelper.getSelectedPriority(spinnerPriority)
+                
+                val category = when (categoryString) {
                     "Work" -> com.cheermateapp.data.model.Category.Work
                     "Personal" -> com.cheermateapp.data.model.Category.Personal
                     "Shopping" -> com.cheermateapp.data.model.Category.Shopping
                     "Others" -> com.cheermateapp.data.model.Category.Others
                     else -> com.cheermateapp.data.model.Category.Work
                 }
-                val selectedPriority = when (spinnerPriority.selectedItem.toString()) {
+                val priority = when (priorityString) {
                     "High" -> Priority.High
                     "Medium" -> Priority.Medium
                     "Low" -> Priority.Low
                     else -> Priority.Medium
                 }
-                val reminderOption = spinnerReminder.selectedItem.toString()
-
+                val reminderOption = com.cheermateapp.util.TaskDialogSpinnerHelper.getSelectedReminder(spinnerReminder)
+                
+                // Validation
                 if (title.isEmpty()) {
-                    etTitle.error = "❌ Task title is required"
+                    etTaskTitle.error = "❌ Task title is required"
+                    etTaskTitle.requestFocus()
                     return@setOnClickListener
                 }
-
+                
                 if (dueDate.isEmpty()) {
                     etDueDate.error = "❌ Due date is required"
+                    etDueDate.requestFocus()
                     return@setOnClickListener
                 }
-
+                
                 // Validate reminder requires time
                 if (reminderOption != "None" && dueTime.isEmpty()) {
                     ToastManager.showToast(this@MainActivity, "❌ Reminder requires a due time to be set", Toast.LENGTH_SHORT)
+                    etDueTime.requestFocus()
                     return@setOnClickListener
                 }
-
-                // Create the task
+                
+                // Create the task using the enhanced method
                 createDetailedTask(
                     title = title,
                     description = if (description.isEmpty()) null else description,
                     dueDate = dueDate,
                     dueTime = if (dueTime.isEmpty()) null else dueTime,
-                    category = selectedCategory,
-                    priority = selectedPriority,
+                    category = category,
+                    priority = priority,
                     reminderOption = reminderOption
                 )
-
+                
+                android.util.Log.d("DIALOG_DEBUG", "Task created successfully, dismissing dialog")
                 dialog.dismiss()
             }
-        }
 
-        dialog.show()
+            android.util.Log.d("DIALOG_DEBUG", "Showing enhanced XML dialog")
+            dialog.show()
+            
+        } catch (e: Exception) {
+            android.util.Log.e("DIALOG_DEBUG", "Error creating XML dialog", e)
+            ToastManager.showToast(this, "Error creating dialog: ${e.message}", Toast.LENGTH_LONG)
+        }
     }
 
     // ✅ DATE PICKER HELPER

@@ -200,6 +200,9 @@ class FragmentTaskActivity : AppCompatActivity() {
         try {
             // FAB click listener
             fabAddTask.setOnClickListener {
+                android.util.Log.d("FAB_DEBUG", "===== FAB CLICKED =====")
+                android.util.Log.d("FAB_DEBUG", "FAB ID: ${fabAddTask.id}")
+                android.util.Log.d("FAB_DEBUG", "Calling showAddTaskDialog()")
                 showAddTaskDialog()
             }
 
@@ -1285,16 +1288,22 @@ class FragmentTaskActivity : AppCompatActivity() {
     // ✅ CRUD OPERATION: CREATE - Add new task dialog
     private fun showAddTaskDialog() {
         try {
+            android.util.Log.d("DIALOG_DEBUG", "===== SHOW ADD TASK DIALOG START =====")
+            android.util.Log.d("DIALOG_DEBUG", "Method: showAddTaskDialog() in FragmentTaskActivity")
+            android.util.Log.d("DIALOG_DEBUG", "Inflating layout: R.layout.dialog_add_task")
+            
             // Inflate the XML layout
             val dialogView = layoutInflater.inflate(R.layout.dialog_add_task, null)
+            android.util.Log.d("DIALOG_DEBUG", "Layout inflated successfully: ${dialogView.javaClass.simpleName}")
+            android.util.Log.d("DIALOG_DEBUG", "Dialog view children count: ${(dialogView as? android.view.ViewGroup)?.childCount}")
             
-            // Get references to all input fields
-            val etTaskTitle = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etTaskTitle)
-            val etTaskDescription = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etTaskDescription)
+            // Get references to all input fields (now using standard EditText)
+            val etTaskTitle = dialogView.findViewById<EditText>(R.id.etTaskTitle)
+            val etTaskDescription = dialogView.findViewById<EditText>(R.id.etTaskDescription)
             val spinnerCategory = dialogView.findViewById<Spinner>(R.id.spinnerCategory)
             val spinnerPriority = dialogView.findViewById<Spinner>(R.id.spinnerPriority)
-            val etDueDate = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etDueDate)
-            val etDueTime = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etDueTime)
+            val etDueDate = dialogView.findViewById<EditText>(R.id.etDueDate)
+            val etDueTime = dialogView.findViewById<EditText>(R.id.etDueTime)
             val spinnerReminder = dialogView.findViewById<Spinner>(R.id.spinnerReminder)
             
             // Set up spinners with icons using the helper
@@ -1333,19 +1342,35 @@ class FragmentTaskActivity : AppCompatActivity() {
                 }
             }
             
+            // Get references to buttons inside the custom layout
+            val btnCreateTask = dialogView.findViewById<Button>(R.id.btnCreateTask)
+            val btnCancelTask = dialogView.findViewById<Button>(R.id.btnCancelTask)
+
             // Create and show the dialog
+            android.util.Log.d("DIALOG_DEBUG", "Creating AlertDialog.Builder")
             val builder = AlertDialog.Builder(this)
-            builder.setTitle("Add New Task")
+            android.util.Log.d("DIALOG_DEBUG", "Setting dialog view (no title override)")
             builder.setView(dialogView)
-            builder.setPositiveButton("Add Task", null)
-            builder.setNegativeButton("Cancel", null)
-            
+            // We no longer set positive/negative buttons here, as they are inside the layout.
+            android.util.Log.d("DIALOG_DEBUG", "Dialog buttons will be handled by the custom layout")
+
+            android.util.Log.d("DIALOG_DEBUG", "Creating dialog instance")
             val dialog = builder.create()
+
+            android.util.Log.d("DIALOG_DEBUG", "Setting dialog properties")
+            // Make dialog non-cancelable by tapping outside to ensure proper task creation
+            dialog.setCanceledOnTouchOutside(false)
+
+            // Set dialog window properties for proper rendering
             dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-            dialog.show()
-            
-            // Override positive button to prevent auto-dismiss on validation errors
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+
+            // Set click listener for the "Cancel" button inside the dialog
+            btnCancelTask.setOnClickListener {
+                dialog.dismiss()
+            }
+
+            // Set click listener for the "Create Task" button inside the dialog
+            btnCreateTask.setOnClickListener {
                 val title = etTaskTitle.text.toString().trim()
                 val description = etTaskDescription.text.toString().trim()
                 val dueDate = etDueDate.text.toString().trim()
@@ -1380,6 +1405,13 @@ class FragmentTaskActivity : AppCompatActivity() {
                 createNewTask(title, description, category, priority, finalCalendar.time, reminderOption)
                 dialog.dismiss()
             }
+
+            android.util.Log.d("DIALOG_DEBUG", "===== SHOWING DIALOG =====")
+            android.util.Log.d("DIALOG_DEBUG", "Dialog class: ${dialog.javaClass.simpleName}")
+            android.util.Log.d("DIALOG_DEBUG", "Window background: transparent")
+            dialog.show()
+            android.util.Log.d("DIALOG_DEBUG", "Dialog.show() called - should be visible now")
+            android.util.Log.d("DIALOG_DEBUG", "===== SHOW ADD TASK DIALOG END =====")
 
         } catch (e: Exception) {
             android.util.Log.e("FragmentTaskActivity", "Error showing add task dialog", e)
