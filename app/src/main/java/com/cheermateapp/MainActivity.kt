@@ -85,6 +85,7 @@ class MainActivity : AppCompatActivity() {
 
     private var isTasksScreenInitialized: Boolean = false
     private var isSettingsScreenInitialized: Boolean = false
+    private var isHomeInteractionSetup: Boolean = false
 
     // Cached roots for embedded "fragments" to avoid re-inflation
     private var tasksRootView: View? = null
@@ -180,7 +181,6 @@ class MainActivity : AppCompatActivity() {
                 // Only initialize Home UI and data if Home tab is selected to prevent flicker on Settings
                 findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNav)?.let { nav ->
                     if (nav.selectedItemId == R.id.nav_home) {
-                        setupHomeScreenInteractions()
                         // Load dashboard data
                         loadUserData()
                         loadTaskStatistics()
@@ -400,6 +400,11 @@ class MainActivity : AppCompatActivity() {
             findViewById<ScrollView>(R.id.homeScroll)?.visibility = View.VISIBLE
             val container = findViewById<FrameLayout>(R.id.contentContainer)
             container?.visibility = View.GONE
+
+            if (!isHomeInteractionSetup) {
+                setupHomeScreenInteractions()
+                isHomeInteractionSetup = true
+            }
             
             // Show FAB on home screen
             setFabVisibility(true)
@@ -2990,6 +2995,12 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         // Reload user data to reflect any personality changes
         loadUserData()
+        
+        // Refresh calendar info display for current selected date
+        selectedCalendarDateStr?.let { dateStr ->
+            updateCalendarSelectedTasks(dateStr)
+        }
+        
         // Restore Settings tab if theme toggle caused recreation
         kotlin.runCatching {
             val prefs = getSharedPreferences("cheermate_theme_prefs", MODE_PRIVATE)
