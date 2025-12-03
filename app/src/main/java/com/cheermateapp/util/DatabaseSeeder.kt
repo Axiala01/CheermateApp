@@ -148,52 +148,52 @@ object DatabaseSeeder {
                     
                     // Kalog (ID=1) - Funny and entertaining messages
                     messageTemplates.addAll(listOf(
-                        MessageTemplate(Personality_ID = 1, Category = "motivation", TextTemplate = "Hala sige! Time to turn that task list into a comedy show! 🎉"),
-                        MessageTemplate(Personality_ID = 1, Category = "task_work", TextTemplate = "Work mode ON! Let's get this bread, besh! 💼😄"),
-                        MessageTemplate(Personality_ID = 1, Category = "task_personal", TextTemplate = "Personal task? Sige na, treat yourself after! 🏆"),
-                        MessageTemplate(Personality_ID = 1, Category = "task_shopping", TextTemplate = "Shopping time! Budget wisely ha, baka lugi ka! 🛍️😂"),
-                        MessageTemplate(Personality_ID = 1, Category = "task_others", TextTemplate = "Another task? Hala, busy bee yarn! Kaya mo yan! 🐝"),
-                        MessageTemplate(Personality_ID = 1, Category = "task_completed", TextTemplate = "Yown! Tapos na yan! Bili tayo ice cream! 🍦✅")
+                        MessageTemplate(Personality_ID = 1, Category = "motivation", MessageText = "Hala sige! Time to turn that task list into a comedy show! 🎉"),
+                        MessageTemplate(Personality_ID = 1, Category = "task_work", MessageText = "Work mode ON! Let's get this bread, besh! 💼😄"),
+                        MessageTemplate(Personality_ID = 1, Category = "task_personal", MessageText = "Personal task? Sige na, treat yourself after! 🏆"),
+                        MessageTemplate(Personality_ID = 1, Category = "task_shopping", MessageText = "Shopping time! Budget wisely ha, baka lugi ka! 🛍️😂"),
+                        MessageTemplate(Personality_ID = 1, Category = "task_others", MessageText = "Another task? Hala, busy bee yarn! Kaya mo yan! 🐝"),
+                        MessageTemplate(Personality_ID = 1, Category = "task_completed", MessageText = "Yown! Tapos na yan! Bili tayo ice cream! 🍦✅")
                     ))
                     
                     // Gen Z (ID=2) - Trendy and tech-savvy messages
                     messageTemplates.addAll(listOf(
-                        MessageTemplate(Personality_ID = 2, Category = "motivation", TextTemplate = "No cap, you're about to absolutely slay these tasks! 💯✨"),
-                        MessageTemplate(Personality_ID = 2, Category = "task_work", TextTemplate = "Work tasks? It's giving main character energy! Let's go! 💼🔥"),
-                        MessageTemplate(Personality_ID = 2, Category = "task_personal", TextTemplate = "Personal growth vibes! Periodt! You're doing amazing! 💅"),
-                        MessageTemplate(Personality_ID = 2, Category = "task_shopping", TextTemplate = "Shopping spree? Living your best life! Just don't go broke! 🛍️💸"),
-                        MessageTemplate(Personality_ID = 2, Category = "task_others", TextTemplate = "Another W incoming! You're on fire today! 🔥"),
-                        MessageTemplate(Personality_ID = 2, Category = "task_completed", TextTemplate = "Yayyy! So proud of you, babe! You're lit AF! 💖✨")
+                        MessageTemplate(Personality_ID = 2, Category = "motivation", MessageText = "No cap, you're about to absolutely slay these tasks! 💯✨"),
+                        MessageTemplate(Personality_ID = 2, Category = "task_work", MessageText = "Work tasks? It's giving main character energy! Let's go! 💼🔥"),
+                        MessageTemplate(Personality_ID = 2, Category = "task_personal", MessageText = "Personal growth vibes! Periodt! You're doing amazing! 💅"),
+                        MessageTemplate(Personality_ID = 2, Category = "task_shopping", MessageText = "Shopping spree? Living your best life! Just don't go broke! 🛍️💸"),
+                        MessageTemplate(Personality_ID = 2, Category = "task_others", MessageText = "Another W incoming! You're on fire today! 🔥"),
+                        MessageTemplate(Personality_ID = 2, Category = "task_completed", MessageText = "Yayyy! So proud of you, babe! You're lit AF! 💖✨")
                     ))
                     
                     // Softy (ID=3) - Gentle and caring messages
                     messageTemplates.addAll(listOf(
-                        MessageTemplate(Personality_ID = 3, Category = "motivation", TextTemplate = "You've got this! Take it one gentle step at a time. 🌸"),
-                        MessageTemplate(Personality_ID = 3, Category = "task_work", TextTemplate = "Work tasks can be peaceful. I'm here supporting you! 💼💕"),
-                        MessageTemplate(Personality_ID = 3, Category = "task_personal", TextTemplate = "Personal time is self-care time. You deserve this! 🤗"),
-                        MessageTemplate(Personality_ID = 3, Category = "task_shopping", TextTemplate = "Shopping can be therapeutic! Treat yourself kindly! 🛍️💝"),
-                        MessageTemplate(Personality_ID = 3, Category = "task_others", TextTemplate = "Every task is a small victory. I believe in you! 🌺"),
-                        MessageTemplate(Personality_ID = 3, Category = "task_completed", TextTemplate = "I'm so proud of you! You did an amazing job! 💕✨")
+                        MessageTemplate(Personality_ID = 3, Category = "motivation", MessageText = "You've got this! Take it one gentle step at a time. 🌸"),
+                        MessageTemplate(Personality_ID = 3, Category = "task_work", MessageText = "Work tasks can be peaceful. I'm here supporting you! 💼💕"),
+                        MessageTemplate(Personality_ID = 3, Category = "task_personal", MessageText = "Personal time is self-care time. You deserve this! 🤗"),
+                        MessageTemplate(Personality_ID = 3, Category = "task_shopping", MessageText = "Shopping can be therapeutic! Treat yourself kindly! 🛍️💝"),
+                        MessageTemplate(Personality_ID = 3, Category = "task_others", MessageText = "Every task is a small victory. I believe in you! 🌺"),
+                        MessageTemplate(Personality_ID = 3, Category = "task_completed", MessageText = "I'm so proud of you! You did an amazing job! 💕✨")
                     ))
                     
                     // Grey (ID=4) - Professional and balanced messages
                     messageTemplates.addAll(listOf(
-                        MessageTemplate(Personality_ID = 4, Category = "motivation", TextTemplate = "Steady progress leads to lasting success. Focus. Execute. ⚖️"),
-                        MessageTemplate(Personality_ID = 4, Category = "task_work", TextTemplate = "Work requires discipline. Your focus is commendable. 💼"),
-                        MessageTemplate(Personality_ID = 4, Category = "task_personal", TextTemplate = "Personal development demands attention. Proceed thoughtfully. 📚"),
-                        MessageTemplate(Personality_ID = 4, Category = "task_shopping", TextTemplate = "Shopping: Balance necessity with desire. Choose wisely. 🛍️"),
-                        MessageTemplate(Personality_ID = 4, Category = "task_others", TextTemplate = "Every task matters. Time is valuable. Execute efficiently. ⏰"),
-                        MessageTemplate(Personality_ID = 4, Category = "task_completed", TextTemplate = "Excellent work. Your discipline is commendable. ✅")
+                        MessageTemplate(Personality_ID = 4, Category = "motivation", MessageText = "Steady progress leads to lasting success. Focus. Execute. ⚖️"),
+                        MessageTemplate(Personality_ID = 4, Category = "task_work", MessageText = "Work requires discipline. Your focus is commendable. 💼"),
+                        MessageTemplate(Personality_ID = 4, Category = "task_personal", MessageText = "Personal development demands attention. Proceed thoughtfully. 📚"),
+                        MessageTemplate(Personality_ID = 4, Category = "task_shopping", MessageText = "Shopping: Balance necessity with desire. Choose wisely. 🛍️"),
+                        MessageTemplate(Personality_ID = 4, Category = "task_others", MessageText = "Every task matters. Time is valuable. Execute efficiently. ⏰"),
+                        MessageTemplate(Personality_ID = 4, Category = "task_completed", MessageText = "Excellent work. Your discipline is commendable. ✅")
                     ))
                     
                     // Flirty (ID=5) - Playful and charming messages
                     messageTemplates.addAll(listOf(
-                        MessageTemplate(Personality_ID = 5, Category = "motivation", TextTemplate = "Hey gorgeous, ready to charm those tasks into submission? 😉💋"),
-                        MessageTemplate(Personality_ID = 5, Category = "task_work", TextTemplate = "Work tasks? You make productivity look sexy! 💼😍"),
-                        MessageTemplate(Personality_ID = 5, Category = "task_personal", TextTemplate = "Personal time? You deserve all the self-love, beautiful! 💝"),
-                        MessageTemplate(Personality_ID = 5, Category = "task_shopping", TextTemplate = "Shopping spree? You're going to look absolutely stunning! 🛍️✨"),
-                        MessageTemplate(Personality_ID = 5, Category = "task_others", TextTemplate = "Another task? You handle it with such grace! 😘"),
-                        MessageTemplate(Personality_ID = 5, Category = "task_completed", TextTemplate = "Look at you go! You're absolutely crushing it! 😍💋")
+                        MessageTemplate(Personality_ID = 5, Category = "motivation", MessageText = "Hey gorgeous, ready to charm those tasks into submission? 😉💋"),
+                        MessageTemplate(Personality_ID = 5, Category = "task_work", MessageText = "Work tasks? You make productivity look sexy! 💼😍"),
+                        MessageTemplate(Personality_ID = 5, Category = "task_personal", MessageText = "Personal time? You deserve all the self-love, beautiful! 💝"),
+                        MessageTemplate(Personality_ID = 5, Category = "task_shopping", MessageText = "Shopping spree? You're going to look absolutely stunning! 🛍️✨"),
+                        MessageTemplate(Personality_ID = 5, Category = "task_others", MessageText = "Another task? You handle it with such grace! 😘"),
+                        MessageTemplate(Personality_ID = 5, Category = "task_completed", MessageText = "Look at you go! You're absolutely crushing it! 😍💋")
                     ))
                     
                     db.messageTemplateDao().insertAll(messageTemplates)

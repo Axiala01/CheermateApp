@@ -2307,7 +2307,7 @@ class MainActivity : AppCompatActivity() {
                         }
                         
                         if (motivationMessages.isNotEmpty()) {
-                            val randomMessage = motivationMessages.random().TextTemplate
+                            val randomMessage = motivationMessages.random().MessageText
                             ToastManager.showToast(this@MainActivity, randomMessage, Toast.LENGTH_LONG)
                         } else {
                             // Fallback to personality's default motivation message

@@ -53,13 +53,13 @@ class MessageTemplateRepositoryTest {
                 Template_ID = 1,
                 Personality_ID = 1,
                 Category = "task_created",
-                TextTemplate = "Hala sige! Let's get this party started! 🎉"
+                MessageText = "Hala sige! Let's get this party started! 🎉"
             ),
             MessageTemplate(
                 Template_ID = 2,
                 Personality_ID = 1,
                 Category = "task_completed",
-                TextTemplate = "Yown! Tapos na yan! Bili tayo ice cream to celebrate! 🍦"
+                MessageText = "Yown! Tapos na yan! Bili tayo ice cream to celebrate! 🍦"
             )
         )
         
@@ -88,7 +88,7 @@ class MessageTemplateRepositoryTest {
                 Template_ID = 2,
                 Personality_ID = 1,
                 Category = "task_completed",
-                TextTemplate = "Yown! Tapos na yan! Bili tayo ice cream to celebrate! 🍦"
+                MessageText = "Yown! Tapos na yan! Bili tayo ice cream to celebrate! 🍦"
             )
         )
         
@@ -115,38 +115,38 @@ class MessageTemplateRepositoryTest {
         val kalogMessage = MessageTemplate(
             Personality_ID = 1,
             Category = "task_created",
-            TextTemplate = "Hala sige! Let's get this party started! 🎉"
+            MessageText = "Hala sige! Let's get this party started! 🎉"
         )
         
         val genZMessage = MessageTemplate(
             Personality_ID = 2,
             Category = "task_created",
-            TextTemplate = "OMG! Ganern?! Let's do this, babe! ✨"
+            MessageText = "OMG! Ganern?! Let's do this, babe! ✨"
         )
         
         val softyMessage = MessageTemplate(
             Personality_ID = 3,
             Category = "task_created",
-            TextTemplate = "I believe in you! You can do this! 🌸"
+            MessageText = "I believe in you! You can do this! 🌸"
         )
         
         val greyMessage = MessageTemplate(
             Personality_ID = 4,
             Category = "task_created",
-            TextTemplate = "Task acknowledged. Let's proceed efficiently."
+            MessageText = "Task acknowledged. Let's proceed efficiently."
         )
         
         val flirtyMessage = MessageTemplate(
             Personality_ID = 5,
             Category = "task_created",
-            TextTemplate = "Ooh, a new challenge? I love watching you work! 😉"
+            MessageText = "Ooh, a new challenge? I love watching you work! 😉"
         )
         
         // Then - Verify each personality has a unique message
-        assertNotEquals(kalogMessage.TextTemplate, genZMessage.TextTemplate)
-        assertNotEquals(genZMessage.TextTemplate, softyMessage.TextTemplate)
-        assertNotEquals(softyMessage.TextTemplate, greyMessage.TextTemplate)
-        assertNotEquals(greyMessage.TextTemplate, flirtyMessage.TextTemplate)
+        assertNotEquals(kalogMessage.MessageText, genZMessage.MessageText)
+        assertNotEquals(genZMessage.MessageText, softyMessage.MessageText)
+        assertNotEquals(softyMessage.MessageText, greyMessage.MessageText)
+        assertNotEquals(greyMessage.MessageText, flirtyMessage.MessageText)
         
         // Verify they're all for the same category but different personalities
         assertEquals("task_created", kalogMessage.Category)
