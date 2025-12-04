@@ -41,4 +41,9 @@
     <color name="calendar_placeholder_text_color">#FFFFFFFF</color>
     <color name="spinner_text_color">#FFFFFFFF</color>
     <color name="btn_create_task_text_color">#FF000000</color>
+
+    <!-- Glass effect colors for login/signup screens (same as light mode for gradient background) -->
+    <color name="glass_fill_color">#33FFFFFF</color>
+    <color name="glass_stroke_color">#66FFFFFF</color>
+    <color name="glass_hint_color">#B3FFFFFF</color>
 </resources>

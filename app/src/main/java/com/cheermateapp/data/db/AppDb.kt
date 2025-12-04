@@ -1,6 +1,7 @@
 package com.cheermateapp.data.db
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -57,6 +58,8 @@ abstract class AppDb : RoomDatabase() {
     abstract fun taskDependencyDao(): TaskDependencyDao
 
     companion object {
+        private const val TAG = "AppDb"
+        
         @Volatile
         private var INSTANCE: AppDb? = null
 
@@ -159,6 +162,13 @@ abstract class AppDb : RoomDatabase() {
             )
                 .addTypeConverter(AppTypeConverters(gson))
                 .addMigrations(MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23)
+                .fallbackToDestructiveMigrationOnDowngrade()
+                .addCallback(object : RoomDatabase.Callback() {
+                    override fun onDestructiveMigration(db: SupportSQLiteDatabase) {
+                        super.onDestructiveMigration(db)
+                        Log.w(TAG, "Database was recreated due to destructive migration (downgrade). All data has been reset.")
+                    }
+                })
                 .build()
         }
     }

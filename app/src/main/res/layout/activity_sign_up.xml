@@ -171,7 +171,6 @@
                 android:textColor="@android:color/white"
                 android:textColorHint="@color/glass_hint_color"
                 android:inputType="none"
-                android:backgroundTint="@color/white"
                 android:background="@null"
                 android:drawablePadding="8dp"
                 android:paddingLeft="12dp"
