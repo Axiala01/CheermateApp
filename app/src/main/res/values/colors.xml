@@ -49,8 +49,8 @@
     <color name="btn_create_task_text_color">#FFFFFFFF</color>
 
     <!-- Glass effect colors for login/signup screens -->
-    <color name="glass_fill_color">#33FFFFFF</color>
-    <color name="glass_stroke_color">#66FFFFFF</color>
-    <color name="glass_hint_color">#B3FFFFFF</color>
-
-</resources>
+        <color name="glass_fill_color">#33FFFFFF</color>
+        <color name="glass_stroke_color">#66FFFFFF</color>
+        <color name="glass_hint_color">#B3FFFFFF</color>
+        <color name="glass_background_dark">#1AFFFFFF</color>
+    </resources>
