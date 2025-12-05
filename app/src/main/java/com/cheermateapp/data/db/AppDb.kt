@@ -28,148 +28,282 @@ import com.cheermateapp.data.model.TaskDependency
 import com.cheermateapp.data.model.TaskReminder
 import com.cheermateapp.data.model.User
 import com.google.gson.Gson
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Database(
+
     entities = [
+
         Personality::class,
+
         User::class,
+
         Task::class,
+
         TaskReminder::class,
+
         SubTask::class,
+
         SecurityQuestion::class,
+
         UserSecurityAnswer::class,
+
         UserSettings::class,
+
         MessageTemplate::class,
+
         TaskDependency::class
+
     ],
+
     version = 23,
+
     exportSchema = false
+
 )
+
 @TypeConverters(AppTypeConverters::class)
+
 abstract class AppDb : RoomDatabase() {
+
     abstract fun userDao(): UserDao
+
     abstract fun taskDao(): TaskDao
+
     abstract fun subTaskDao(): SubTaskDao
+
     abstract fun taskReminderDao(): TaskReminderDao
+
     abstract fun userSettingsDao(): UserSettingsDao
+
     abstract fun securityDao(): SecurityDao
+
     abstract fun personalityDao(): PersonalityDao
+
     abstract fun messageTemplateDao(): MessageTemplateDao
+
     abstract fun taskDependencyDao(): TaskDependencyDao
 
+
+
     companion object {
+
         private const val TAG = "AppDb"
+
         
+
         @Volatile
+
         private var INSTANCE: AppDb? = null
 
+
+
         fun get(context: Context): AppDb {
+
             return INSTANCE ?: synchronized(this) {
+
                 INSTANCE ?: buildDatabase(context.applicationContext).also { INSTANCE = it }
+
             }
+
         }
+
+
 
         private val MIGRATION_19_20 = object : Migration(19, 20) {
+
             override fun migrate(database: SupportSQLiteDatabase) {
+
                 // Create new table with NOT NULL constraints
+
                 database.execSQL("""
+
                     CREATE TABLE User_new (
+
                         User_ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+
                         Username TEXT NOT NULL,
+
                         Email TEXT NOT NULL,
+
                         PasswordHash TEXT NOT NULL,
+
                         FirstName TEXT NOT NULL DEFAULT '',
+
                         LastName TEXT NOT NULL DEFAULT '',
+
                         Birthdate TEXT,
+
                         Personality_ID INTEGER,
+
                         CreatedAt INTEGER NOT NULL,
+
                         UpdatedAt INTEGER NOT NULL,
+
                         DeletedAt INTEGER
+
                     )
+
                 """)
+
+
 
                 // Copy data from old table to new table, coalescing null names to empty strings
+
                 database.execSQL("""
+
                     INSERT INTO User_new (User_ID, Username, Email, PasswordHash, FirstName, LastName, Birthdate, Personality_ID, CreatedAt, UpdatedAt, DeletedAt)
+
                     SELECT User_ID, Username, Email, PasswordHash, COALESCE(FirstName, ''), COALESCE(LastName, ''), Birthdate, Personality_ID, CreatedAt, UpdatedAt, DeletedAt FROM User
+
                 """)
+
+
 
                 // Drop old table
+
                 database.execSQL("DROP TABLE User")
 
+
+
                 // Rename new table to old table name
+
                 database.execSQL("ALTER TABLE User_new RENAME TO User")
 
+
+
                 // Re-create indexes from original schema
+
                 database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_User_Username ON User(Username)")
+
                 database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_User_Email ON User(Email)")
+
                 database.execSQL("CREATE INDEX IF NOT EXISTS index_User_Personality_ID ON User(Personality_ID)")
+
             }
+
         }
+
+
 
         private val MIGRATION_20_21 = object : Migration(20, 21) {
+
             override fun migrate(database: SupportSQLiteDatabase) {
+
                 // Drop RecurringTask table and its indexes
+
                 database.execSQL("DROP TABLE IF EXISTS RecurringTask")
+
                 
+
                 // Drop TaskTemplate table and its indexes
+
                 database.execSQL("DROP TABLE IF EXISTS TaskTemplate")
+
             }
+
         }
+
+
 
         private val MIGRATION_21_22 = object : Migration(21, 22) {
+
             override fun migrate(database: SupportSQLiteDatabase) {
+
                 // Create new UserSettings table with updated schema
+
                 database.execSQL("""
+
                     CREATE TABLE IF NOT EXISTS UserSettings (
+
                         UserSettings_ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+
                         User_ID INTEGER NOT NULL,
+
                         Appearance TEXT,
+
                         Notification TEXT,
+
                         DataManagement TEXT,
+
                         Statistics TEXT,
+
                         FOREIGN KEY (User_ID) REFERENCES User(User_ID) ON DELETE CASCADE
+
                     )
+
                 """)
+
                 
+
                 // Create index on User_ID
+
                 database.execSQL("CREATE INDEX IF NOT EXISTS index_UserSettings_User_ID ON UserSettings(User_ID)")
+
                 
+
                 // Migrate data from old Settings table (if exists) to new UserSettings table
+
                 database.execSQL("""
+
                     INSERT INTO UserSettings (User_ID, Appearance, Notification, DataManagement, Statistics)
+
                     SELECT User_ID, Appearance, Notification, DataManagement, Statistics FROM Settings
+
                 """)
+
                 
+
                 // Drop old Settings table
+
                 database.execSQL("DROP TABLE IF EXISTS Settings")
+
             }
+
         }
 
+
+
         private val MIGRATION_22_23 = object : Migration(22, 23) {
+
             override fun migrate(database: SupportSQLiteDatabase) {
+
                 database.execSQL("ALTER TABLE MessageTemplate RENAME COLUMN TextTemplate TO MessageText")
+
             }
+
         }
+
+
+
 
 
         private fun buildDatabase(appContext: Context): AppDb {
+
             val gson = Gson()
+
             return Room.databaseBuilder(
+
                 appContext,
+
                 AppDb::class.java,
+
                 "cheermate_database"
+
             )
+
                 .addTypeConverter(AppTypeConverters(gson))
+
                 .addMigrations(MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23)
-                .fallbackToDestructiveMigrationOnDowngrade()
-                .addCallback(object : RoomDatabase.Callback() {
-                    override fun onDestructiveMigration(db: SupportSQLiteDatabase) {
-                        super.onDestructiveMigration(db)
-                        Log.w(TAG, "Database was recreated due to destructive migration (downgrade). All data has been reset.")
-                    }
-                })
+
+                .fallbackToDestructiveMigration()
+
                 .build()
+
         }
+
     }
+
 }

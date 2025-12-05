@@ -2287,49 +2287,39 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showMotivationalMessage() {
-        try {
-            uiScope.launch {
-                try {
-                    val db = AppDb.get(this@MainActivity)
-
-                    // Get user's personality ID
-                    val user = withContext(Dispatchers.IO) {
-                        db.userDao().getById(userId)
-                    }
-                    
-                    val personalityId = user?.Personality_ID
-                    
-                    if (personalityId != null) {
-                        // Fetch motivation messages from database
-                        val motivationMessages = withContext(Dispatchers.IO) {
-                            db.messageTemplateDao().getByPersonalityAndCategory(personalityId, "motivation")
+        private fun showMotivationalMessage() {
+            try {
+                uiScope.launch {
+                    try {
+                        val db = AppDb.get(this@MainActivity)
+    
+                        // Get user's personality ID
+                        val user = withContext(Dispatchers.IO) {
+                            db.userDao().getById(userId)
                         }
                         
-                        if (motivationMessages.isNotEmpty()) {
-                            val randomMessage = motivationMessages.random().MessageText
-                            ToastManager.showToast(this@MainActivity, randomMessage, Toast.LENGTH_LONG)
-                        } else {
-                            // Fallback to personality's default motivation message
-                            val personality = withContext(Dispatchers.IO) {
-                                db.personalityDao().getById(personalityId)
+                        val personalityId = user?.Personality_ID
+                        
+                        if (personalityId != null) {
+                            // Fetch motivation messages from database
+                            val motivationMessages = withContext(Dispatchers.IO) {
+                                db.messageTemplateDao().getByPersonalityAndCategory(personalityId, "motivation")
                             }
-                            val message = personality?.MotivationMessage ?: "💪 You've got this! Let's make today amazing!"
-                            ToastManager.showToast(this@MainActivity, message, Toast.LENGTH_LONG)
+                            
+                            if (motivationMessages.isNotEmpty()) {
+                                val randomMessage = motivationMessages.random().MessageText
+                                ToastManager.showToast(this@MainActivity, randomMessage, Toast.LENGTH_LONG)
+                            }
                         }
-                    } else {
-                        ToastManager.showToast(this@MainActivity, "💪 You've got this! Let's make today amazing!", Toast.LENGTH_SHORT)
+    
+                    } catch (e: Exception) {
+                        android.util.Log.e("MainActivity", "Error showing motivational message", e)
                     }
-
-                } catch (e: Exception) {
-                    ToastManager.showToast(this@MainActivity, "💪 You've got this! Let's make today amazing!", Toast.LENGTH_SHORT)
                 }
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Error in showMotivationalMessage", e)
             }
-        } catch (e: Exception) {
-            ToastManager.showToast(this, "💪 Stay motivated and keep pushing forward!", Toast.LENGTH_SHORT)
         }
-    }
-
         // ✅ DASHBOARD DATA LOADING - FULLY IMPLEMENTED
         private fun loadUserData() {
             uiScope.launch {

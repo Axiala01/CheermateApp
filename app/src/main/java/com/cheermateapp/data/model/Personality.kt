@@ -21,9 +21,6 @@ data class Personality(
     @ColumnInfo(name = "Description")
     val Description: String,
 
-    @ColumnInfo(name = "MotivationMessage")
-    val MotivationMessage: String? = null,
-
     @ColumnInfo(name = "IsActive")
     val IsActive: Boolean = true,
 
