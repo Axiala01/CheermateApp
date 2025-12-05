@@ -52,6 +52,8 @@ import com.cheermateapp.ui.tasks.TasksViewModel
 import com.cheermateapp.ui.tasks.TasksViewModelFactory
 import com.cheermateapp.util.InputValidationUtil
 import com.cheermateapp.util.PasswordHashUtil
+import com.cheermateapp.util.AlarmTestHelper
+import com.cheermateapp.util.ReminderManager
 import com.cheermateapp.util.ThemeManager
 import com.cheermateapp.util.ToastManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -348,9 +350,108 @@ class MainActivity : AppCompatActivity() {
             if (toolbar != null) {
                 setSupportActionBar(toolbar)
                 supportActionBar?.setDisplayShowTitleEnabled(false)
+                
+                // 🧪 DEBUG: Add long press listener for alarm testing
+                toolbar.setOnLongClickListener {
+                    showAlarmTestMenu()
+                    true
+                }
             }
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error setting up toolbar", e)
+        }
+    }
+    
+    /**
+     * 🧪 DEBUG: Show alarm testing menu (long press toolbar to access)
+     */
+    private fun showAlarmTestMenu() {
+        val options = arrayOf(
+            "🧪 Test Alarm (15s)",
+            "⏰ Multiple Test Alarms", 
+            "🔍 Check System Status",
+            "📋 List Active Reminders",
+            "🧹 Clean Test Data"
+        )
+        
+        AlertDialog.Builder(this)
+            .setTitle("🔔 Alarm Testing Menu")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> {
+                        // Quick test alarm
+                        android.util.Log.d("MainActivity", "🧪 Starting quick test alarm...")
+                        lifecycleScope.launch {
+                            AlarmTestHelper.scheduleTestAlarm(this@MainActivity, 15, "🧪 Quick Test (15s)")
+                            ToastManager.showToast(this@MainActivity, "🔔 Test alarm set for 15 seconds. Watch logcat!", Toast.LENGTH_LONG)
+                        }
+                    }
+                    1 -> {
+                        // Multiple test alarms
+                        android.util.Log.d("MainActivity", "🧪 Starting multiple test alarms...")
+                        lifecycleScope.launch {
+                            AlarmTestHelper.scheduleMultipleTestAlarms(this@MainActivity)
+                            ToastManager.showToast(this@MainActivity, "🔔 Multiple test alarms scheduled. Check logcat!", Toast.LENGTH_LONG)
+                        }
+                    }
+                    2 -> {
+                        // Check system status
+                        android.util.Log.d("MainActivity", "🔍 Checking alarm system status...")
+                        AlarmTestHelper.checkAlarmSystemStatus(this)
+                        ToastManager.showToast(this, "🔍 System status logged. Check logcat!", Toast.LENGTH_SHORT)
+                    }
+                    3 -> {
+                        // List active reminders
+                        android.util.Log.d("MainActivity", "📋 Listing active reminders...")
+                        lifecycleScope.launch {
+                            AlarmTestHelper.listActiveReminders(this@MainActivity)
+                            ToastManager.showToast(this@MainActivity, "📋 Active reminders listed in logcat!", Toast.LENGTH_SHORT)
+                        }
+                    }
+                    4 -> {
+                        // Clean test data
+                        cleanTestData()
+                    }
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    /**
+     * 🧹 Clean up test alarm data
+     */
+    private fun cleanTestData() {
+        lifecycleScope.launch {
+            try {
+                val db = AppDb.get(this@MainActivity)
+                
+                // Delete test tasks (those with "🧪" or "Test" in title)
+                withContext(Dispatchers.IO) {
+                    val testTasks = db.taskDao().getAllTasks()
+                        .filter { it.Title.contains("🧪") || it.Title.contains("Test") }
+                    
+                    testTasks.forEach { task ->
+                        // Cancel any scheduled alarms
+                        withContext(Dispatchers.Main) {
+                            ReminderManager.cancelReminder(this@MainActivity, task.Task_ID)
+                        }
+                        
+                        // Delete reminders and task
+                        db.taskReminderDao().deleteAllForTask(task.Task_ID, task.User_ID)
+                        db.taskDao().softDelete(task.User_ID, task.Task_ID)
+                        
+                        android.util.Log.d("MainActivity", "🧹 Cleaned test task: ${task.Title}")
+                    }
+                }
+                
+                ToastManager.showToast(this@MainActivity, "🧹 Test data cleaned!", Toast.LENGTH_SHORT)
+                android.util.Log.d("MainActivity", "🧹 Test data cleanup complete")
+                
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "💥 Error cleaning test data", e)
+                ToastManager.showToast(this@MainActivity, "❌ Error cleaning test data", Toast.LENGTH_SHORT)
+            }
         }
     }
 
@@ -2151,7 +2252,7 @@ class MainActivity : AppCompatActivity() {
                         "10 minutes before" -> dueTimeMillis - (10 * 60 * 1000)
                         "30 minutes before" -> dueTimeMillis - (30 * 60 * 1000)
                         "At specific time" -> dueTimeMillis
-                        else -> dueTimeMillis
+                        else -> dueTimeMillis // Default to dueTimeMillis if option is "None" or unrecognized
                     }
 
                     // Get next reminder ID
@@ -2172,9 +2273,23 @@ class MainActivity : AppCompatActivity() {
 
                     withContext(Dispatchers.IO) {
                         db.taskReminderDao().insert(reminder)
+                        
+                        // Fetch the task to schedule the alarm
+                        val task = db.taskDao().getTaskById(taskId)
+                        if (task != null) {
+                            ReminderManager.scheduleReminder(
+                                applicationContext,
+                                task.Task_ID,
+                                task.Title,
+                                task.Description,
+                                task.User_ID,
+                                reminder.RemindAt
+                            )
+                            android.util.Log.d("MainActivity", "✅ Alarm scheduled for task $taskId")
+                        }
                     }
 
-                    android.util.Log.d("MainActivity", "✅ Created reminder for task $taskId at $remindAtMillis with type: $reminderType")
+
                 }
 
             } catch (e: Exception) {

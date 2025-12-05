@@ -19,6 +19,8 @@ android {
         multiDexEnabled = true
     }
 
+    setProperty("archivesBaseName", "CheermateApp-${defaultConfig.versionName}")
+
     buildTypes {
         release {
             isMinifyEnabled = false

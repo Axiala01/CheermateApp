@@ -8,6 +8,7 @@ import com.cheermateapp.data.model.Task
 import com.cheermateapp.data.repository.DataResult
 import com.cheermateapp.data.repository.TaskRepository
 import com.cheermateapp.data.repository.UiState
+import com.cheermateapp.util.ReminderManager
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -367,7 +368,14 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
             when (val result = taskRepository.insertTaskAndReminder(task, reminder)) {
                 is DataResult.Success -> {
                     val newReminder = result.data
-                    com.cheermateapp.util.AlarmScheduler.schedule(getApplication(), task, newReminder)
+                    ReminderManager.scheduleReminder(
+                        getApplication(),
+                        task.Task_ID,
+                        task.Title,
+                        task.Description,
+                        task.User_ID,
+                        newReminder.RemindAt
+                    )
                     _taskOperationState.value = UiState.Success("Task with reminder created")
                 }
                 is DataResult.Error -> {
@@ -389,7 +397,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
             
             when (val result = taskRepository.softDeleteTask(task.User_ID, task.Task_ID)) {
                 is DataResult.Success -> {
-                    com.cheermateapp.util.AlarmScheduler.cancel(getApplication(), reminder)
+                    ReminderManager.cancelReminder(getApplication(), reminder.Task_ID)
                     _taskOperationState.value = UiState.Success("Task deleted successfully")
                 }
                 is DataResult.Error -> {

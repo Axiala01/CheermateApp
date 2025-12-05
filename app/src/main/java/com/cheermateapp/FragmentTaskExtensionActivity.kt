@@ -27,6 +27,8 @@ import kotlinx.coroutines.runBlocking
 import java.text.SimpleDateFormat
 import java.util.*
 
+import com.cheermateapp.util.ReminderManager
+
 class FragmentTaskExtensionActivity : AppCompatActivity() {
 
     companion object {
@@ -477,18 +479,29 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                 
                 withContext(Dispatchers.IO) {
                     // Calculate reminder time based on type
+                    val dueDate = task.getDueDate()
+                    val dueTime = task.DueTime
+                    
+                    val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+                    val dueDateTime = dateFormat.parse("${task.DueAt} ${task.DueTime}")
+
+                    if (dueDateTime == null) {
+                        android.util.Log.e("AlarmDebug", "Failed to parse due date/time for task ${task.Task_ID}")
+                        return@withContext
+                    }
+                    val dueTimeMillis = dueDateTime.time
+
                     val remindAt = when (reminderType) {
                         ReminderType.TEN_MINUTES_BEFORE -> {
-                            task.getDueDate()?.time?.minus(10 * 60 * 1000) ?: System.currentTimeMillis()
+                            dueTimeMillis - (10 * 60 * 1000)
                         }
                         ReminderType.THIRTY_MINUTES_BEFORE -> {
-                            task.getDueDate()?.time?.minus(30 * 60 * 1000) ?: System.currentTimeMillis()
+                            dueTimeMillis - (30 * 60 * 1000)
                         }
                         ReminderType.AT_SPECIFIC_TIME -> {
-                            specificTime ?: System.currentTimeMillis()
+                            specificTime ?: dueTimeMillis
                         }
-                    }
-                    
+                    }                    
                     // ✅ FIX: Check for existing active reminders first
                     val existingReminders = db.taskReminderDao().activeForTask(task.Task_ID, task.User_ID)
                     
@@ -501,7 +514,15 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                             UpdatedAt = System.currentTimeMillis()
                         )
                         db.taskReminderDao().update(updatedReminder)
-                        android.util.Log.d("FragmentTaskExtension", "✅ Reminder updated: $reminderType at $remindAt")
+                        ReminderManager.scheduleReminder(
+                            applicationContext,
+                            task.Task_ID,
+                            task.Title,
+                            task.Description,
+                            task.User_ID,
+                            updatedReminder.RemindAt
+                        ) // Schedule alarm
+                        android.util.Log.d("FragmentTaskExtension", "✅ Reminder updated and scheduled: $reminderType at $remindAt")
                     } else {
                         // No existing reminder, create a new one
                         val nextId = db.taskReminderDao().getNextReminderIdForUser(userId)
@@ -518,7 +539,15 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                         )
                         
                         db.taskReminderDao().insert(reminder)
-                        android.util.Log.d("FragmentTaskExtension", "✅ Reminder created: $reminderType at $remindAt")
+                        ReminderManager.scheduleReminder(
+                            applicationContext,
+                            task.Task_ID,
+                            task.Title,
+                            task.Description,
+                            task.User_ID,
+                            reminder.RemindAt
+                        ) // Schedule alarm
+                        android.util.Log.d("FragmentTaskExtension", "✅ Reminder created and scheduled: $reminderType at $remindAt")
                     }
                 }
                 

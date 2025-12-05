@@ -14,10 +14,30 @@ import kotlinx.coroutines.withContext
 import com.cheermateapp.data.model.Personality
 
 
+import com.cheermateapp.util.PermissionManager
+import androidx.activity.result.contract.ActivityResultContracts
+
 class ActivityLogin : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
     private val uiScope = CoroutineScope(Dispatchers.Main)
+
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                // Notification permission granted, now check for exact alarm permission.
+                PermissionManager.checkAndRequestExactAlarmPermission(this)
+            } else {
+                Toast.makeText(this, "Notifications are recommended for reminders.", Toast.LENGTH_LONG).show()
+            }
+        }
+
+    private fun requestPermissionsIfNecessary() {
+        if (PermissionManager.checkAndRequestNotificationPermission(this, requestPermissionLauncher)) {
+            // If notification permission is already granted, check for exact alarm permission too.
+            PermissionManager.checkAndRequestExactAlarmPermission(this)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +47,9 @@ class ActivityLogin : AppCompatActivity() {
             binding = ActivityLoginBinding.inflate(layoutInflater)
             setContentView(binding.root)
             
+            // Request permissions on launch
+            requestPermissionsIfNecessary()
+
             // Set initial state
             binding.PasswordHash.transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
             binding.passwordLayout.isEndIconVisible = false

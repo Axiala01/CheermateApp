@@ -60,7 +60,6 @@ object TaskDialogSpinnerHelper {
      */
     fun setupReminderSpinner(context: Context, spinner: Spinner) {
         val reminderItems = listOf(
-            IconSpinnerAdapter.SpinnerItem("🔕", "None"),
             IconSpinnerAdapter.SpinnerItem("⏰", "10 minutes before"),
             IconSpinnerAdapter.SpinnerItem("⏰", "30 minutes before"),
             IconSpinnerAdapter.SpinnerItem("🕐", "At specific time")
@@ -68,7 +67,7 @@ object TaskDialogSpinnerHelper {
         
         val adapter = IconSpinnerAdapter(context, reminderItems)
         spinner.adapter = adapter
-        spinner.setSelection(0) // Default to None
+        spinner.setSelection(2) // Default to At specific time
     }
     
     /**
@@ -92,6 +91,6 @@ object TaskDialogSpinnerHelper {
      */
     fun getSelectedReminder(spinner: Spinner): String {
         val item = spinner.selectedItem as? IconSpinnerAdapter.SpinnerItem
-        return item?.text ?: "None"
+        return item?.text ?: "At specific time"
     }
 }

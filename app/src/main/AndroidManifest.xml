@@ -65,10 +65,7 @@
             android:theme="@style/Theme.Material3.Light.NoActionBar" />
 
         <!-- Broadcast Receivers -->
-        <receiver
-            android:name=".receiver.ReminderReceiver"
-            android:enabled="true"
-            android:exported="false" />
+
 
         <receiver
             android:name=".receiver.AlarmReceiver"
@@ -79,7 +76,7 @@
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.permission.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 

@@ -5,7 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import com.cheermateapp.receiver.ReminderReceiver
+import com.cheermateapp.receiver.AlarmReceiver
 
 /**
  * Utility class for scheduling and managing task reminders using AlarmManager
@@ -31,10 +31,8 @@ object ReminderManager {
     ) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         
-        val intent = Intent(context, ReminderReceiver::class.java).apply {
+        val intent = Intent(context, AlarmReceiver::class.java).apply {
             putExtra("TASK_ID", taskId)
-            putExtra("TASK_TITLE", taskTitle)
-            putExtra("TASK_DESCRIPTION", taskDescription)
             putExtra("USER_ID", userId)
         }
         
@@ -45,16 +43,33 @@ object ReminderManager {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         
+        // Check if we can schedule exact alarms
+        val canSchedule = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            alarmManager.canScheduleExactAlarms()
+        } else {
+            true
+        }
+        
+        android.util.Log.d("ReminderManager", "📋 SCHEDULING ALARM:")
+        android.util.Log.d("ReminderManager", "  Task ID: $taskId")
+        android.util.Log.d("ReminderManager", "  Task Title: '$taskTitle'")
+        android.util.Log.d("ReminderManager", "  User ID: $userId")
+        android.util.Log.d("ReminderManager", "  Reminder Time: ${java.util.Date(reminderTimeMillis)}")
+        android.util.Log.d("ReminderManager", "  Current Time: ${java.util.Date()}")
+        android.util.Log.d("ReminderManager", "  Time Until Alarm: ${(reminderTimeMillis - System.currentTimeMillis()) / 1000} seconds")
+        android.util.Log.d("ReminderManager", "  Can Schedule Exact Alarms: $canSchedule")
+        
         // Schedule alarm
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                // For API 23+, use setExactAndAllowWhileIdle for better reliability
+                android.util.Log.d("ReminderManager", "🔧 Using setExactAndAllowWhileIdle (API 23+)")
                 alarmManager.setExactAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
                     reminderTimeMillis,
                     pendingIntent
                 )
             } else {
+                android.util.Log.d("ReminderManager", "🔧 Using setExact (API < 23)")
                 alarmManager.setExact(
                     AlarmManager.RTC_WAKEUP,
                     reminderTimeMillis,
@@ -62,12 +77,14 @@ object ReminderManager {
                 )
             }
             
-            android.util.Log.d(
-                "ReminderManager",
-                "⏰ Reminder scheduled for task: $taskTitle at ${java.util.Date(reminderTimeMillis)}"
-            )
+            android.util.Log.d("ReminderManager", "✅ ALARM SCHEDULED SUCCESSFULLY!")
+            android.util.Log.d("ReminderManager", "⏰ Reminder set for task '$taskTitle' at ${java.util.Date(reminderTimeMillis)}")
+            
         } catch (e: SecurityException) {
-            android.util.Log.e("ReminderManager", "Permission denied for scheduling alarm", e)
+            android.util.Log.e("ReminderManager", "❌ PERMISSION DENIED for scheduling alarm", e)
+            android.util.Log.e("ReminderManager", "💡 Please check SCHEDULE_EXACT_ALARM permission")
+        } catch (e: Exception) {
+            android.util.Log.e("ReminderManager", "💥 UNEXPECTED ERROR scheduling alarm", e)
         }
     }
     
@@ -79,7 +96,7 @@ object ReminderManager {
     fun cancelReminder(context: Context, taskId: Int) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         
-        val intent = Intent(context, ReminderReceiver::class.java)
+        val intent = Intent(context, AlarmReceiver::class.java)
         val pendingIntent = PendingIntent.getBroadcast(
             context,
             taskId,

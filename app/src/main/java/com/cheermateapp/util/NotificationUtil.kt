@@ -5,6 +5,8 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -30,6 +32,11 @@ object NotificationUtil {
                 description = CHANNEL_DESCRIPTION
                 enableLights(true)
                 enableVibration(true)
+                // Set the default alarm sound for the channel
+                setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM), null)
+                // Set a custom vibration pattern for the channel
+                // Example: wait 0ms, vibrate 1000ms, pause 500ms, vibrate 1000ms
+                vibrationPattern = longArrayOf(0, 1000, 500, 1000)
             }
             
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -71,6 +78,9 @@ object NotificationUtil {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
+            .setDefaults(NotificationCompat.DEFAULT_LIGHTS) // Enable default lights
+            .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)) // Set alarm sound
+            .setVibrate(longArrayOf(0, 1000, 500, 1000)) // Set custom vibration pattern
             .build()
         
         // Show notification
