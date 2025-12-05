@@ -355,6 +355,56 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // ==================== REMINDER OPERATIONS ====================
+
+    /**
+     * Insert a new task with a reminder and schedule it.
+     */
+    fun insertTaskWithReminder(task: Task, reminder: com.cheermateapp.data.model.TaskReminder) {
+        viewModelScope.launch {
+            _taskOperationState.value = UiState.Loading
+            
+            when (val result = taskRepository.insertTaskAndReminder(task, reminder)) {
+                is DataResult.Success -> {
+                    val newReminder = result.data
+                    com.cheermateapp.util.AlarmScheduler.schedule(getApplication(), task, newReminder)
+                    _taskOperationState.value = UiState.Success("Task with reminder created")
+                }
+                is DataResult.Error -> {
+                    _taskOperationState.value = UiState.Error(result.message ?: "Failed", result.exception)
+                }
+                is DataResult.Loading -> {
+                    // Loading state
+                }
+            }
+        }
+    }
+
+    /**
+     * Delete a task and cancel its associated reminder.
+     */
+    fun deleteTaskWithReminder(task: Task, reminder: com.cheermateapp.data.model.TaskReminder) {
+        viewModelScope.launch {
+            _taskOperationState.value = UiState.Loading
+            
+            when (val result = taskRepository.softDeleteTask(task.User_ID, task.Task_ID)) {
+                is DataResult.Success -> {
+                    com.cheermateapp.util.AlarmScheduler.cancel(getApplication(), reminder)
+                    _taskOperationState.value = UiState.Success("Task deleted successfully")
+                }
+                is DataResult.Error -> {
+                    _taskOperationState.value = UiState.Error(
+                        result.message ?: "Failed to delete task",
+                        result.exception
+                    )
+                }
+                is DataResult.Loading -> {
+                    // Already in loading state
+                }
+            }
+        }
+    }
+
     // ==================== RESET STATE ====================
 
     /**

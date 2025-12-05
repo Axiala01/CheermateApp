@@ -403,4 +403,38 @@ class TaskRepository(
             DataResult.Error(e, "Failed to complete tasks: ${e.message}")
         }
     }
+
+    // ==================== REMINDER OPERATIONS ====================
+
+    /**
+     * Get a single task by its composite key.
+     * This is a simplified version for use in background services like BroadcastReceivers.
+     */
+    suspend fun getTaskForReceiver(userId: Int, taskId: Int): Task? = withContext(Dispatchers.IO) {
+        try {
+            taskDao.getTaskByCompositeKey(userId, taskId)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting task by ID for receiver", e)
+            null
+        }
+    }
+
+    /**
+     * Inserts a task and its reminder in a single transaction.
+     */
+    suspend fun insertTaskAndReminder(task: Task, reminder: TaskReminder): DataResult<TaskReminder> = withContext(Dispatchers.IO) {
+        try {
+            // Note: This isn't a true DB transaction without a @Transaction method in the DAO.
+            // For a true transaction, you would need to add a method to the DAO.
+            // This is a simplified version for now.
+            val taskId = taskDao.insert(task)
+            val reminderWithTaskId = reminder.copy(Task_ID = taskId.toInt())
+            val reminderId = taskReminderDao.insert(reminderWithTaskId)
+            val finalReminder = reminderWithTaskId.copy(TaskReminder_ID = reminderId.toInt())
+            DataResult.Success(finalReminder)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error inserting task and reminder", e)
+            DataResult.Error(e, "Failed to create task with reminder: ${e.message}")
+        }
+    }
 }

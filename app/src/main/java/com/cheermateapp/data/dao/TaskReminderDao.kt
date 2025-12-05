@@ -44,4 +44,7 @@ interface TaskReminderDao {
     @Transaction
     @Query("DELETE FROM TaskReminder WHERE Task_ID = :taskId AND User_ID = :userId")
     suspend fun deleteAllForTask(taskId: Int, userId: Int)
+
+    @Query("SELECT * FROM TaskReminder WHERE IsActive = 1")
+    suspend fun getAllActiveReminders(): List<TaskReminder>
 }
