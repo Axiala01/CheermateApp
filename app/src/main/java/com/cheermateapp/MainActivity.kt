@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AnimationUtils
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.CalendarView
@@ -54,7 +53,6 @@ import com.cheermateapp.ui.tasks.TasksViewModelFactory
 import com.cheermateapp.util.InputValidationUtil
 import com.cheermateapp.util.PasswordHashUtil
 import com.cheermateapp.util.AlarmTestHelper
-import com.cheermateapp.util.AnimationHelper
 import com.cheermateapp.util.ReminderManager
 import com.cheermateapp.util.ThemeManager
 import com.cheermateapp.util.ToastManager
@@ -519,17 +517,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun showHomeScreen() {
         try {
-            val homeScroll = findViewById<ScrollView>(R.id.homeScroll)
+            findViewById<ScrollView>(R.id.homeScroll)?.visibility = View.VISIBLE
             val container = findViewById<FrameLayout>(R.id.contentContainer)
-            
-            // Animate content transition
-            if (container?.visibility == View.VISIBLE) {
-                AnimationHelper.fadeOut(container, 150, true)
-            }
-            homeScroll?.let {
-                it.visibility = View.VISIBLE
-                AnimationHelper.fadeIn(it, 200)
-            }
             container?.visibility = View.GONE
 
             if (!isHomeInteractionSetup) {
@@ -558,16 +547,11 @@ class MainActivity : AppCompatActivity() {
     // ✅ NAVIGATION METHODS - FRAGMENT SWITCHING (NOT SEPARATE ACTIVITIES)
     private fun navigateToTasks() {
         try {
-            val homeScroll = findViewById<ScrollView>(R.id.homeScroll)
-            val container = findViewById<FrameLayout>(R.id.contentContainer)
-            
-            // Animate content transition
-            if (homeScroll?.visibility == View.VISIBLE) {
-                AnimationHelper.fadeOut(homeScroll, 150, true)
-            }
-            homeScroll?.visibility = View.GONE
+            // Hide home screen
+            findViewById<ScrollView>(R.id.homeScroll)?.visibility = View.GONE
 
-            // Show content container with animation
+            // Show content container
+            val container = findViewById<FrameLayout>(R.id.contentContainer)
             container?.visibility = View.VISIBLE
 
             // Reuse cached Tasks root view to avoid re-inflation and flicker
@@ -588,9 +572,6 @@ class MainActivity : AppCompatActivity() {
                     android.util.Log.d("MainActivity", "ℹ️ Tasks Fragment already visible, no re-attach")
                 }
             }
-            
-            // Animate container entrance
-            container?.let { AnimationHelper.fadeIn(it, 200) }
 
             isSettingsScreenInitialized = false
 
@@ -606,16 +587,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun navigateToSettings() {
         try {
-            val homeScroll = findViewById<ScrollView>(R.id.homeScroll)
-            val container = findViewById<FrameLayout>(R.id.contentContainer)
-            
-            // Animate content transition
-            if (homeScroll?.visibility == View.VISIBLE) {
-                AnimationHelper.fadeOut(homeScroll, 150, true)
-            }
-            homeScroll?.visibility = View.GONE
+            // Hide home screen
+            findViewById<ScrollView>(R.id.homeScroll)?.visibility = View.GONE
 
-            // Show content container with animation
+            // Show content container
+            val container = findViewById<FrameLayout>(R.id.contentContainer)
             container?.visibility = View.VISIBLE
 
             // Reuse cached Settings root view to avoid re-inflation and flicker
@@ -636,9 +612,6 @@ class MainActivity : AppCompatActivity() {
                     android.util.Log.d("MainActivity", "ℹ️ Settings Fragment already visible, no re-attach")
                 }
             }
-            
-            // Animate container entrance
-            container?.let { AnimationHelper.fadeIn(it, 200) }
 
             isTasksScreenInitialized = false
 
@@ -678,12 +651,6 @@ class MainActivity : AppCompatActivity() {
             // ✅ Initialize RecyclerView and TaskAdapter
             taskRecyclerView = findViewById<RecyclerView>(R.id.recyclerViewTasks)
             taskRecyclerView?.layoutManager = LinearLayoutManager(this)
-            
-            // ✅ Add RecyclerView item animations
-            taskRecyclerView?.let { rv ->
-                AnimationHelper.setupRecyclerViewItemAnimator(rv)
-                AnimationHelper.applyLayoutAnimation(rv, R.anim.layout_animation_fall_down)
-            }
             
             taskAdapter = TaskAdapter(
                 tasks = mutableListOf(),
@@ -786,21 +753,19 @@ class MainActivity : AppCompatActivity() {
     
     private fun updateTaskTabSelection(selectedTab: TextView) {
         try {
-            // Reset all tabs with animation
+            // Reset all tabs
             val tabs = listOf(findViewById<TextView>(R.id.tabAll), findViewById<TextView>(R.id.tabToday), findViewById<TextView>(R.id.tabPending), findViewById<TextView>(R.id.tabDone))
-            tabs.forEach { tab ->
+            tabs.forEach {
+                tab ->
                 tab?.apply {
                     setBackgroundResource(android.R.color.transparent)
-                    AnimationHelper.animateTabAlpha(this, 0.7f)
+                    alpha = 0.7f
                 }
             }
 
-            // Highlight selected tab with animation
+            // Highlight selected tab
             selectedTab.setBackgroundResource(R.drawable.bg_chip_glass)
-            AnimationHelper.animateTabAlpha(selectedTab, 1.0f)
-            
-            // Run layout animation on RecyclerView for filter change
-            taskRecyclerView?.let { AnimationHelper.runLayoutAnimation(it) }
+            selectedTab.alpha = 1.0f
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error updating tab selection", e)
         }
@@ -1784,16 +1749,12 @@ class MainActivity : AppCompatActivity() {
     // ✅ HOME SCREEN INTERACTIONS (DASHBOARD ONLY)
     private fun setupHomeScreenInteractions() {
         try {
-            // ✅ Setup FAB for adding tasks with entrance animation
+            // ✅ Setup FAB for adding tasks
             findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fabAddTask)?.apply {
                 isEnabled = true
                 isClickable = true
                 bringToFront()
                 setOnClickListener { showQuickAddTaskDialog() }
-                
-                // Apply entrance animation
-                val fabAnimation = AnimationUtils.loadAnimation(this@MainActivity, R.anim.fab_scale_up)
-                startAnimation(fabAnimation)
             }
 
             // Calendar date selection -> show tasks under calendar
@@ -2045,9 +2006,6 @@ class MainActivity : AppCompatActivity() {
             val dialog = builder.create()
             dialog.setCanceledOnTouchOutside(false)
             dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-            
-            // Apply dialog animation using setWindowAnimations for reliable application
-            dialog.window?.setWindowAnimations(R.style.DialogAnimation)
 
             // Set click listener for the "Cancel" button inside the dialog
             btnCancelTask.setOnClickListener {
@@ -2623,16 +2581,25 @@ class MainActivity : AppCompatActivity() {
             progressSubtitle.text = subtitle
             progressPercent.text = "$percentage%"
 
-            // ✅ Animate progress bar weight to reflect percentage
-            AnimationHelper.animateProgressWeight(progressCompleted, percentage.toFloat())
-            AnimationHelper.animateProgressWeight(progressInProgress, inProgressPercentage.toFloat())
+            // ✅ Update progress bar weight to reflect percentage
+            (progressCompleted.layoutParams as? LinearLayout.LayoutParams)?.let { params ->
+                params.weight = percentage.toFloat()
+                progressCompleted.layoutParams = params
+            }
+
+            (progressInProgress.layoutParams as? LinearLayout.LayoutParams)?.let { params ->
+                params.weight = inProgressPercentage.toFloat()
+                progressInProgress.layoutParams = params
+            }
 
             // Update the remainder weight
             val progressBar = progressCompleted.parent as? LinearLayout
             if (progressBar != null && progressBar.childCount > 2) {
                 val remainder = progressBar.getChildAt(2)
-                val remainderWeight = (100 - percentage - inProgressPercentage).toFloat().coerceAtLeast(0f)
-                AnimationHelper.animateProgressWeight(remainder, remainderWeight)
+                (remainder.layoutParams as? LinearLayout.LayoutParams)?.let { remParams ->
+                    remParams.weight = (100 - percentage - inProgressPercentage).toFloat().coerceAtLeast(0f)
+                    remainder.layoutParams = remParams
+                }
                 // ✅ Request layout update to force redraw
                 progressBar.requestLayout()
             }
