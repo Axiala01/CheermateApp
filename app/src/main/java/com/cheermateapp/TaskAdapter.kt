@@ -114,11 +114,13 @@ class TaskAdapter(
             val taskDate = Calendar.getInstance().apply { time = date!! }
 
             when {
-                            val timeText = ""                    "📅 Today$timeText"
+                isSameDay(today, taskDate) -> {
+                    val timeText = if (!task.DueTime.isNullOrBlank()) " at ${task.DueTime.trim()}" else ""
+                    "📅 Due Today$timeText"
                 }
                 isSameDay(tomorrow, taskDate) -> {
-                    val timeText = ""
-                    "📅 Tomorrow$timeText"
+                    val timeText = if (!task.DueTime.isNullOrBlank()) " at ${task.DueTime.trim()}" else ""
+                    "📅 Due Tomorrow$timeText"
                 }
                 taskDate.before(today) -> {
                     "🔴 Overdue"
