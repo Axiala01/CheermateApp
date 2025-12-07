@@ -127,8 +127,7 @@ class TaskAdapter(
                 }
                 else -> {
                     val displayFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
-                    val timeText = if (!task.DueTime.isNullOrBlank()) " at ${task.DueTime.trim()}" else ""
-                    "📅 ${displayFormat.format(date)}$timeText"
+                    "📅 ${displayFormat.format(date)}"
                 }
             }
         } catch (e: Exception) {
