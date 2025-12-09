@@ -31,32 +31,27 @@ object DatabaseSeeder {
                         Personality(
                             Personality_ID = 1,
                             Name = "Kalog",
-                            Description = "The funny friend who makes everything entertaining!",
-                            IsActive = true
+                            Description = "The funny friend who makes everything entertaining!"
                         ),
                         Personality(
                             Personality_ID = 2,
                             Name = "Gen Z",
-                            Description = "Tech-savvy and trendy with the latest slang!",
-                            IsActive = true
+                            Description = "Tech-savvy and trendy with the latest slang!"
                         ),
                         Personality(
                             Personality_ID = 3,
                             Name = "Softy",
-                            Description = "Gentle and caring with a warm heart!",
-                            IsActive = true
+                            Description = "Gentle and caring with a warm heart!"
                         ),
                         Personality(
                             Personality_ID = 4,
                             Name = "Grey",
-                            Description = "Calm and balanced with steady wisdom!",
-                            IsActive = true
+                            Description = "Calm and balanced with steady wisdom!"
                         ),
                         Personality(
                             Personality_ID = 5,
                             Name = "Flirty",
-                            Description = "Playful and charming with a wink!",
-                            IsActive = true
+                            Description = "Playful and charming with a wink!"
                         )
                     )
                     

@@ -268,7 +268,6 @@ class SignUpActivity : AppCompatActivity() {
                         PasswordHash = hashedPassword,
                         FirstName = firstName,
                         LastName = lastName,
-                        Birthdate = null,
                         Personality_ID = null
                     )
 
