@@ -71,7 +71,7 @@ object BulkTaskOperations {
                 if (task != null) {
                     val updatedTask = task.copy(
                         Priority = newPriority,
-                        UpdatedAt = System.currentTimeMillis()
+                        UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                     )
                     taskDao.update(updatedTask)
                     successCount++
@@ -212,7 +212,7 @@ object BulkTaskOperations {
                     val updatedTask = task.copy(
                         DueAt = newDueDate,
                         DueTime = newDueTime ?: task.DueTime,
-                        UpdatedAt = System.currentTimeMillis()
+                        UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                     )
                     taskDao.update(updatedTask)
                     successCount++

@@ -23,7 +23,7 @@ import com.google.gson.Gson
         UserSettings::class,
         MessageTemplate::class
     ],
-    version = 35,
+    version = 36,
     exportSchema = false
 )
 @TypeConverters(AppTypeConverters::class)
@@ -317,6 +317,104 @@ abstract class AppDb : RoomDatabase() {
         private val MIGRATION_34_35 = createMigration(34, 35) { db ->
             db.execSQL("DROP TABLE IF EXISTS TaskDependency")
         }
+        
+        private val MIGRATION_35_36 = createMigration(35, 36) { db ->
+            recreateTableWithSchema(db, "User",
+                createSql = """
+                    CREATE TABLE User_new (
+                        User_ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        Username TEXT NOT NULL,
+                        Email TEXT NOT NULL,
+                        PasswordHash TEXT NOT NULL,
+                        FirstName TEXT NOT NULL DEFAULT '',
+                        LastName TEXT NOT NULL DEFAULT '',
+                        Personality_ID INTEGER,
+                        CreatedAt TEXT NOT NULL,
+                        UpdatedAt TEXT NOT NULL
+                    )
+                """.trimIndent(),
+                copySql = """
+                    INSERT INTO User_new (User_ID, Username, Email, PasswordHash, FirstName, LastName, Personality_ID, CreatedAt, UpdatedAt)
+                    SELECT User_ID, Username, Email, PasswordHash, FirstName, LastName, Personality_ID, datetime(CreatedAt/1000, 'unixepoch'), datetime(UpdatedAt/1000, 'unixepoch') FROM User
+                """.trimIndent()
+            ) { createIndexesForUser(it) }
+
+            recreateTableWithSchema(db, "Task",
+                createSql = """
+                    CREATE TABLE Task_new (
+                        Task_ID INTEGER NOT NULL,
+                        User_ID INTEGER NOT NULL,
+                        Title TEXT NOT NULL,
+                        Description TEXT,
+                        Category TEXT NOT NULL,
+                        Priority TEXT NOT NULL,
+                        DueAt TEXT,
+                        DueTime TEXT,
+                        Status TEXT NOT NULL,
+                        TaskProgress INTEGER NOT NULL,
+                        CreatedAt TEXT NOT NULL,
+                        UpdatedAt TEXT NOT NULL,
+                        DeletedAt INTEGER,
+                        PRIMARY KEY(Task_ID, User_ID),
+                        FOREIGN KEY(User_ID) REFERENCES User(User_ID) ON DELETE CASCADE
+                    )
+                """.trimIndent(),
+                copySql = """
+                    INSERT INTO Task_new (Task_ID, User_ID, Title, Description, Category, Priority, DueAt, DueTime, Status, TaskProgress, CreatedAt, UpdatedAt, DeletedAt)
+                    SELECT Task_ID, User_ID, Title, Description, Category, Priority, DueAt, DueTime, Status, TaskProgress, datetime(CreatedAt/1000, 'unixepoch'), datetime(UpdatedAt/1000, 'unixepoch'), DeletedAt FROM Task
+                """.trimIndent()
+            ) {
+                it.execSQL("CREATE INDEX IF NOT EXISTS index_Task_User_ID ON Task(User_ID)")
+            }
+
+            recreateTableWithSchema(db, "TaskReminder",
+                createSql = """
+                    CREATE TABLE TaskReminder_new (
+                        TaskReminder_ID INTEGER NOT NULL,
+                        Task_ID INTEGER NOT NULL,
+                        User_ID INTEGER NOT NULL,
+                        RemindAt INTEGER NOT NULL,
+                        ReminderType TEXT,
+                        IsActive INTEGER NOT NULL,
+                        CreatedAt TEXT NOT NULL,
+                        UpdatedAt TEXT NOT NULL,
+                        PRIMARY KEY(TaskReminder_ID, Task_ID, User_ID),
+                        FOREIGN KEY(Task_ID, User_ID) REFERENCES Task(Task_ID, User_ID) ON DELETE CASCADE
+                    )
+                """.trimIndent(),
+                copySql = """
+                    INSERT INTO TaskReminder_new (TaskReminder_ID, Task_ID, User_ID, RemindAt, ReminderType, IsActive, CreatedAt, UpdatedAt)
+                    SELECT TaskReminder_ID, Task_ID, User_ID, RemindAt, ReminderType, IsActive, datetime(CreatedAt/1000, 'unixepoch'), datetime(UpdatedAt/1000, 'unixepoch') FROM TaskReminder
+                """.trimIndent()
+            ) {
+                it.execSQL("CREATE INDEX IF NOT EXISTS index_TaskReminder_Task_ID ON TaskReminder(Task_ID)")
+                it.execSQL("CREATE INDEX IF NOT EXISTS index_TaskReminder_User_ID ON TaskReminder(User_ID)")
+                it.execSQL("CREATE INDEX IF NOT EXISTS `index_TaskReminder_Task_ID_User_ID` ON `TaskReminder` (`Task_ID`, `User_ID`)")
+            }
+
+            recreateTableWithSchema(db, "SubTask",
+                createSql = """
+                    CREATE TABLE SubTask_new (
+                        SubTask_ID INTEGER NOT NULL,
+                        Task_ID INTEGER NOT NULL,
+                        User_ID INTEGER NOT NULL,
+                        Name TEXT NOT NULL,
+                        IsCompleted INTEGER NOT NULL,
+                        CreatedAt TEXT NOT NULL,
+                        UpdatedAt TEXT NOT NULL,
+                        PRIMARY KEY(Task_ID, User_ID, SubTask_ID),
+                        FOREIGN KEY(Task_ID, User_ID) REFERENCES Task(Task_ID, User_ID) ON DELETE CASCADE
+                    )
+                """.trimIndent(),
+                copySql = """
+                    INSERT INTO SubTask_new (SubTask_ID, Task_ID, User_ID, Name, IsCompleted, CreatedAt, UpdatedAt)
+                    SELECT SubTask_ID, Task_ID, User_ID, Name, IsCompleted, datetime(CreatedAt/1000, 'unixepoch'), datetime(CreatedAt/1000, 'unixepoch') FROM SubTask
+                """.trimIndent()
+            ) {
+                it.execSQL("CREATE INDEX IF NOT EXISTS index_SubTask_Task_ID ON SubTask(Task_ID)")
+                it.execSQL("CREATE INDEX IF NOT EXISTS index_SubTask_User_ID ON SubTask(User_ID)")
+            }
+        }
 
         private fun buildDatabase(appContext: Context): AppDb {
             return Room.databaseBuilder(
@@ -339,7 +437,8 @@ abstract class AppDb : RoomDatabase() {
                     MIGRATION_31_32,
                     MIGRATION_32_33,
                     MIGRATION_33_34,
-                    MIGRATION_34_35
+                    MIGRATION_34_35,
+                    MIGRATION_35_36
                 )
                 .addTypeConverter(AppTypeConverters(Gson()))
                 .build()

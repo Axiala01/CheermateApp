@@ -42,17 +42,17 @@ interface TaskDao {
 
     // ✅ SOFT DELETE WITH COMPOSITE KEY
     @Query("UPDATE Task SET DeletedAt = :deletedAt, UpdatedAt = :updatedAt WHERE User_ID = :userId AND Task_ID = :taskId")
-    suspend fun softDelete(userId: Int, taskId: Int, deletedAt: Long = System.currentTimeMillis(), updatedAt: Long = System.currentTimeMillis())
+    suspend fun softDelete(userId: Int, taskId: Int, deletedAt: Long = System.currentTimeMillis(), updatedAt: String = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp())
 
     @Query("UPDATE Task SET DeletedAt = NULL, UpdatedAt = :updatedAt WHERE User_ID = :userId AND Task_ID = :taskId")
-    suspend fun restoreTask(userId: Int, taskId: Int, updatedAt: Long = System.currentTimeMillis())
+    suspend fun restoreTask(userId: Int, taskId: Int, updatedAt: String = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp())
 
     // ✅ TASK COMPLETION WITH COMPOSITE KEY
     @Query("UPDATE Task SET Status = 'Completed', TaskProgress = 100, UpdatedAt = :updatedAt WHERE User_ID = :userId AND Task_ID = :taskId")
-    suspend fun markTaskCompleted(userId: Int, taskId: Int, updatedAt: Long = System.currentTimeMillis())
+    suspend fun markTaskCompleted(userId: Int, taskId: Int, updatedAt: String = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp())
 
     @Query("UPDATE Task SET TaskProgress = :progress, UpdatedAt = :updatedAt WHERE User_ID = :userId AND Task_ID = :taskId")
-    suspend fun updateTaskProgress(userId: Int, taskId: Int, progress: Int, updatedAt: Long = System.currentTimeMillis())
+    suspend fun updateTaskProgress(userId: Int, taskId: Int, progress: Int, updatedAt: String = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp())
 
     // ✅ TASK STATUS UPDATE (also updates TaskProgress based on status)
     @Query("""
@@ -65,7 +65,7 @@ interface TaskDao {
             UpdatedAt = :updatedAt 
         WHERE User_ID = :userId AND Task_ID = :taskId
     """)
-    suspend fun updateTaskStatus(userId: Int, taskId: Int, status: String, updatedAt: Long = System.currentTimeMillis())
+    suspend fun updateTaskStatus(userId: Int, taskId: Int, status: String, updatedAt: String = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp())
 
     // ✅ **MISSING METHODS IMPLEMENTED FOR FragmentTaskActivity**
 
@@ -242,11 +242,11 @@ interface TaskDao {
 
     @Transaction
     @Query("UPDATE Task SET DeletedAt = :deletedAt WHERE User_ID = :userId AND Task_ID IN (:taskIds)")
-    suspend fun softDeleteMultiple(userId: Int, taskIds: List<Int>, deletedAt: Long = System.currentTimeMillis())
+    suspend fun softDeleteMultiple(userId: Int, taskIds: List<Int>, deletedAt: String = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp())
 
     @Transaction
     @Query("UPDATE Task SET Status = 'Completed', TaskProgress = 100, UpdatedAt = :updatedAt WHERE User_ID = :userId AND Task_ID IN (:taskIds)")
-    suspend fun markMultipleCompleted(userId: Int, taskIds: List<Int>, updatedAt: Long = System.currentTimeMillis())
+    suspend fun markMultipleCompleted(userId: Int, taskIds: List<Int>, updatedAt: String = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp())
 
     // ✅ DATA MANAGEMENT QUERIES (WITH @Transaction FOR SAFETY)
     @Transaction

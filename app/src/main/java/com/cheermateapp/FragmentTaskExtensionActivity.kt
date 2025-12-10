@@ -294,8 +294,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
             .setItems(categories) { _, which ->
                 currentTask?.let { task ->
                     val updatedTask = task.copy(
-                        Category = categoryValues[which],
-                        UpdatedAt = System.currentTimeMillis()
+                        UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                     )
                     // Update currentTask immediately to ensure it's saved in onPause
                     currentTask = updatedTask
@@ -315,9 +314,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
             .setItems(priorities) { _, which ->
                 currentTask?.let { task ->
                     val updatedTask = task.copy(
-                        Priority = priorityValues[which],
-                        UpdatedAt = System.currentTimeMillis()
-                    )
+                                                        UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()                    )
                     // Update currentTask immediately to ensure it's saved in onPause
                     currentTask = updatedTask
                     saveTask(updatedTask)
@@ -391,7 +388,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
         currentTask?.let { task ->
             val updatedTask = task.copy(
                 DueAt = newDueDate,
-                UpdatedAt = System.currentTimeMillis()
+                UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
             )
             // Update currentTask immediately to ensure it's saved in onPause
             currentTask = updatedTask
@@ -510,7 +507,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                         val updatedReminder = existingReminder.copy(
                             RemindAt = remindAt,
                             ReminderType = reminderType,
-                            UpdatedAt = System.currentTimeMillis()
+                            UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                         )
                         db.taskReminderDao().update(updatedReminder)
                         ReminderManager.scheduleReminder(
@@ -533,8 +530,8 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                             RemindAt = remindAt,
                             ReminderType = reminderType,
                             IsActive = true,
-                            CreatedAt = System.currentTimeMillis(),
-                            UpdatedAt = System.currentTimeMillis()
+                            CreatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp(),
+                            UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                         )
                         
                         db.taskReminderDao().insert(reminder)
@@ -621,7 +618,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                 val updatedTask = task.copy(
                     Title = title,
                     Description = description.ifEmpty { null },
-                    UpdatedAt = System.currentTimeMillis()
+                    UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                 )
                 saveTask(updatedTask)
             }
@@ -703,7 +700,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                     User_ID = userId,
                     Name = subtaskName,
                     IsCompleted = false,
-                    CreatedAt = System.currentTimeMillis()
+                    CreatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                 )
                 
                 withContext(Dispatchers.IO) {
@@ -816,7 +813,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                 val updatedTask = task.copy(
                     Title = title,
                     Description = description.ifEmpty { null },
-                    UpdatedAt = System.currentTimeMillis()
+                    UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                 )
                 saveTaskSynchronously(updatedTask)
             }
@@ -889,7 +886,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                     lifecycleScope.launch {
                         try {
                             val db = AppDb.get(this@FragmentTaskExtensionActivity)
-                            val updatedAt = System.currentTimeMillis()
+                            val updatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                             withContext(Dispatchers.IO) {
                                 db.taskDao().updateTaskStatus(
                                     task.User_ID,
@@ -961,7 +958,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
             
             val updatedTask = task.copy(
                 DueAt = newDueDate,
-                UpdatedAt = System.currentTimeMillis()
+                UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
             )
             
             // Update currentTask immediately to ensure it's saved in onPause
@@ -1022,7 +1019,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                 currentTask?.let { task ->
                     val updatedTask = task.copy(
                         DueAt = newDueDate,
-                        UpdatedAt = System.currentTimeMillis()
+                        UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                     )
                     
                     // Update currentTask immediately to ensure it's saved in onPause
@@ -1069,7 +1066,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
         )
         
         // Set minimum date to today
-        datePickerDialog.datePicker.minDate = System.currentTimeMillis()
+        datePickerDialog.datePicker.minDate = Date().time
         datePickerDialog.show()
     }
 
@@ -1093,7 +1090,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                             // Update the current task status
                             currentTask = task.copy(
                                 Status = Status.Cancelled,
-                                UpdatedAt = System.currentTimeMillis()
+                                UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                             )
                             
                             // Update the status display

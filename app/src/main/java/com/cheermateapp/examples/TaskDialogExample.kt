@@ -205,7 +205,6 @@ class TaskDialogExample : AppCompatActivity() {
                 }
                 
                 // Create the task object
-                val currentTime = System.currentTimeMillis()
                 val task = Task(
                     Task_ID = taskId,
                     User_ID = currentUserId,
@@ -217,8 +216,8 @@ class TaskDialogExample : AppCompatActivity() {
                     TaskProgress = 0,
                     DueAt = dueDate,
                     DueTime = dueTime,
-                    CreatedAt = currentTime,
-                    UpdatedAt = currentTime,
+                    CreatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp(),
+                    UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp(),
                     DeletedAt = null
                 )
                 

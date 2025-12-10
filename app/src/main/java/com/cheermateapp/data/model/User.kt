@@ -21,6 +21,6 @@ data class User(
     val FirstName: String = "",
     val LastName: String = "",
     val Personality_ID: Int? = null,
-    val CreatedAt: Long = System.currentTimeMillis(),
-    val UpdatedAt: Long = System.currentTimeMillis()
+    val CreatedAt: String = TimestampUtil.getCurrentTimestamp(),
+    val UpdatedAt: String = TimestampUtil.getCurrentTimestamp()
 )

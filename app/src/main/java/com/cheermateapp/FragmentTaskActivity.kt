@@ -293,7 +293,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                         Category = category ?: task.Category,
                         Priority = priority ?: task.Priority,
                         DueAt = dueDate ?: task.DueAt,
-                        UpdatedAt = System.currentTimeMillis()
+                        UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                     )
                     
                     // Update in database
@@ -533,7 +533,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                 android.util.Log.d("FragmentTaskActivity", "Creating test tasks for user $userId")
 
                 withContext(Dispatchers.IO) {
-                    val currentTime = System.currentTimeMillis()
+                    val currentTime = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
 
                     // ✅ FIXED: Use Long timestamps instead of String dates
                     val task1 = Task(
@@ -576,7 +576,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                         TaskProgress = 100,
                         DueAt = "2025-09-28",
                         DueTime = "16:00",
-                        CreatedAt = currentTime - 86400000L,  // ✅ 1 day ago (Long timestamp)
+                        CreatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp(),  // ✅ 1 day ago (Long timestamp)
                         UpdatedAt = currentTime,  // ✅ Long timestamp
                         DeletedAt = null
                     )
@@ -1238,7 +1238,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                     TaskProgress = progress,
                     DueAt = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(dueDate),
                     DueTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(dueDate),
-                    UpdatedAt = System.currentTimeMillis()
+                    UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                 )
 
                 withContext(Dispatchers.IO) {
@@ -1479,7 +1479,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                     else -> Priority.Medium
                 }
 
-                val currentTime = System.currentTimeMillis()  // ✅ Get current timestamp
+                val currentTime = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()  // ✅ Get current timestamp
 
                 val newTask = Task(
                     Task_ID = taskId,

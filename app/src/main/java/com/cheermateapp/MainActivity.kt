@@ -1096,7 +1096,7 @@ class MainActivity : AppCompatActivity() {
                     TaskProgress = progress,
                     DueAt = if (dueDate.isNotBlank()) dueDate else null,
                     DueTime = if (dueTime.isNotBlank()) dueTime else null,
-                    UpdatedAt = System.currentTimeMillis()
+                    UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                 )
 
                 withContext(Dispatchers.IO) {
@@ -1471,8 +1471,7 @@ class MainActivity : AppCompatActivity() {
                         Username = newUsername,
                         Email = newEmail,
                         FirstName = newFirstName,
-                        LastName = newLastName,
-                        UpdatedAt = System.currentTimeMillis()
+                    UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                     )
                     db.userDao().update(updatedUser)
                 }
@@ -1637,8 +1636,7 @@ class MainActivity : AppCompatActivity() {
                     // Update user
                     val updatedUser = user.copy(
                         PasswordHash = newHashedPassword,
-                        UpdatedAt = System.currentTimeMillis()
-                    )
+                                                        UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()                    )
                     db.userDao().update(updatedUser)
                     
                     return@withContext true
