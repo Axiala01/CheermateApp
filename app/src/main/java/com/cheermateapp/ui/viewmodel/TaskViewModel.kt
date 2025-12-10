@@ -23,8 +23,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     private val taskRepository = TaskRepository(
         db.taskDao(),
         db.subTaskDao(),
-        db.taskReminderDao(),
-        db.taskDependencyDao()
+        db.taskReminderDao()
     )
 
     // ==================== UI STATE FLOWS ====================

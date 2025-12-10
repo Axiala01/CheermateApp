@@ -16,8 +16,7 @@ import kotlinx.coroutines.withContext
 class TaskRepository(
     private val taskDao: TaskDao,
     private val subTaskDao: SubTaskDao,
-    private val taskReminderDao: TaskReminderDao,
-    private val taskDependencyDao: TaskDependencyDao
+    private val taskReminderDao: TaskReminderDao
 ) {
 
     companion object {

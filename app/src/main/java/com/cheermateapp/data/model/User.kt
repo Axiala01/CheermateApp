@@ -22,6 +22,5 @@ data class User(
     val LastName: String = "",
     val Personality_ID: Int? = null,
     val CreatedAt: Long = System.currentTimeMillis(),
-    val UpdatedAt: Long = System.currentTimeMillis(),
-    val DeletedAt: Long? = null
+    val UpdatedAt: Long = System.currentTimeMillis()
 )
