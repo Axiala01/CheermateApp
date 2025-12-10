@@ -49,7 +49,13 @@ A comprehensive Android task management application built with Kotlin, featuring
 
 ## 📱 Screenshots
 
-*Add screenshots of your app here*
+| | | |
+|:-------------------------:|:-------------------------:|:-------------------------:|
+| <img src="screenshots/Screenshot_20251211_025154.png" width="200"> | <img src="screenshots/Screenshot_20251211_025318.png" width="200"> | <img src="screenshots/Screenshot_20251211_025406.png" width="200"> |
+| <img src="screenshots/Screenshot_20251211_025424.png" width="200"> | <img src="screenshots/Screenshot_20251211_025443.png" width="200"> | <img src="screenshots/Screenshot_20251211_025453.png" width="200"> |
+| <img src="screenshots/Screenshot_20251211_025505.png" width="200"> | <img src="screenshots/Screenshot_20251211_025516.png" width="200"> | <img src="screenshots/Screenshot_20251211_025539.png" width="200"> |
+| <img src="screenshots/Screenshot_20251211_025542.png" width="200"> | <img src="screenshots/Screenshot_20251211_025549.png" width="200"> | <img src="screenshots/Screenshot_20251211_025602.png" width="200"> |
+| <img src="screenshots/Screenshot_20251211_025611.png" width="200"> | | |
 
 ## 📋 Development
 
