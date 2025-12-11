@@ -1,19 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/gradient_background"
-    android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".ActivityLogin">
+
+    <ImageButton
+        android:id="@+id/btnToggleTheme"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_margin="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/toggle_theme"
+        android:padding="8dp"
+        android:src="@drawable/ic_dark_mode_night_moon"
+        app:tint="@android:color/white" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="match_parent"
         android:layout_gravity="center_vertical"
-        android:layout_weight="1"
         android:gravity="center_horizontal"
         android:orientation="vertical"
         android:padding="20dp">
@@ -57,11 +68,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            app:boxBackgroundColor="#80FFFFFF"
+            app:boxBackgroundColor="@color/glass_fill_color"
             app:boxCornerRadiusBottomEnd="12dp"
             app:boxCornerRadiusBottomStart="12dp"
             app:boxCornerRadiusTopEnd="12dp"
             app:boxCornerRadiusTopStart="12dp"
+            app:hintTextColor="@color/white"
             app:boxStrokeColor="#FFFFFFFF"
             app:boxStrokeWidth="1dp"
             app:boxStrokeWidthFocused="2dp">
@@ -84,11 +96,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            app:boxBackgroundColor="#80FFFFFF"
+            app:boxBackgroundColor="@color/glass_fill_color"
             app:boxCornerRadiusBottomEnd="12dp"
             app:boxCornerRadiusBottomStart="12dp"
             app:boxCornerRadiusTopEnd="12dp"
             app:boxCornerRadiusTopStart="12dp"
+            app:hintTextColor="@color/white"
             app:boxStrokeColor="#FFFFFFFF"
             app:boxStrokeWidth="1dp"
             app:boxStrokeWidthFocused="2dp"
@@ -174,4 +187,4 @@
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</RelativeLayout>

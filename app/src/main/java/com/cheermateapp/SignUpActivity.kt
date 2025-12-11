@@ -3,6 +3,7 @@ package com.cheermateapp
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ArrayAdapter
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.cheermateapp.data.StaticDataRepository
@@ -13,6 +14,7 @@ import com.cheermateapp.data.model.SecurityQuestion
 import com.cheermateapp.data.model.UserSecurityAnswer
 import com.cheermateapp.util.PasswordHashUtil
 import com.cheermateapp.util.InputValidationUtil
+import com.cheermateapp.util.ThemeManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -27,6 +29,12 @@ class SignUpActivity : AppCompatActivity() {
     private val uiScope = CoroutineScope(Dispatchers.Main)
     private lateinit var staticDataRepository: StaticDataRepository
 
+    private fun updateThemeToggleButton(button: ImageButton?) {
+        button?.setImageResource(
+            R.drawable.ic_dark_mode_night_moon
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         com.cheermateapp.util.ThemeManager.initializeTheme(this)
@@ -34,6 +42,14 @@ class SignUpActivity : AppCompatActivity() {
         try {
             binding = ActivitySignUpBinding.inflate(layoutInflater)
             setContentView(binding.root)
+
+            // Setup theme toggle button
+            val btnToggleTheme = findViewById<ImageButton>(R.id.btnToggleTheme)
+            updateThemeToggleButton(btnToggleTheme)
+            btnToggleTheme?.setOnClickListener {
+                com.cheermateapp.util.ThemeManager.toggleDarkMode(this)
+                recreate()
+            }
 
             // Set initial state
             binding.etPassword.transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()

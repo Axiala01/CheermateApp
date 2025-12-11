@@ -279,7 +279,7 @@
             <ImageView
                 android:layout_width="22dp"
                 android:layout_height="22dp"
-                android:src="@drawable/ic_darkmode"
+                android:src="@drawable/ic_dark_mode_night_moon"
                 app:tint="@color/white" />
 
             <LinearLayout

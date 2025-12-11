@@ -2,6 +2,7 @@ package com.cheermateapp
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.cheermateapp.databinding.ActivityLoginBinding
@@ -21,6 +22,12 @@ class ActivityLogin : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
     private val uiScope = CoroutineScope(Dispatchers.Main)
+
+    private fun updateThemeToggleButton(button: android.widget.ImageButton?) {
+        button?.setImageResource(
+            R.drawable.ic_dark_mode_night_moon
+        )
+    }
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
@@ -46,6 +53,14 @@ class ActivityLogin : AppCompatActivity() {
         try {
             binding = ActivityLoginBinding.inflate(layoutInflater)
             setContentView(binding.root)
+
+            // Setup theme toggle button
+            val btnToggleTheme = findViewById<android.widget.ImageButton>(R.id.btnToggleTheme)
+            updateThemeToggleButton(btnToggleTheme)
+            btnToggleTheme?.setOnClickListener {
+                com.cheermateapp.util.ThemeManager.toggleDarkMode(this)
+                recreate()
+            }
             
             // Request permissions on launch
             requestPermissionsIfNecessary()

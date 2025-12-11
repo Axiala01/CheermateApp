@@ -4,11 +4,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.cheermateapp.data.StaticDataRepository
 import com.cheermateapp.data.db.AppDb
 import com.cheermateapp.data.model.Personality
+import com.cheermateapp.util.ThemeManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -19,10 +21,24 @@ class PersonalityActivity : AppCompatActivity() {
     private lateinit var staticDataRepository: StaticDataRepository
     private var personalities: List<Personality> = emptyList()
 
+    private fun updateThemeToggleButton(button: ImageButton?) {
+        button?.setImageResource(
+            R.drawable.ic_dark_mode_night_moon
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         com.cheermateapp.util.ThemeManager.initializeTheme(this)
         setContentView(R.layout.activity_personality)
+
+        // Setup theme toggle button
+        val btnToggleTheme = findViewById<ImageButton>(R.id.btnToggleTheme)
+        updateThemeToggleButton(btnToggleTheme)
+        btnToggleTheme?.setOnClickListener {
+            com.cheermateapp.util.ThemeManager.toggleDarkMode(this)
+            recreate()
+        }
 
         // Initialize repository
         staticDataRepository = StaticDataRepository(this)
