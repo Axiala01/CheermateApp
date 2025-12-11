@@ -264,7 +264,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
         tvTaskStatus.text = when (status) {
             Status.Pending -> "⏳ Pending"
             Status.InProgress -> "🔄 In Progress"
-            Status.Done -> "✅ Done"
+            Status.Completed -> "✅ Done"
             Status.Cancelled -> "❌ Cancelled"
             Status.OverDue -> "🔴 Overdue"
         }
@@ -935,13 +935,13 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                             
                             // Update the current task status
                             currentTask = task.copy(
-                                Status = Status.Done,
+                                Status = Status.Completed,
                                 TaskProgress = 100,
                                 UpdatedAt = updatedAt
                             )
                             
                             // Update the status display
-                            updateTaskStatus(Status.Done)
+                            updateTaskStatus(Status.Completed)
                             
                             Toast.makeText(
                                 this@FragmentTaskExtensionActivity,
