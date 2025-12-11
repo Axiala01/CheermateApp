@@ -53,6 +53,7 @@ class FragmentTaskActivity : AppCompatActivity() {
     private var progressSubtitle: TextView? = null
     private var progressPercent: TextView? = null
     private var progressCompleted: View? = null
+    private var progressInProgress: View? = null
 
     private var currentFilter = FilterType.ALL
     private var userId: Int = 0
@@ -172,6 +173,7 @@ class FragmentTaskActivity : AppCompatActivity() {
             progressSubtitle = findViewById(R.id.progressSubtitle)
             progressPercent = findViewById(R.id.progressPercent)
             progressCompleted = findViewById(R.id.progressCompleted)
+            progressInProgress = findViewById(R.id.progressInProgress)
 
             // Setup RecyclerView
             recyclerViewTasks.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
@@ -701,21 +703,18 @@ class FragmentTaskActivity : AppCompatActivity() {
             progressSubtitle?.text = "$completed of $total tasks completed"
             progressPercent?.text = "$percentage%"
 
-            val progressCompleted = findViewById<View>(R.id.progressCompleted)
-            val progressInProgress = findViewById<View>(R.id.progressInProgress)
-
             // Update progress bar fill using weight
-            progressCompleted?.layoutParams?.let { params ->
-                if (params is LinearLayout.LayoutParams) {
+            progressCompleted?.let { progressView ->
+                (progressView.layoutParams as? LinearLayout.LayoutParams)?.also { params ->
                     params.weight = percentage.coerceAtLeast(0).toFloat()
-                    progressCompleted.layoutParams = params
+                    progressView.layoutParams = params
                 }
             }
 
-            progressInProgress?.layoutParams?.let { params ->
-                if (params is LinearLayout.LayoutParams) {
+            progressInProgress?.let { progressView ->
+                (progressView.layoutParams as? LinearLayout.LayoutParams)?.also { params ->
                     params.weight = inProgressPercentage.coerceAtLeast(0).toFloat()
-                    progressInProgress.layoutParams = params
+                    progressView.layoutParams = params
                 }
             }
 

@@ -1080,12 +1080,17 @@ class MainActivity : AppCompatActivity() {
                     else -> Priority.Medium
                 }
 
-                val statusEnum = when (status.uppercase()) {
+                var statusEnum = when (status.uppercase()) {
                     "PENDING" -> Status.Pending
                     "INPROGRESS" -> Status.InProgress
                     "DONE" -> Status.Done
                     "CANCELLED" -> Status.Cancelled
                     else -> Status.Pending
+                }
+
+                // If progress is 100, force status to Done
+                if (progress == 100) {
+                    statusEnum = Status.Done
                 }
 
                 val updatedTask = originalTask.copy(
@@ -2555,7 +2560,7 @@ class MainActivity : AppCompatActivity() {
 
                 updateStatisticsDisplay(stats)
                 // ✅ Update progress bar with today's tasks progress
-                // updateProgressDisplay(stats["todayCompleted"] ?: 0, stats["todayInProgress"] ?: 0, stats["today"] ?: 0)
+                updateProgressDisplay(stats["todayCompleted"] ?: 0, stats["todayInProgress"] ?: 0, stats["today"] ?: 0)
 
                 android.util.Log.d("MainActivity", "✅ Dashboard statistics loaded")
 

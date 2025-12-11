@@ -41,7 +41,7 @@ interface TaskDao {
     fun getTaskByCompositeKeyLive(userId: Int, taskId: Int): LiveData<Task?>
 
     // ✅ TASK COMPLETION WITH COMPOSITE KEY
-    @Query("UPDATE Task SET Status = 'Completed', TaskProgress = 100, UpdatedAt = :updatedAt WHERE User_ID = :userId AND Task_ID = :taskId")
+    @Query("UPDATE Task SET Status = 'Done', TaskProgress = 100, UpdatedAt = :updatedAt WHERE User_ID = :userId AND Task_ID = :taskId")
     suspend fun markTaskCompleted(userId: Int, taskId: Int, updatedAt: String = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp())
 
     @Query("UPDATE Task SET TaskProgress = :progress, UpdatedAt = :updatedAt WHERE User_ID = :userId AND Task_ID = :taskId")
@@ -52,7 +52,7 @@ interface TaskDao {
         UPDATE Task 
         SET Status = :status, 
             TaskProgress = CASE 
-                WHEN :status = 'Completed' THEN 100 
+                WHEN :status = 'Done' THEN 100 
                 ELSE 0 
             END,
             UpdatedAt = :updatedAt 
@@ -85,7 +85,7 @@ interface TaskDao {
     @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND Status IN ('Pending', 'InProgress')")
     suspend fun getPendingTasksCount(userId: Int): Int
 
-    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND Status = 'Completed'")
+    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND Status = 'Done'")
     suspend fun getCompletedTasksCount(userId: Int): Int
 
     @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND Status IN ('Pending', 'InProgress')")
@@ -105,16 +105,16 @@ interface TaskDao {
     @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DueAt = :date")
     fun getTodayTasksCountFlow(userId: Int, date: String): Flow<Int>
 
-    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND Status = 'Completed'")
+    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND Status = 'Done'")
     fun getCompletedTasksCountFlow(userId: Int): Flow<Int>
 
-    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DueAt = :todayStr AND Status = 'Completed'")
+    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DueAt = :todayStr AND Status = 'Done'")
     fun getCompletedTodayTasksCountFlow(userId: Int, todayStr: String): Flow<Int>
 
     @Query("""
         SELECT COUNT(*) FROM Task 
         WHERE User_ID = :userId 
-        AND Status = 'Completed' 
+        AND Status = 'Done' 
         AND date(UpdatedAt) = date('now', 'localtime')
     """)
     fun getTasksCompletedTodayByUpdateFlow(userId: Int): Flow<Int>
@@ -129,7 +129,7 @@ interface TaskDao {
     @Query("SELECT * FROM Task WHERE User_ID = :userId AND Status IN ('Pending', 'InProgress') ORDER BY DueAt ASC")
     fun getPendingTasksLive(userId: Int): LiveData<List<Task>>
 
-    @Query("SELECT * FROM Task WHERE User_ID = :userId AND Status = 'Completed' ORDER BY UpdatedAt DESC")
+    @Query("SELECT * FROM Task WHERE User_ID = :userId AND Status = 'Done' ORDER BY UpdatedAt DESC")
     fun getCompletedTasksLive(userId: Int): LiveData<List<Task>>
 
     // ✅ FLOW METHODS FOR REACTIVE UPDATES (MODERN APPROACH)
@@ -142,7 +142,7 @@ interface TaskDao {
     @Query("SELECT * FROM Task WHERE User_ID = :userId AND Status IN ('Pending', 'InProgress') ORDER BY DueAt ASC")
     fun getPendingTasksFlow(userId: Int): Flow<List<Task>>
 
-    @Query("SELECT * FROM Task WHERE User_ID = :userId AND Status = 'Completed' ORDER BY UpdatedAt DESC")
+    @Query("SELECT * FROM Task WHERE User_ID = :userId AND Status = 'Done' ORDER BY UpdatedAt DESC")
     fun getCompletedTasksFlow(userId: Int): Flow<List<Task>>
 
     @Query("SELECT * FROM Task WHERE User_ID = :userId AND Task_ID = :taskId")
@@ -156,7 +156,7 @@ interface TaskDao {
     @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND Status = 'OverDue'")
     suspend fun getOverdueTasksCount(userId: Int): Int
 
-    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DueAt = :todayStr AND Status = 'Completed'")
+    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DueAt = :todayStr AND Status = 'Done'")
     suspend fun getCompletedTodayTasksCount(userId: Int, todayStr: String): Int
 
     @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DueAt = :todayStr AND Status = 'InProgress'")
