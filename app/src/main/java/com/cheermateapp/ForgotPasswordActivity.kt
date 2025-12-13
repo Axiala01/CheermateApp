@@ -31,7 +31,9 @@ class ForgotPasswordActivity : AppCompatActivity() {
     private lateinit var staticDataRepository: StaticDataRepository
 
     private fun updateThemeToggleButton(button: ImageButton?) {
-        button?.setImageResource(R.drawable.ic_dark_mode_night_moon)
+        button?.setImageResource(
+            if (ThemeManager.isDarkModeActive(this)) R.drawable.dark_mode__streamline_rounded_material_pro_free else R.drawable.light_mode__streamline_rounded_material_symbols
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,7 +88,7 @@ class ForgotPasswordActivity : AppCompatActivity() {
                 
                 val adapter = ArrayAdapter(
                     this@ForgotPasswordActivity,
-                    android.R.layout.simple_dropdown_item_1line,
+                    R.layout.dropdown_item,
                     securityQuestions
                 )
                 binding.etSecurityQuestion?.setAdapter(adapter)

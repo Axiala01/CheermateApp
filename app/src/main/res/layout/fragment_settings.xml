@@ -277,10 +277,10 @@
             android:paddingHorizontal="14dp">
 
             <ImageView
+                android:id="@+id/darkModeIcon"
                 android:layout_width="22dp"
                 android:layout_height="22dp"
-                android:src="@drawable/ic_dark_mode_night_moon"
-                app:tint="@color/white" />
+                android:src="@drawable/light_mode__streamline_rounded_material_symbols" />
 
             <LinearLayout
                 android:layout_width="0dp"

@@ -2,8 +2,8 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
-            <solid android:color="#33FF6B6B"/>      <!-- Brighter red on press -->
-            <stroke android:width="1dp" android:color="#66FF6B6B"/>
+            <solid android:color="@color/card_glass_danger_pressed_solid"/>      <!-- Brighter red on press -->
+            <stroke android:width="1dp" android:color="@color/card_glass_danger_pressed_stroke"/>
             <corners android:radius="14dp"/>
             <padding
                 android:left="8dp"
@@ -14,8 +14,8 @@
     </item>
     <item android:state_hovered="true">
         <shape android:shape="rectangle">
-            <solid android:color="#26FF6B6B"/>      <!-- Subtle red hover -->
-            <stroke android:width="1dp" android:color="#59FF6B6B"/>
+            <solid android:color="@color/card_glass_danger_hovered_solid"/>      <!-- Subtle red hover -->
+            <stroke android:width="1dp" android:color="@color/card_glass_danger_hovered_stroke"/>
             <corners android:radius="14dp"/>
             <padding
                 android:left="8dp"
@@ -26,8 +26,8 @@
     </item>
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="#1AFF6B6B"/>      <!-- Base red glass -->
-            <stroke android:width="1dp" android:color="#4DFF6B6B"/>
+            <solid android:color="@color/card_glass_danger_default_solid"/>      <!-- Base red glass -->
+            <stroke android:width="1dp" android:color="@color/card_glass_danger_default_stroke"/>
             <corners android:radius="14dp"/>
             <padding
                 android:left="8dp"

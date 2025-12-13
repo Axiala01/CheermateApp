@@ -14,12 +14,12 @@
         android:layout_height="48dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
-        android:layout_margin="16dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="16dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/toggle_theme"
         android:padding="8dp"
-        android:src="@drawable/ic_dark_mode_night_moon"
-        app:tint="@android:color/white" />
+        android:src="@drawable/light_mode__streamline_rounded_material_symbols" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -33,7 +33,9 @@
             android:id="@+id/imageView2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:srcCompat="@drawable/cheermate_logo" />
+            app:srcCompat="@drawable/cheermate_logo"
+            android:layout_marginTop="48dp"
+            android:layout_marginBottom="16dp" />
 
         <TextView
             android:id="@+id/editTextText2"
@@ -152,7 +154,7 @@
                 android:focusable="true"
                 android:fontFamily="@font/sf_pro_rounded_regular"
                 android:text="@string/forgot_password_underlined"
-                android:textColor="@android:color/white"
+                android:textColor="@color/white"
                 android:foreground="?attr/selectableItemBackgroundBorderless" />
 
             <!-- Line 2: Regular + bold "Sign up" -->
@@ -169,7 +171,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/don_t_have_an_account"
-                    android:textColor="@android:color/white"
+                    android:textColor="@color/white"
                     android:textSize="14sp"
                     android:fontFamily="@font/sf_pro_rounded_regular"/>
 
@@ -179,7 +181,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/sign_up"
                     android:layout_marginStart="5dp"
-                    android:textColor="@android:color/white"
+                    android:textColor="@color/white"
                     android:textSize="14sp"
                     android:fontFamily="@font/sf_pro_rounded_bold"
                     android:clickable="true"

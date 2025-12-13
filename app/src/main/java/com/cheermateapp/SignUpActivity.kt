@@ -31,7 +31,7 @@ class SignUpActivity : AppCompatActivity() {
 
     private fun updateThemeToggleButton(button: ImageButton?) {
         button?.setImageResource(
-            R.drawable.ic_dark_mode_night_moon
+            if (ThemeManager.isDarkModeActive(this)) R.drawable.dark_mode__streamline_rounded_material_pro_free else R.drawable.light_mode__streamline_rounded_material_symbols
         )
     }
 
@@ -112,7 +112,7 @@ class SignUpActivity : AppCompatActivity() {
                 
                 val adapter = ArrayAdapter(
                     this@SignUpActivity,
-                    android.R.layout.simple_dropdown_item_1line,
+                    R.layout.dropdown_item,
                     securityQuestions
                 )
                 binding.etSecurityQuestion?.setAdapter(adapter)

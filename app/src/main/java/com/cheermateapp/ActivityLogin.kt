@@ -25,7 +25,7 @@ class ActivityLogin : AppCompatActivity() {
 
     private fun updateThemeToggleButton(button: android.widget.ImageButton?) {
         button?.setImageResource(
-            R.drawable.ic_dark_mode_night_moon
+            if (com.cheermateapp.util.ThemeManager.isDarkModeActive(this)) R.drawable.dark_mode__streamline_rounded_material_pro_free else R.drawable.light_mode__streamline_rounded_material_symbols
         )
     }
 

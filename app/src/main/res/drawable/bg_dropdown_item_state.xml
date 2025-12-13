@@ -2,13 +2,13 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
-            <solid android:color="#33FFFFFF"/> <!-- same family as glass stroke/fill -->
+            <solid android:color="@color/dropdown_item_pressed_solid"/> <!-- same family as glass stroke/fill -->
             <corners android:radius="8dp"/>
         </shape>
     </item>
     <item android:state_hovered="true">
         <shape android:shape="rectangle">
-            <solid android:color="#26FFFFFF"/> <!-- slightly lighter on hover -->
+            <solid android:color="@color/dropdown_item_hovered_solid"/> <!-- slightly lighter on hover -->
             <corners android:radius="8dp"/>
         </shape>
     </item>

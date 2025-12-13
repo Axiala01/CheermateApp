@@ -26,6 +26,13 @@ class FragmentSettingsActivity : AppCompatActivity() {
     private var userId: Int = 0
     private lateinit var staticDataRepository: StaticDataRepository
 
+    private fun updateDarkModeIcon() {
+        val darkModeIcon = findViewById<ImageView>(R.id.darkModeIcon)
+        darkModeIcon?.setImageResource(
+            if (ThemeManager.isDarkModeActive(this)) R.drawable.dark_mode__streamline_rounded_material_pro_free else R.drawable.light_mode__streamline_rounded_material_symbols
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         com.cheermateapp.util.ThemeManager.initializeTheme(this)
@@ -41,6 +48,7 @@ class FragmentSettingsActivity : AppCompatActivity() {
         setupBottomNavigation()
         loadSettingsUserData()
         setupSettingsInteractions()
+        updateDarkModeIcon()
     }
 
     private fun setupToolbar() {
@@ -264,7 +272,7 @@ class FragmentSettingsActivity : AppCompatActivity() {
                     if (isChecked) "🌙 Dark mode enabled" else "☀️ Light mode enabled", 
                     Toast.LENGTH_SHORT
                 ).show()
-                
+                updateDarkModeIcon()
                 // Recreate activity to apply theme
                 recreate()
             }

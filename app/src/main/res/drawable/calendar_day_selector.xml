@@ -4,7 +4,7 @@
     <item android:state_selected="true">
         <shape android:shape="oval">
             <solid android:color="@color/calendar_selected" />
-            <stroke android:width="2dp" android:color="#FFFFFF40" />
+            <stroke android:width="2dp" android:color="@color/calendar_selector_stroke" />
             <size android:width="48dp" android:height="48dp" />
         </shape>
     </item>
@@ -12,8 +12,8 @@
     <!-- Pressed state -->
     <item android:state_pressed="true">
         <shape android:shape="oval">
-            <solid android:color="#CC9F5FD9" />
-            <stroke android:width="2dp" android:color="#FFFFFF40" />
+            <solid android:color="@color/calendar_pressed_solid" />
+            <stroke android:width="2dp" android:color="@color/calendar_selector_stroke" />
             <size android:width="48dp" android:height="48dp" />
         </shape>
     </item>
@@ -22,7 +22,7 @@
     <item android:state_activated="true">
         <shape android:shape="oval">
             <solid android:color="@color/calendar_today" />
-            <stroke android:width="2dp" android:color="#FFFFFF40" />
+            <stroke android:width="2dp" android:color="@color/calendar_selector_stroke" />
             <size android:width="48dp" android:height="48dp" />
         </shape>
     </item>
