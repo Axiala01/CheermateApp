@@ -26,7 +26,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/sf_pro_rounded_bold"
                 android:text="Settings"
-                android:textColor="@android:color/white"
+                android:textColor="@color/white"
                 android:textSize="18sp" />
 
             <ImageView
@@ -34,7 +34,7 @@
                 android:layout_height="16dp"
                 android:layout_marginStart="6dp"
                 android:src="@android:drawable/ic_menu_preferences"
-                app:tint="@android:color/white" />
+                app:tint="@color/white" />
         </LinearLayout>
 
         <TextView
@@ -83,7 +83,7 @@
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/sf_pro_rounded_bold"
                         android:text="User"
-                        android:textColor="@android:color/white"
+                        android:textColor="@color/white"
                         android:textSize="14sp" />
 
                     <TextView
@@ -100,7 +100,7 @@
                     android:layout_width="18dp"
                     android:layout_height="18dp"
                     android:src="@android:drawable/ic_menu_edit"
-                    app:tint="@android:color/white" />
+                app:tint="@color/white" />
             </LinearLayout>
 
             <TextView
@@ -112,7 +112,7 @@
                 android:paddingHorizontal="10dp"
                 android:paddingVertical="4dp"
                 android:text="Your Personality"
-                android:textColor="@android:color/white"
+                android:textColor="@color/white"
                 android:textSize="11sp" />
         </LinearLayout>
 
@@ -148,7 +148,7 @@
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/sf_pro_rounded_bold"
                         android:text="0"
-                        android:textColor="@android:color/white"
+                        android:textColor="@color/white"
                         android:textSize="18sp" />
 
                     <TextView
@@ -172,7 +172,7 @@
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/sf_pro_rounded_bold"
                         android:text="0"
-                        android:textColor="@android:color/white"
+                        android:textColor="@color/white"
                         android:textSize="18sp" />
 
                     <TextView
@@ -196,7 +196,7 @@
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/sf_pro_rounded_bold"
                         android:text="0%"
-                        android:textColor="@android:color/white"
+                        android:textColor="@color/white"
                         android:textSize="18sp" />
 
                     <TextView
@@ -233,7 +233,7 @@
                 android:layout_width="22dp"
                 android:layout_height="22dp"
                 android:src="@drawable/ic_magic_wand"
-                app:tint="@android:color/white" />
+                app:tint="@color/white" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -247,7 +247,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sf_pro_rounded_bold"
                     android:text="@string/personality"
-                    android:textColor="@android:color/white"
+                    android:textColor="@color/white"
                     android:textSize="14sp" />
 
                 <TextView
@@ -263,7 +263,7 @@
                 android:layout_width="16dp"
                 android:layout_height="16dp"
                 android:src="@android:drawable/ic_menu_edit"
-                app:tint="@android:color/white" />
+                app:tint="@color/white" />
         </LinearLayout>
 
         <!-- Dark Mode row -->
@@ -338,7 +338,7 @@
                 android:layout_width="22dp"
                 android:layout_height="22dp"
                 android:src="@drawable/ic_bell"
-                app:tint="@android:color/white" />
+                app:tint="@color/white" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -352,7 +352,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/sf_pro_rounded_bold"
                     android:text="Notifications"
-                    android:textColor="@android:color/white"
+                    android:textColor="@color/white"
                     android:textSize="14sp" />
 
                 <TextView

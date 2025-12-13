@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.View
 import android.widget.ImageButton
 import android.widget.Toast
+import com.cheermateapp.util.ToastManager
 import androidx.appcompat.app.AppCompatActivity
 import com.cheermateapp.data.StaticDataRepository
 import com.cheermateapp.data.db.AppDb
@@ -49,12 +50,12 @@ class PersonalityActivity : AppCompatActivity() {
 
         if (userId == -1) {
             Log.e("PersonalityActivity", "USER_ID is invalid!")
-            Toast.makeText(this, "Invalid user ID", Toast.LENGTH_SHORT).show()
+            ToastManager.showCustomToast(this, "Invalid user ID", Toast.LENGTH_SHORT)
             finish()
             return
         }
 
-        Toast.makeText(this, "Select your personality", Toast.LENGTH_SHORT).show()
+        ToastManager.showCustomToast(this, "Select your personality", Toast.LENGTH_SHORT)
 
         // Load personalities from database with cache
         loadPersonalities(userId)
@@ -69,7 +70,7 @@ class PersonalityActivity : AppCompatActivity() {
                 }
                 
                 if (personalities.isEmpty()) {
-                    Toast.makeText(this@PersonalityActivity, "No personalities available", Toast.LENGTH_SHORT).show()
+                    ToastManager.showCustomToast(this@PersonalityActivity, "No personalities available", Toast.LENGTH_SHORT)
                     finish()
                     return@launch
                 }
@@ -81,7 +82,7 @@ class PersonalityActivity : AppCompatActivity() {
                 
             } catch (e: Exception) {
                 Log.e("PersonalityActivity", "Error loading personalities", e)
-                Toast.makeText(this@PersonalityActivity, "Error loading personalities", Toast.LENGTH_SHORT).show()
+                ToastManager.showCustomToast(this@PersonalityActivity, "Error loading personalities", Toast.LENGTH_SHORT)
                 finish()
             }
         }
@@ -122,7 +123,7 @@ class PersonalityActivity : AppCompatActivity() {
 
                 } catch (e: Exception) {
                     Log.e("PersonalityActivity", "Error saving personality", e)
-                    Toast.makeText(this@PersonalityActivity, "Error saving personality: ${e.message}", Toast.LENGTH_LONG).show()
+                    ToastManager.showCustomToast(this@PersonalityActivity, "Error saving personality: ${e.message}", Toast.LENGTH_LONG)
 
                     // Re-enable buttons on error
                     findViewById<View>(R.id.cardKalog)?.isEnabled = true

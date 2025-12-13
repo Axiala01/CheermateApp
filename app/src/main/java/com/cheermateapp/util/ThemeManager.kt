@@ -24,7 +24,7 @@ object ThemeManager {
      * Get current theme mode
      */
             fun getThemeMode(context: Context): String {
-                return getPreferences(context).getString(KEY_THEME_MODE, THEME_LIGHT) ?: THEME_LIGHT
+                return getPreferences(context).getString(KEY_THEME_MODE, THEME_SYSTEM) ?: THEME_SYSTEM
             }    
         /**
          * Apply theme based on mode
@@ -67,7 +67,10 @@ object ThemeManager {
             return when (mode) {
                 THEME_DARK -> true
                 THEME_LIGHT -> false
-                else -> false // Should not happen with current setup, but for safety
+                else -> {
+                    val nightModeFlags = context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
+                    nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES
+                }
             }
         }
     /**

@@ -223,7 +223,7 @@ class MainActivity : AppCompatActivity() {
 
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Critical error in onCreate", e)
-            ToastManager.showToast(this, "Loading dashboard...", Toast.LENGTH_SHORT)
+            ToastManager.showCustomToast(this, "Loading dashboard...", Toast.LENGTH_SHORT)
             finish()
         }
     }
@@ -383,7 +383,7 @@ class MainActivity : AppCompatActivity() {
                         android.util.Log.d("MainActivity", "🧪 Starting quick test alarm...")
                         lifecycleScope.launch {
                             AlarmTestHelper.scheduleTestAlarm(this@MainActivity, 15, "🧪 Quick Test (15s)")
-                            ToastManager.showToast(this@MainActivity, "🔔 Test alarm set for 15 seconds. Watch logcat!", Toast.LENGTH_LONG)
+                            ToastManager.showCustomToast(this@MainActivity, "🔔 Test alarm set for 15 seconds. Watch logcat!", Toast.LENGTH_LONG)
                         }
                     }
                     1 -> {

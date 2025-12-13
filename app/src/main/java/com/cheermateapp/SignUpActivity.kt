@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.ImageButton
 import android.widget.Toast
+import com.cheermateapp.util.ToastManager
 import androidx.appcompat.app.AppCompatActivity
 import com.cheermateapp.data.StaticDataRepository
 import com.cheermateapp.databinding.ActivitySignUpBinding
@@ -83,7 +84,7 @@ class SignUpActivity : AppCompatActivity() {
             setupKeyboardAwareScroll()
 
         } catch (e: Exception) {
-            Toast.makeText(this, "Error loading sign up screen", Toast.LENGTH_LONG).show()
+            ToastManager.showCustomToast(this, "Error loading sign up screen", Toast.LENGTH_LONG)
             android.util.Log.e("SignUpActivity", "Error in onCreate", e)
             finish()
         }
@@ -101,11 +102,11 @@ class SignUpActivity : AppCompatActivity() {
                 }
                 
                 if (securityQuestions.isEmpty()) {
-                    Toast.makeText(
+                    ToastManager.showCustomToast(
                         this@SignUpActivity,
                         "No security questions available. Please try again later.",
                         Toast.LENGTH_LONG
-                    ).show()
+                    )
                     android.util.Log.e("SignUpActivity", "No security questions found")
                     return@launch
                 }
@@ -121,11 +122,11 @@ class SignUpActivity : AppCompatActivity() {
                 android.util.Log.d("SignUpActivity", "Loaded ${securityQuestions.size} security questions")
             } catch (e: Exception) {
                 android.util.Log.e("SignUpActivity", "Error loading security questions", e)
-                Toast.makeText(
+                ToastManager.showCustomToast(
                     this@SignUpActivity,
                     "Error loading security questions",
                     Toast.LENGTH_SHORT
-                ).show()
+                )
             }
         }
     }

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="black">#FFFFFFFF</color> <!-- White in dark mode -->
-    <color name="white">#FFCCCCCC</color> <!-- Black in dark mode -->
+    <color name="white">#FFFFFFFF</color> <!-- White in dark mode -->
     <color name="gradient_start">#FFA667C3</color>
     <color name="gradient_end">#FF00B4D8</color>
 
     <!-- Text colors -->
-    <color name="text_secondary_white_70">#CC000000</color> <!-- Translucent black in dark mode -->
+    <color name="text_secondary_white_70">#B3FFFFFF</color> <!-- Translucent white in dark mode -->
     <color name="text_primary">#FFFFFFFF</color> <!-- White in dark mode -->
     <color name="text_secondary">#B3FFFFFF</color> <!-- Translucent white in dark mode -->
 
@@ -45,6 +45,12 @@
 
     <color name="spinner_text_color">#FFFFFFFF</color>
     <color name="btn_create_task_text_color">#FF000000</color>
+
+    <color name="switch_thumb_normal">#FF666666</color>
+    <color name="control_activated">#FF8A65FF</color>
+
+    <color name="toast_background_color">#FF333333</color>
+    <color name="toast_text_color">#FFFFFFFF</color>
 
     <!-- Glass effect colors -->
     <color name="glass_fill_color">#0D000000</color> <!-- Base dark glass from drawable-night -->

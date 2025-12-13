@@ -111,10 +111,6 @@ class ProperViewModelUsageExampleActivity : AppCompatActivity() {
         observeUiState(
             stateFlow = taskViewModel.allTasksState,
             progressBar = progressBar,
-            onLoading = {
-                // Optional: Additional loading logic
-                emptyStateView.visibility = View.GONE
-            },
             onSuccess = { tasks ->
                 // Update UI with tasks
                 displayTasks(tasks)
