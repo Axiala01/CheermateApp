@@ -160,7 +160,7 @@ object BulkTaskOperations {
                 val task = taskDao.getTaskByCompositeKey(userId, taskId)
                 if (task != null) {
                     val updatedTask = task.copy(
-                        DueAt = newDueDate,
+                        DueDate = newDueDate,
                         DueTime = newDueTime ?: task.DueTime,
                         UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                     )

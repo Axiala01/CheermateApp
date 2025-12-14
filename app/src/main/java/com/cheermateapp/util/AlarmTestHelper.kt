@@ -44,7 +44,7 @@ object AlarmTestHelper {
                 Title = taskTitle,
                 Description = "This is a test alarm created for testing purposes. Time created: ${Date()}",
                 CreatedAt = currentTime,
-                DueAt = null,
+                DueDate = null,
                 DueTime = null,
                 Status = com.cheermateapp.data.model.Status.Pending,
                 Priority = com.cheermateapp.data.model.Priority.Medium,
@@ -69,14 +69,14 @@ object AlarmTestHelper {
                     TaskReminder_ID = 0, // Will be auto-generated
                     Task_ID = insertedTaskId,
                     User_ID = 1,
-                    RemindAt = triggerTime,
+                    RemindAt = TaskReminder.timestampToReadableString(triggerTime),
                     ReminderType = com.cheermateapp.data.model.ReminderType.AT_SPECIFIC_TIME,
                     CreatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp(),
                     UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                 )
                 
                 Log.d(TAG, "⏰ Test reminder details:")
-                Log.d(TAG, "  Will trigger at: ${Date(testReminder.RemindAt)}")
+                Log.d(TAG, "  Will trigger at: ${testReminder.formattedRemindAtFull}")
                 
                 // Insert the reminder
                 val insertedReminderId = db.taskReminderDao().insert(testReminder).toInt()
@@ -93,7 +93,7 @@ object AlarmTestHelper {
                         finalTask.Title,
                         finalTask.Description,
                         finalTask.User_ID,
-                        finalReminder.RemindAt
+                        finalReminder.remindAtTimestamp
                     )
                 }
                 
@@ -173,7 +173,7 @@ object AlarmTestHelper {
                     reminders.forEachIndexed { index, reminder ->
                         val task = db.taskDao().getTaskByCompositeKey(reminder.User_ID, reminder.Task_ID)
                         Log.d(TAG, "  ${index + 1}. Task: '${task?.Title}' | Reminder ID: ${reminder.TaskReminder_ID}")
-                        Log.d(TAG, "      ⏰ Scheduled for: ${Date(reminder.RemindAt)}")
+                        Log.d(TAG, "      ⏰ Scheduled for: ${reminder.formattedRemindAtFull}")
                         Log.d(TAG, "      🔄 Active: ${reminder.IsActive}")
                     }
                 }

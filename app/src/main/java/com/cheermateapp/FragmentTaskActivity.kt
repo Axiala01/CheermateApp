@@ -294,7 +294,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                     val updatedTask = task.copy(
                         Category = category ?: task.Category,
                         Priority = priority ?: task.Priority,
-                        DueAt = dueDate ?: task.DueAt,
+                        DueDate = dueDate ?: task.DueDate,
                         UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                     )
                     
@@ -359,8 +359,8 @@ class FragmentTaskActivity : AppCompatActivity() {
 
     private fun Task.getFormattedDueDateTime(): String {
         return try {
-            if (DueAt != null) {
-                val dateStr = DueAt
+            if (DueDate != null) {
+                val dateStr = DueDate
                 val timeStr = DueTime
 
                 val parsedDate: Date? = try {
@@ -460,9 +460,9 @@ class FragmentTaskActivity : AppCompatActivity() {
 
     private fun Task.isToday(): Boolean {
         return try {
-            if (DueAt != null) {
+            if (DueDate != null) {
                 val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-                DueAt == today
+                DueDate == today
             } else {
                 false
             }
@@ -488,7 +488,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                     android.util.Log.d("FragmentTaskActivity", "🔍 Task $index: ${task.Title}")
                     android.util.Log.d("FragmentTaskActivity", "   - Status: ${task.Status}")
                     android.util.Log.d("FragmentTaskActivity", "   - User_ID: ${task.User_ID}")
-                    android.util.Log.d("FragmentTaskActivity", "   - DueAt: ${task.DueAt}")
+                    android.util.Log.d("FragmentTaskActivity", "   - DueDate: ${task.DueDate}")
                 }
                 android.util.Log.d("FragmentTaskActivity", "🔍 === END DEBUG ===")
 
@@ -545,7 +545,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                         Priority = Priority.High,
                         Status = Status.Pending,
                         TaskProgress = 75,
-                        DueAt = "2025-09-29",
+                        DueDate = "2025-09-29",
                         DueTime = "14:30",
                         CreatedAt = currentTime,  // ✅ Long timestamp
                         UpdatedAt = currentTime  // ✅ Long timestamp
@@ -559,7 +559,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                         Priority = Priority.Medium,
                         Status = Status.InProgress,
                         TaskProgress = 50,
-                        DueAt = "2025-09-30",
+                        DueDate = "2025-09-30",
                         DueTime = "10:00",
                         CreatedAt = currentTime,  // ✅ Long timestamp
                         UpdatedAt = currentTime  // ✅ Long timestamp
@@ -573,7 +573,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                         Priority = Priority.Low,
                         Status = Status.Completed,
                         TaskProgress = 100,
-                        DueAt = "2025-09-28",
+                        DueDate = "2025-09-28",
                         DueTime = "16:00",
                         CreatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp(),  // ✅ 1 day ago (Long timestamp)
                         UpdatedAt = currentTime  // ✅ Long timestamp
@@ -815,8 +815,8 @@ class FragmentTaskActivity : AppCompatActivity() {
             val sortedTasks: List<Task> = when (sortType) {
                 0 -> { // Due Date
                     currentTasks.sortedWith { task1, task2 ->
-                        val date1 = task1.DueAt ?: ""
-                        val date2 = task2.DueAt ?: ""
+                        val date1 = task1.DueDate ?: ""
+                        val date2 = task2.DueDate ?: ""
                         date1.compareTo(date2)
                     }
                 }
@@ -986,7 +986,7 @@ class FragmentTaskActivity : AppCompatActivity() {
         ${if (task.Description?.isNotBlank() == true) "📝 ${task.Description}\n" else ""}🎯 Priority: ${task.Priority}
         📊 Status: ${task.Status}
         📈 Progress: ${task.TaskProgress}%
-        ${if (task.DueAt != null) "📅 Due: ${task.getFormattedDueDateTime()}\n" else ""}
+        ${if (task.DueDate != null) "📅 Due: ${task.getFormattedDueDateTime()}\n" else ""}
         
         ${task.getStatusEmoji()} ${task.Status}
         ${if (task.isOverdue()) "🔴 OVERDUE" else ""}
@@ -1105,8 +1105,8 @@ class FragmentTaskActivity : AppCompatActivity() {
 
             // Parse existing due date
             var selectedDate: Date = try {
-                if (task.DueAt != null) {
-                    SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(task.DueAt) ?: Date()
+                if (task.DueDate != null) {
+                    SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(task.DueDate) ?: Date()
                 } else {
                     Date()
                 }
@@ -1234,8 +1234,8 @@ class FragmentTaskActivity : AppCompatActivity() {
                     Priority = priorityEnum,
                     Status = statusEnum,
                     TaskProgress = progress,
-                    DueAt = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(dueDate),
-                    DueTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(dueDate),
+                    DueDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(dueDate),
+                    DueTime = SimpleDateFormat("h:mm a", Locale.getDefault()).format(dueDate),
                     UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                 )
 
@@ -1409,6 +1409,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                 // Create the task
                 createNewTask(title, description, category, priority, finalCalendar.time, reminderOption)
                 dialog.dismiss()
+                Toast.makeText(this@FragmentTaskActivity, "Task created successfully", Toast.LENGTH_SHORT).show()
             }
 
             android.util.Log.d("DIALOG_DEBUG", "===== SHOWING DIALOG =====")
@@ -1488,8 +1489,8 @@ class FragmentTaskActivity : AppCompatActivity() {
                     Priority = priorityEnum,
                     Status = Status.Pending,
                     TaskProgress = 0,
-                    DueAt = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(dueDate),
-                    DueTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(dueDate),
+                    DueDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(dueDate),
+                    DueTime = SimpleDateFormat("h:mm a", Locale.getDefault()).format(dueDate),
                     CreatedAt = currentTime,  // ✅ Long timestamp
                     UpdatedAt = currentTime  // ✅ Long timestamp
                 )
@@ -1500,7 +1501,7 @@ class FragmentTaskActivity : AppCompatActivity() {
 
                 // Create reminder if requested
                 if (reminderOption != "None") {
-                    createTaskReminder(taskId, newTask.DueAt!!, newTask.DueTime!!, reminderOption)
+                    createTaskReminder(taskId, newTask.DueDate!!, newTask.DueTime!!, reminderOption)
                 }
 
                 loadTasks()
@@ -1558,7 +1559,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                         TaskReminder_ID = reminderId,
                         Task_ID = taskId,
                         User_ID = userId,
-                        RemindAt = remindAtMillis,
+                        RemindAt = TaskReminder.timestampToReadableString(remindAtMillis),
                         IsActive = true
                     )
 
@@ -1566,7 +1567,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                         db.taskReminderDao().insert(reminder)
                     }
 
-                    android.util.Log.d("FragmentTaskActivity", "✅ Created reminder for task $taskId at $remindAtMillis")
+                    android.util.Log.d("FragmentTaskActivity", "✅ Created reminder for task $taskId at ${com.cheermateapp.data.model.TaskReminder.formatTimestamp(remindAtMillis)}")
                 }
 
             } catch (e: Exception) {

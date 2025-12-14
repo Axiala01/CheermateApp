@@ -82,16 +82,16 @@ class TaskListAdapter(
         // Set due date (shortened format for list)
         if (task.Status == com.cheermateapp.data.model.Status.Completed) {
             holder.tvDueDate.visibility = View.GONE
-        } else if (task.DueAt != null) {
+        } else if (task.DueDate != null) {
             try {
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                val date = dateFormat.parse(task.DueAt)
+                val date = dateFormat.parse(task.DueDate)
                 val shortFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
                 holder.tvDueDate.text = "📅 ${shortFormat.format(date)}"
                 holder.tvDueDate.setTextColor(0xFFE53E3E.toInt()) // Red
                 holder.tvDueDate.visibility = View.VISIBLE
             } catch (e: Exception) {
-                holder.tvDueDate.text = "📅 ${task.DueAt}"
+                holder.tvDueDate.text = "📅 ${task.DueDate}"
                 holder.tvDueDate.setTextColor(0xFFE53E3E.toInt()) // Red
                 holder.tvDueDate.visibility = View.VISIBLE
             }
@@ -163,10 +163,10 @@ class TaskListAdapter(
         val calendar = Calendar.getInstance()
         
         // Parse current due date if available
-        if (task.DueAt != null) {
+        if (task.DueDate != null) {
             try {
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                dateFormat.parse(task.DueAt)?.let { calendar.time = it }
+                dateFormat.parse(task.DueDate)?.let { calendar.time = it }
             } catch (e: Exception) {
                 // Use current date
             }

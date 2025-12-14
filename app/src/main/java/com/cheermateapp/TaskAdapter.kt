@@ -63,7 +63,7 @@ class TaskAdapter(
         // Set due date
         if (task.Status == Status.Completed) {
             holder.tvDueDate.visibility = View.GONE
-        } else if (task.DueAt != null) {
+        } else if (task.DueDate != null) {
             val dueText = formatDueDate(task)
             holder.tvDueDate.text = dueText
             holder.tvDueDate.visibility = View.VISIBLE
@@ -107,7 +107,7 @@ class TaskAdapter(
     private fun formatDueDate(task: Task): String {
         return try {
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            val date = dateFormat.parse(task.DueAt!!)
+            val date = dateFormat.parse(task.DueDate!!)
 
             val today = Calendar.getInstance()
             val tomorrow = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 1) }
@@ -131,7 +131,7 @@ class TaskAdapter(
                 }
             }
         } catch (e: Exception) {
-            "📅 ${task.DueAt}"
+            "📅 ${task.DueDate}"
         }
     }
 

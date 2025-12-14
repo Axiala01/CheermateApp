@@ -57,7 +57,7 @@ object CalendarDecorator {
         
         // Group tasks by date
         tasks.forEach { task ->
-            val date = task.DueAt ?: return@forEach
+            val date = task.DueDate ?: return@forEach
             if (!dateMap.containsKey(date)) {
                 dateMap[date] = mutableListOf()
             }

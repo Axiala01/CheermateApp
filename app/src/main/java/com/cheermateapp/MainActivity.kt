@@ -258,7 +258,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         try {
-            val dueDate = task.DueAt ?: return false
+            val dueDate = task.DueDate ?: return false
             val dueTime = task.DueTime
 
             val calendar = Calendar.getInstance()
@@ -333,7 +333,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun Task.getFormattedDueDateTime(): String {
-        val dueDate = this.DueAt ?: return "No due date"
+        val dueDate = this.DueDate ?: return "No due date"
         val dueTime = this.DueTime
 
         return if (dueTime.isNullOrBlank()) {
@@ -994,7 +994,7 @@ class MainActivity : AppCompatActivity() {
 
             val dateInput = EditText(this)
             dateInput.hint = "YYYY-MM-DD"
-            dateInput.setText(task.DueAt ?: "")
+            dateInput.setText(task.DueDate ?: "")
             dateInput.setPadding(16, 16, 16, 16)
             dateInput.isFocusable = false
             dateInput.isClickable = true
@@ -1088,7 +1088,7 @@ class MainActivity : AppCompatActivity() {
                     Priority = priorityEnum,
                     Status = statusEnum,
                     TaskProgress = progress,
-                    DueAt = if (dueDate.isNotBlank()) dueDate else null,
+                    DueDate = if (dueDate.isNotBlank()) dueDate else null,
                     DueTime = if (dueTime.isNotBlank()) dueTime else null,
                     UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                 )
@@ -1156,8 +1156,8 @@ class MainActivity : AppCompatActivity() {
             val sortedTasks: List<Task> = when (sortType) {
                 0 -> { // Due Date
                     currentTasks.sortedWith { task1, task2 ->
-                        val date1 = task1.DueAt ?: ""
-                        val date2 = task2.DueAt ?: ""
+                        val date1 = task1.DueDate ?: ""
+                        val date2 = task2.DueDate ?: ""
                         date1.compareTo(date2)
                     }
                 }
@@ -2069,6 +2069,7 @@ class MainActivity : AppCompatActivity() {
                 
                 android.util.Log.d("DIALOG_DEBUG", "Task created successfully, dismissing dialog")
                 dialog.dismiss()
+                ToastManager.showToast(this@MainActivity, "Task created successfully", Toast.LENGTH_SHORT)
             }
 
             android.util.Log.d("DIALOG_DEBUG", "Showing enhanced XML dialog")
@@ -2184,7 +2185,7 @@ class MainActivity : AppCompatActivity() {
                     description = description,
                     category = category,
                     priority = priority,
-                    dueAt = dueDate,
+                    dueDate = dueDate,
                     dueTime = dueTime,
                     status = Status.Pending
                 )
@@ -2264,7 +2265,7 @@ class MainActivity : AppCompatActivity() {
                         TaskReminder_ID = reminderId,
                         Task_ID = taskId,
                         User_ID = userId,
-                        RemindAt = remindAtMillis,
+                        RemindAt = com.cheermateapp.data.model.TaskReminder.timestampToReadableString(remindAtMillis),
                         ReminderType = reminderType,
                         IsActive = true
                     )
@@ -2281,7 +2282,7 @@ class MainActivity : AppCompatActivity() {
                                 task.Title,
                                 task.Description,
                                 task.User_ID,
-                                reminder.RemindAt
+                                reminder.remindAtTimestamp
                             )
                             android.util.Log.d("MainActivity", "✅ Alarm scheduled for task $taskId")
                         }
@@ -2948,7 +2949,7 @@ class MainActivity : AppCompatActivity() {
             }
             append("🎯 Priority: ${task.Priority}\n")
             append("📊 Status: ${task.Status}\n")
-            append("📅 Due Date: ${task.DueAt ?: "Not set"}\n")
+            append("📅 Due Date: ${task.DueDate ?: "Not set"}\n")
             if (!task.DueTime.isNullOrBlank()) {
                 append("⏰ Due Time: ${task.DueTime}\n")
             }

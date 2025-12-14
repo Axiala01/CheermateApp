@@ -22,7 +22,7 @@ import com.google.gson.Gson
         UserSecurityAnswer::class,
         MessageTemplate::class
     ],
-        version = 39,
+        version = 41,
         exportSchema = false
     )
     @TypeConverters(AppTypeConverters::class)
@@ -400,6 +400,77 @@ import com.google.gson.Gson
                     it.execSQL("CREATE INDEX IF NOT EXISTS index_SubTask_User_ID ON SubTask(User_ID)")
                 }
             }
+
+            private val MIGRATION_39_40 = createMigration(39, 40) { db ->
+                recreateTableWithSchema(db, "Task",
+                    createSql = """
+                        CREATE TABLE Task_new (
+                            Task_ID INTEGER NOT NULL,
+                            User_ID INTEGER NOT NULL,
+                            Title TEXT NOT NULL,
+                            Description TEXT,
+                            Category TEXT NOT NULL,
+                            Priority TEXT NOT NULL,
+                            DueDate TEXT,
+                            DueTime TEXT,
+                            Status TEXT NOT NULL,
+                            TaskProgress INTEGER NOT NULL,
+                            CreatedAt TEXT NOT NULL,
+                            UpdatedAt TEXT NOT NULL,
+                            PRIMARY KEY(Task_ID, User_ID),
+                            FOREIGN KEY(User_ID) REFERENCES User(User_ID) ON DELETE CASCADE
+                        )
+                    """.trimIndent(),
+                    copySql = """
+                        INSERT INTO Task_new (Task_ID, User_ID, Title, Description, Category, Priority, DueDate, DueTime, Status, TaskProgress, CreatedAt, UpdatedAt)
+                        SELECT Task_ID, User_ID, Title, Description, Category, Priority, DueAt, DueTime, Status, TaskProgress, CreatedAt, UpdatedAt FROM Task
+                    """.trimIndent()
+                ) {
+                    it.execSQL("CREATE INDEX IF NOT EXISTS index_Task_User_ID ON Task(User_ID)")
+                }
+            }
+
+            private val MIGRATION_40_41 = createMigration(40, 41) { db ->
+                // Convert RemindAt from INTEGER (timestamp) to TEXT (human-readable)
+                recreateTableWithSchema(db, "TaskReminder",
+                    createSql = """
+                        CREATE TABLE TaskReminder_new (
+                            TaskReminder_ID INTEGER NOT NULL,
+                            Task_ID INTEGER NOT NULL,
+                            User_ID INTEGER NOT NULL,
+                            RemindAt TEXT NOT NULL,
+                            ReminderType TEXT,
+                            IsActive INTEGER NOT NULL,
+                            CreatedAt TEXT NOT NULL,
+                            UpdatedAt TEXT NOT NULL,
+                            PRIMARY KEY(TaskReminder_ID, Task_ID, User_ID),
+                            FOREIGN KEY(Task_ID, User_ID) REFERENCES Task(Task_ID, User_ID) ON DELETE CASCADE
+                        )
+                    """.trimIndent(),
+                    copySql = """
+                        INSERT INTO TaskReminder_new (TaskReminder_ID, Task_ID, User_ID, RemindAt, ReminderType, IsActive, CreatedAt, UpdatedAt)
+                        SELECT 
+                            TaskReminder_ID, 
+                            Task_ID, 
+                            User_ID, 
+                            CASE 
+                                WHEN RemindAt IS NOT NULL AND RemindAt > 0 THEN
+                                    strftime('%b %d, %Y at %I:%M %p', RemindAt/1000, 'unixepoch', 'localtime')
+                                ELSE 
+                                    'Invalid Date'
+                            END,
+                            ReminderType, 
+                            IsActive, 
+                            CreatedAt, 
+                            UpdatedAt 
+                        FROM TaskReminder
+                    """.trimIndent()
+                ) {
+                    it.execSQL("CREATE INDEX IF NOT EXISTS index_TaskReminder_Task_ID ON TaskReminder(Task_ID)")
+                    it.execSQL("CREATE INDEX IF NOT EXISTS index_TaskReminder_User_ID ON TaskReminder(User_ID)")
+                    it.execSQL("CREATE INDEX IF NOT EXISTS `index_TaskReminder_Task_ID_User_ID` ON `TaskReminder` (`Task_ID`, `User_ID`)")
+                }
+            }
     
             private fun buildDatabase(appContext: Context): AppDb {
                 return Room.databaseBuilder(
@@ -419,7 +490,9 @@ import com.google.gson.Gson
                         MIGRATION_35_36,
                         MIGRATION_36_37,
                         MIGRATION_37_38,
-                        MIGRATION_38_39
+                        MIGRATION_38_39,
+                        MIGRATION_39_40,
+                        MIGRATION_40_41
                     )
                     .addTypeConverter(AppTypeConverters(Gson()))
                     .build()

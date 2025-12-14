@@ -52,6 +52,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
     private lateinit var btnTaskCategory: TextView
     private lateinit var btnTaskPriority: TextView
     private lateinit var btnTaskDueDate: TextView
+    private lateinit var btnTaskDueTime: TextView
     private lateinit var btnTaskReminder: TextView
     private lateinit var subtaskCard: LinearLayout
     private lateinit var etSubtaskInput: EditText
@@ -93,6 +94,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
         btnTaskCategory = findViewById(R.id.btn_task_category)
         btnTaskPriority = findViewById(R.id.btn_task_priority)
         btnTaskDueDate = findViewById(R.id.btn_task_due_date)
+        btnTaskDueTime = findViewById(R.id.btn_task_due_time)
         btnTaskReminder = findViewById(R.id.btn_task_reminder)
         subtaskCard = findViewById(R.id.subtask_card)
         etSubtaskInput = findViewById(R.id.et_subtask_input)
@@ -146,6 +148,11 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                 // Due Date button click
                 btnTaskDueDate.setOnClickListener {
                     showDueDateDialog()
+                }
+                
+                // Due Time button click
+                btnTaskDueTime.setOnClickListener {
+                    showDueTimeDialog()
                 }
         
                 // Reminder button click
@@ -228,7 +235,10 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                 updatePriorityButton(task.Priority)
         
                 // Update due date button
-                updateDueDateButton(task.DueAt)
+                updateDueDateButton(task.DueDate)
+                
+                // Update due time button
+                updateDueTimeButton(task.DueTime)
         
                 // ✅ Load and display reminder if exists
                 loadTaskReminder(task)
@@ -284,6 +294,30 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                     btnTaskDueDate.text = "📅 Select Date"
                 }
             }
+            
+            private fun updateDueTimeButton(dueTime: String?) {
+                android.util.Log.d("FragmentTaskExtension", "🕐 Updating due time button with: $dueTime")
+                
+                if (dueTime != null && dueTime != "12:00 PM") {
+                    try {
+                        // Parse the stored time (should be in HH:mm format)
+                        val inputFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                        val time = inputFormat.parse(dueTime)
+                        
+                        // Format to 12-hour format with AM/PM
+                        val displayFormat = SimpleDateFormat("🕐 h:mm a", Locale.getDefault())
+                        btnTaskDueTime.text = displayFormat.format(time!!)
+                        
+                        android.util.Log.d("FragmentTaskExtension", "✅ Due time button updated to: ${btnTaskDueTime.text}")
+                    } catch (e: Exception) {
+                        android.util.Log.e("FragmentTaskExtension", "❌ Error parsing due time: $dueTime", e)
+                        btnTaskDueTime.text = "🕐 $dueTime"
+                    }
+                } else {
+                    btnTaskDueTime.text = "🕐 12:00 PM"
+                    android.util.Log.d("FragmentTaskExtension", "📭 Due time is null/default, showing default time")
+                }
+            }
         
             private fun showCategoryDialog() {
                 val categories = arrayOf("💼 Work", "👤 Personal", "🛒 Shopping", "📤 Others")
@@ -293,13 +327,18 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                     .setTitle("Select Category")
                     .setItems(categories) { _, which ->
                         currentTask?.let { task ->
+                            android.util.Log.d("FragmentTaskExtension", "🏷️ Setting category to: ${categoryValues[which]}")
+                            
                             val updatedTask = task.copy(
+                                Category = categoryValues[which], // ✅ FIXED: Include Category field!
                                 UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                             )
                             // Update currentTask immediately to ensure it's saved in onPause
                             currentTask = updatedTask
                             saveTask(updatedTask)
                             updateCategoryButton(categoryValues[which])
+                            
+                            android.util.Log.d("FragmentTaskExtension", "✅ Category updated to: ${categoryValues[which]}")
                         }
                     }
                     .show()
@@ -313,12 +352,18 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                     .setTitle("Select Priority")
                     .setItems(priorities) { _, which ->
                         currentTask?.let { task ->
+                            android.util.Log.d("FragmentTaskExtension", "🔥 Setting priority to: ${priorityValues[which]}")
+                            
                             val updatedTask = task.copy(
-                                                                UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()                    )
+                                Priority = priorityValues[which], // ✅ FIXED: Include Priority field!
+                                UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
+                            )
                             // Update currentTask immediately to ensure it's saved in onPause
                             currentTask = updatedTask
                             saveTask(updatedTask)
                             updatePriorityButton(priorityValues[which])
+                            
+                            android.util.Log.d("FragmentTaskExtension", "✅ Priority updated to: ${priorityValues[which]}")
                         }
                     }
                     .show()
@@ -358,7 +403,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                 val calendar = Calendar.getInstance()
                 
                 // Parse current due date if available
-                currentTask?.DueAt?.let { dueAt ->
+                currentTask?.DueDate?.let { dueAt ->
                     try {
                         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                         dateFormat.parse(dueAt)?.let { calendar.time = it }
@@ -387,7 +432,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
             private fun updateTaskDueDate(newDueDate: String) {
                 currentTask?.let { task ->
                     val updatedTask = task.copy(
-                        DueAt = newDueDate,
+                        DueDate = newDueDate,
                         UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                     )
                     // Update currentTask immediately to ensure it's saved in onPause
@@ -403,6 +448,60 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                     } else {
                         overdueRow.visibility = View.GONE
                     }
+                }
+            }
+            
+            private fun showDueTimeDialog() {
+                val calendar = Calendar.getInstance()
+                
+                // Parse current due time if available
+                currentTask?.DueTime?.let { dueTime ->
+                    try {
+                        val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                        timeFormat.parse(dueTime)?.let { 
+                            calendar.time = it 
+                        }
+                    } catch (e: Exception) {
+                        android.util.Log.e("FragmentTaskExtension", "Error parsing current due time: $dueTime", e)
+                    }
+                }
+                
+                val timePickerDialog = TimePickerDialog(
+                    this,
+                    { _, hourOfDay, minute ->
+                        android.util.Log.d("FragmentTaskExtension", "🕐 Time selected: $hourOfDay:$minute")
+                        
+                        // Format time as HH:mm for database storage
+                        val timeFormat24 = SimpleDateFormat("HH:mm", Locale.getDefault())
+                        calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
+                        calendar.set(Calendar.MINUTE, minute)
+                        val newDueTime = timeFormat24.format(calendar.time)
+                        
+                        // Update task with new due time
+                        updateTaskDueTime(newDueTime)
+                    },
+                    calendar.get(Calendar.HOUR_OF_DAY),
+                    calendar.get(Calendar.MINUTE),
+                    false // Use 12-hour format
+                )
+                
+                timePickerDialog.show()
+            }
+            
+            private fun updateTaskDueTime(newDueTime: String) {
+                currentTask?.let { task ->
+                    android.util.Log.d("FragmentTaskExtension", "🕐 Updating task due time to: $newDueTime")
+                    
+                    val updatedTask = task.copy(
+                        DueTime = newDueTime,
+                        UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
+                    )
+                    // Update currentTask immediately to ensure it's saved
+                    currentTask = updatedTask
+                    saveTask(updatedTask)
+                    updateDueTimeButton(newDueTime)
+                    
+                    android.util.Log.d("FragmentTaskExtension", "✅ Due time updated to: $newDueTime")
                 }
             }
         
@@ -422,9 +521,9 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
             }
         
             private fun setReminder(reminderText: String) {
-                btnTaskReminder.text = "⏰ $reminderText"
+                android.util.Log.d("FragmentTaskExtension", "🎯 Setting reminder: $reminderText")
                 
-                // ✅ Save reminder to database
+                // ✅ Save reminder to database (UI will be updated in callback)
                 currentTask?.let { task ->
                     val reminderType = when (reminderText) {
                         "10 minutes before" -> ReminderType.TEN_MINUTES_BEFORE
@@ -450,14 +549,14 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                         calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
                         calendar.set(Calendar.MINUTE, minute)
                         val timeString = timeFormat.format(calendar.time)
-                        btnTaskReminder.text = "⏰ At $timeString"
                         
-                        // ✅ Save reminder to database
+                        android.util.Log.d("FragmentTaskExtension", "🎯 Setting specific time reminder: $timeString")
+                        
+                        // ✅ Save reminder to database (UI will be updated in callback)
                         currentTask?.let { task ->
                             saveReminderToDatabase(task, ReminderType.AT_SPECIFIC_TIME, calendar.timeInMillis)
+                            Toast.makeText(this, "Reminder set at $timeString", Toast.LENGTH_SHORT).show()
                         }
-                        
-                        Toast.makeText(this, "Reminder set at $timeString", Toast.LENGTH_SHORT).show()
                     },
                     calendar.get(Calendar.HOUR_OF_DAY),
                     calendar.get(Calendar.MINUTE),
@@ -467,85 +566,113 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                 timePickerDialog.show()
             }
         
+            // ✅ Prevent rapid duplicate calls
+            private var isReminderSaving = false
+            
             // ✅ FIXED: Save or update reminder in TaskReminder table (prevents duplication)
             private fun saveReminderToDatabase(task: Task, reminderType: ReminderType, specificTime: Long? = null) {
+                // ✅ Debounce: Prevent multiple simultaneous saves
+                if (isReminderSaving) {
+                    android.util.Log.d("FragmentTaskExtension", "⏭️ Skipping duplicate reminder save call")
+                    return
+                }
+                
+                isReminderSaving = true
+                
+                // Show immediate feedback
+                btnTaskReminder.text = "⏰ Saving..."
+                
                 lifecycleScope.launch {
                     try {
                         val db = AppDb.get(this@FragmentTaskExtensionActivity)
                         
                         withContext(Dispatchers.IO) {
-                            // Calculate reminder time based on type
-                            val dueDate = task.getDueDate()
-                            val dueTime = task.DueTime
-                            
-                            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-                            val dueDateTime = dateFormat.parse("${task.DueAt} ${task.DueTime}")
-        
-                            if (dueDateTime == null) {
-                                android.util.Log.e("AlarmDebug", "Failed to parse due date/time for task ${task.Task_ID}")
-                                return@withContext
-                            }
-                            val dueTimeMillis = dueDateTime.time
-        
-                            val remindAt = when (reminderType) {
-                                ReminderType.TEN_MINUTES_BEFORE -> {
-                                    dueTimeMillis - (10 * 60 * 1000)
-                                }
-                                ReminderType.THIRTY_MINUTES_BEFORE -> {
-                                    dueTimeMillis - (30 * 60 * 1000)
-                                }
-                                ReminderType.AT_SPECIFIC_TIME -> {
-                                    specificTime ?: dueTimeMillis
-                                }
-                            }                    
-                            // ✅ FIX: Check for existing active reminders first
-                            val existingReminders = db.taskReminderDao().activeForTask(task.Task_ID, task.User_ID)
-                            
-                            if (existingReminders.isNotEmpty()) {
-                                // Update the first existing reminder instead of creating a new one
-                                val existingReminder = existingReminders.first()
-                                val updatedReminder = existingReminder.copy(
-                                    RemindAt = remindAt,
-                                    ReminderType = reminderType,
-                                    UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
-                                )
-                                db.taskReminderDao().update(updatedReminder)
-                                ReminderManager.scheduleReminder(
-                                    applicationContext,
-                                    task.Task_ID,
-                                    task.Title,
-                                    task.Description,
-                                    task.User_ID,
-                                    updatedReminder.RemindAt
-                                ) // Schedule alarm
-                                android.util.Log.d("FragmentTaskExtension", "✅ Reminder updated and scheduled: $reminderType at $remindAt")
-                            } else {
-                                // No existing reminder, create a new one
-                                val nextId = db.taskReminderDao().getNextReminderIdForUser(userId)
+                            android.util.Log.d("FragmentTaskExtension", "🔧 Starting reminder save for Task_ID: ${task.Task_ID}")
                                 
-                                val reminder = TaskReminder(
-                                    TaskReminder_ID = nextId,
+                            // Calculate reminder time based on type
+                            val dueDate = task.getParsedDueDate()
+                            val dueTime = task.DueTime
+                                
+                                val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+                                val dueDateTime = dateFormat.parse("${task.DueDate} ${task.DueTime}")
+
+                                if (dueDateTime == null) {
+                                    android.util.Log.e("AlarmDebug", "Failed to parse due date/time for task ${task.Task_ID}")
+                                    return@withContext
+                                }
+                                val dueTimeMillis = dueDateTime.time
+
+                                val remindAt = when (reminderType) {
+                                    ReminderType.TEN_MINUTES_BEFORE -> {
+                                        dueTimeMillis - (10 * 60 * 1000)
+                                    }
+                                    ReminderType.THIRTY_MINUTES_BEFORE -> {
+                                        dueTimeMillis - (30 * 60 * 1000)
+                                    }
+                                    ReminderType.AT_SPECIFIC_TIME -> {
+                                        specificTime ?: dueTimeMillis
+                                    }
+                                }                    
+                                
+                                // ✅ DEBUG: Check all reminders first, then active ones
+                                val allRemindersForTask = db.taskReminderDao().getRemindersByTask(task.Task_ID)
+                                android.util.Log.d("FragmentTaskExtension", "🔍 DEBUG: Found ${allRemindersForTask.size} total reminders for Task_ID: ${task.Task_ID}")
+                                allRemindersForTask.forEach { reminder ->
+                                    android.util.Log.d("FragmentTaskExtension", "  📝 Reminder ID: ${reminder.TaskReminder_ID}, IsActive: ${reminder.IsActive}, Type: ${reminder.ReminderType}")
+                                }
+                                
+                                val existingReminders = db.taskReminderDao().activeForTask(task.Task_ID, task.User_ID)
+                                android.util.Log.d("FragmentTaskExtension", "🔍 Found ${existingReminders.size} ACTIVE reminders for Task_ID: ${task.Task_ID}")
+                                
+                                // ✅ SIMPLE FIX: Delete ALL existing reminders first, then create ONE new one
+                                // This guarantees exactly one reminder per task
+                                android.util.Log.d("FragmentTaskExtension", "🗑️ Deleting ALL existing reminders for Task_ID: ${task.Task_ID}")
+                                db.taskReminderDao().deleteAllForTask(task.Task_ID, task.User_ID)
+                                
+                                // ✅ Always create ONE new reminder (guaranteed no duplicates)
+                                val userId = task.User_ID
+                                val fixedReminderId = task.Task_ID  // Use Task_ID as Reminder_ID for 1:1 relationship
+                                
+                                val newReminder = TaskReminder(
+                                    TaskReminder_ID = fixedReminderId,
                                     Task_ID = task.Task_ID,
                                     User_ID = task.User_ID,
-                                    RemindAt = remindAt,
+                                    RemindAt = TaskReminder.timestampToReadableString(remindAt),
                                     ReminderType = reminderType,
                                     IsActive = true,
                                     CreatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp(),
                                     UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                                 )
                                 
-                                db.taskReminderDao().insert(reminder)
+                                db.taskReminderDao().insert(newReminder)
+                                android.util.Log.d("FragmentTaskExtension", "✅ SINGLE reminder CREATED: $reminderType with ID: $fixedReminderId for Task_ID: ${task.Task_ID}")
+                                
+                                
+                                // Schedule alarm within transaction
                                 ReminderManager.scheduleReminder(
                                     applicationContext,
                                     task.Task_ID,
                                     task.Title,
                                     task.Description,
                                     task.User_ID,
-                                    reminder.RemindAt
-                                ) // Schedule alarm
-                                android.util.Log.d("FragmentTaskExtension", "✅ Reminder created and scheduled: $reminderType at $remindAt")
+                                    remindAt
+                                )
+                        }
+                        
+                        // ✅ Update UI immediately with the saved reminder type
+                        withContext(Dispatchers.Main) {
+                            when (reminderType) {
+                                ReminderType.TEN_MINUTES_BEFORE -> btnTaskReminder.text = "⏰ 10 minutes before"
+                                ReminderType.THIRTY_MINUTES_BEFORE -> btnTaskReminder.text = "⏰ 30 minutes before"
+                                ReminderType.AT_SPECIFIC_TIME -> {
+                                    val formatter = SimpleDateFormat("h:mm a", Locale.getDefault())
+                                    val timeString = formatter.format(Date(specificTime ?: System.currentTimeMillis()))
+                                    btnTaskReminder.text = "⏰ At $timeString"
+                                }
                             }
                         }
+                        
+                        android.util.Log.d("FragmentTaskExtension", "🔧 Transaction completed successfully")
                         
                     } catch (e: Exception) {
                         android.util.Log.e("FragmentTaskExtension", "Error saving reminder", e)
@@ -554,6 +681,12 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                             "Error saving reminder: ${e.message}",
                             Toast.LENGTH_SHORT
                         ).show()
+                        
+                        // Reset button text on error
+                        btnTaskReminder.text = "⏰ Reminder"
+                    } finally {
+                        // ✅ Always reset the saving flag
+                        isReminderSaving = false
                     }
                 }
             }
@@ -562,23 +695,34 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
             private fun loadTaskReminder(task: Task) {
                 lifecycleScope.launch {
                     try {
+                        android.util.Log.d("FragmentTaskExtension", "🔍 Loading reminders for Task_ID: ${task.Task_ID}, User_ID: ${task.User_ID}")
+                        
                         val db = AppDb.get(this@FragmentTaskExtensionActivity)
                         
                         val reminders = withContext(Dispatchers.IO) {
                             db.taskReminderDao().activeForTask(task.Task_ID, task.User_ID)
                         }
                         
+                        android.util.Log.d("FragmentTaskExtension", "📋 Found ${reminders.size} reminder(s)")
+                        
                         if (reminders.isNotEmpty()) {
                             val reminder = reminders.first()
+                            
+                            android.util.Log.d("FragmentTaskExtension", "📝 Reminder Type: ${reminder.ReminderType}")
+                            android.util.Log.d("FragmentTaskExtension", "📝 Reminder Time: ${reminder.RemindAt}")
                             
                             // Display reminder based on type
                             val reminderText = when (reminder.ReminderType) {
                                 ReminderType.TEN_MINUTES_BEFORE -> "⏰ 10 minutes before"
                                 ReminderType.THIRTY_MINUTES_BEFORE -> "⏰ 30 minutes before"
                                 ReminderType.AT_SPECIFIC_TIME -> {
-                                    val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
-                                    val time = Date(reminder.RemindAt)
-                                    "⏰ At ${timeFormat.format(time)}"
+                                    try {
+                                        val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
+                                        val time = Date(reminder.remindAtTimestamp)
+                                        "⏰ At ${timeFormat.format(time)}"
+                                    } catch (e: Exception) {
+                                        "⏰ At specific time"
+                                    }
                                 }
                                 null -> "⏰ Reminder"
                             }
@@ -588,6 +732,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                             android.util.Log.d("FragmentTaskExtension", "✅ Loaded reminder: $reminderText")
                         } else {
                             btnTaskReminder.text = "⏰ Reminder"
+                            android.util.Log.d("FragmentTaskExtension", "📭 No reminders found - showing default text")
                         }
                         
                     } catch (e: Exception) {
@@ -599,7 +744,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
         
         
             private fun calculateOverdueDays(task: Task): Int {
-                val dueDate = task.getDueDate()
+                val dueDate = task.getParsedDueDate()
                 if (dueDate != null) {
                     val currentDate = Date()
                     val diffInMillis = currentDate.time - dueDate.time
@@ -992,7 +1137,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                     val newDueDate = dateFormat.format(calendar.time)
                     
                     val updatedTask = task.copy(
-                        DueAt = newDueDate,
+                        DueDate = newDueDate,
                         UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                     )
                     
@@ -1053,7 +1198,7 @@ class FragmentTaskExtensionActivity : AppCompatActivity() {
                         
                         currentTask?.let { task ->
                             val updatedTask = task.copy(
-                                DueAt = newDueDate,
+                                DueDate = newDueDate,
                                 UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                             )
                             

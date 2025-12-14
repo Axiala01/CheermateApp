@@ -24,7 +24,7 @@ class TasksViewModel(private val db: AppDb, private val userId: Int) : ViewModel
                 val todayStr = dateToString(Date())
                 val altTodayFormat = java.text.SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
                 val altTodayStr = altTodayFormat.format(Date())
-                tasks.filter { it.DueAt == todayStr || it.DueAt == altTodayStr }
+                tasks.filter { it.DueDate == todayStr || it.DueDate == altTodayStr }
             }
             "PENDING" -> tasks.filter { it.Status == Status.Pending || it.Status == Status.InProgress }
             "COMPLETED" -> tasks.filter { it.Status == Status.Completed }
@@ -43,9 +43,9 @@ class TasksViewModel(private val db: AppDb, private val userId: Int) : ViewModel
         val todayStr = dateToString(Date())
         val altTodayFormat = java.text.SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
         val altTodayStr = altTodayFormat.format(Date())
-        val count = list.count { it.DueAt == todayStr || it.DueAt == altTodayStr }
+        val count = list.count { it.DueDate == todayStr || it.DueDate == altTodayStr }
         android.util.Log.d("TasksViewModel", "Recalculating todayTasksCount. Today is: $todayStr or $altTodayStr. Found $count tasks.")
-        val dueDates = list.take(5).map { "'${it.DueAt}'" }.joinToString()
+        val dueDates = list.take(5).map { "'${it.DueDate}'" }.joinToString()
         android.util.Log.d("TasksViewModel", "Sample task due dates for today check: [$dueDates]")
         count
     }

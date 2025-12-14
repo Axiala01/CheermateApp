@@ -42,7 +42,7 @@ object DataExportImport {
         val csv = StringBuilder()
         
         // CSV Header
-        csv.append("Task_ID,User_ID,Title,Description,Priority,Status,DueAt,DueTime,TaskProgress,CreatedAt,UpdatedAt\n")
+        csv.append("Task_ID,User_ID,Title,Description,Priority,Status,DueDate,DueTime,TaskProgress,CreatedAt,UpdatedAt\n")
         
         // CSV Rows
         tasks.forEach { task ->
@@ -52,7 +52,7 @@ object DataExportImport {
             csv.append("\"${escapeCsv(task.Description ?: "")}\",")
             csv.append("${task.Priority},")
             csv.append("${task.Status},")
-            csv.append("\"${task.DueAt ?: ""}\",")
+            csv.append("\"${task.DueDate ?: ""}\",")
             csv.append("\"${task.DueTime ?: ""}\",")
             csv.append("${task.TaskProgress},")
             csv.append("${task.CreatedAt},")
