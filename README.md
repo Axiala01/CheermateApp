@@ -17,6 +17,7 @@ A comprehensive Android task management application built with Kotlin, featuring
 - **📊 Sort Options**: Date, Priority, Title, Status, Progress
 - **⏮️⏭️ Task Navigation**: Previous/Next with counter display
 - **🎯 Quick Actions**: Mark as Done, Edit, Delete
+- **👆 Swipe Gestures**: Swipe right to complete tasks, swipe left to delete with confirmation dialogs
 - **🏷️ Color-coded Priorities**: Visual priority indicators
 - **📅 Date/Time Pickers**: Professional date and time selection
 - **🌙 Dark Mode**: Functional light/dark theme support with persistent preferences
@@ -64,6 +65,7 @@ A comprehensive Android task management application built with Kotlin, featuring
 
 ### Documentation
 - **[QUICKSTART.md](QUICKSTART.md)** - Quick reference guide for contributors
+- **[USER_FEATURES_GUIDE.md](docs/USER_FEATURES_GUIDE.md)** - Complete user features guide including swipe gestures
 - **[CACHING_SYSTEM_GUIDE.md](CACHING_SYSTEM_GUIDE.md)** - Database-backed caching system documentation
 - **[TODO.md](TODO.md)** - Immediate tasks and known issues to address
 - **[ROADMAP.md](ROADMAP.md)** - Long-term development roadmap and feature planning

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Swipe Gestures for Task Management**: Interactive swipe gestures in RecyclerView for quick task actions
+  - Swipe right: Mark task as completed with confirmation dialog
+  - Swipe left: Delete task with confirmation dialog
+  - Visual feedback with color-coded backgrounds (green for complete, red for delete)
+  - Safety confirmations to prevent accidental actions
+  - Smooth animations and responsive touch feedback
+
 ### Changed
 - Simplified "Task created successfully" toast message for task creation dialog.
 - Timestamps (`CreatedAt`, `UpdatedAt`) are now stored as human-readable strings (`TEXT`) instead of `Long`.

@@ -196,6 +196,20 @@ This document tracks immediate tasks and known issues that need to be addressed 
   - Write app description
   - Create promotional graphics
 
+---
+
+## ✅ Recently Completed
+
+### December 2024
+- [x] **Swipe Gestures for Task Management** (Completed: Dec 14, 2024)
+  - Implemented swipe right to complete tasks
+  - Implemented swipe left to delete tasks
+  - Added visual feedback with color-coded backgrounds
+  - Added confirmation dialogs for safety
+  - Created SwipeGestureHelper utility class
+  - Integrated with RecyclerView using ItemTouchHelper
+  - Added comprehensive user documentation
+
 - [ ] **CI/CD Setup**
   - Automated builds
   - Automated testing
