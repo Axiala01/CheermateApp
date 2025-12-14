@@ -2302,8 +2302,16 @@ class MainActivity : AppCompatActivity() {
                 val db = AppDb.get(this@MainActivity)
 
                 // Parse due date and time
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-                val dueDateTime = dateFormat.parse("$dueDate $dueTime")
+                // ✅ FIX: Handle 12-hour format (h:mm a) from time picker
+                val dueDateTime = if (dueTime.contains("AM") || dueTime.contains("PM")) {
+                    // Time is in 12-hour format from time picker
+                    val dateFormat12 = SimpleDateFormat("yyyy-MM-dd h:mm a", Locale.getDefault())
+                    dateFormat12.parse("$dueDate $dueTime")
+                } else {
+                    // Time is in 24-hour format (fallback)
+                    val dateFormat24 = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+                    dateFormat24.parse("$dueDate $dueTime")
+                }
 
                 if (dueDateTime != null) {
                     val dueTimeMillis = dueDateTime.time
