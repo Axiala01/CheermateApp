@@ -223,7 +223,7 @@ class MainActivity : AppCompatActivity() {
 
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Critical error in onCreate", e)
-            ToastManager.showToast(this, "Loading dashboard...", Toast.LENGTH_SHORT)
+            ToastManager.showCustomToast(this, "Loading dashboard...", Toast.LENGTH_SHORT)
             finish()
         }
     }
@@ -258,7 +258,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         try {
-            val dueDate = task.DueAt ?: return false
+            val dueDate = task.DueDate ?: return false
             val dueTime = task.DueTime
 
             val calendar = Calendar.getInstance()
@@ -333,7 +333,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun Task.getFormattedDueDateTime(): String {
-        val dueDate = this.DueAt ?: return "No due date"
+        val dueDate = this.DueDate ?: return "No due date"
         val dueTime = this.DueTime
 
         return if (dueTime.isNullOrBlank()) {
@@ -383,7 +383,7 @@ class MainActivity : AppCompatActivity() {
                         android.util.Log.d("MainActivity", "🧪 Starting quick test alarm...")
                         lifecycleScope.launch {
                             AlarmTestHelper.scheduleTestAlarm(this@MainActivity, 15, "🧪 Quick Test (15s)")
-                            ToastManager.showToast(this@MainActivity, "🔔 Test alarm set for 15 seconds. Watch logcat!", Toast.LENGTH_LONG)
+                            ToastManager.showCustomToast(this@MainActivity, "🔔 Test alarm set for 15 seconds. Watch logcat!", Toast.LENGTH_LONG)
                         }
                     }
                     1 -> {
@@ -670,7 +670,8 @@ class MainActivity : AppCompatActivity() {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
                 override fun afterTextChanged(s: android.text.Editable?) {
-                    // tasksViewModel.setSearchQuery(s.toString())
+                    android.util.Log.d("MainActivity", "🔍 Search text changed: ${s.toString()}") // Re-add the debug log
+                    tasksViewModel.setSearchQuery(s.toString())
                 }
             })
 
@@ -707,7 +708,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun observeTasks() {
         lifecycleScope.launch {
-            tasksViewModel.tasks.collectLatest { tasks ->
+            tasksViewModel.tasks.collectLatest { tasks: List<Task> -> // Explicit type here
                 taskAdapter?.updateTasks(tasks)
                 findViewById<TextView>(R.id.chipFound)?.text = "${tasks.size} found"
 
@@ -729,24 +730,24 @@ class MainActivity : AppCompatActivity() {
         }
         
         lifecycleScope.launch {
-            tasksViewModel.allTasksCount.collectLatest {
-                tabAll.text = "All ($it)"
-                tvTasksSub.text = "$it total tasks"
+            tasksViewModel.allTasksCount.collectLatest { count: Int -> // Explicit type here
+                tabAll.text = "All ($count)"
+                tvTasksSub.text = "$count total tasks"
             }
         }
         lifecycleScope.launch {
-            tasksViewModel.todayTasksCount.collectLatest {
-                tabToday.text = "Today ($it)"
+            tasksViewModel.todayTasksCount.collectLatest { count: Int -> // Explicit type here
+                tabToday.text = "Today ($count)"
             }
         }
         lifecycleScope.launch {
-            tasksViewModel.pendingTasksCount.collectLatest {
-                tabPending.text = "Pending ($it)"
+            tasksViewModel.pendingTasksCount.collectLatest { count: Int -> // Explicit type here
+                tabPending.text = "Pending ($count)"
             }
         }
         lifecycleScope.launch {
-            tasksViewModel.completedTasksCount.collectLatest {
-                tabDone.text = "Completed ($it)"
+            tasksViewModel.completedTasksCount.collectLatest { count: Int -> // Explicit type here
+                tabDone.text = "Completed ($count)"
             }
         }
     }
@@ -835,31 +836,20 @@ class MainActivity : AppCompatActivity() {
                     .putBoolean("ignore_next_toggle", true)
                     .apply()
                 com.cheermateapp.util.ThemeManager.setThemeMode(this, newMode)
-                // Persist to UserSettings.Appearance
-                lifecycleScope.launch {
-                    try {
-                        val db = com.cheermateapp.data.db.AppDb.get(this@MainActivity)
-                        val current = withContext(kotlinx.coroutines.Dispatchers.IO) { db.userSettingsDao().getSettingsByUser(userId) }
-                        val appearance = com.cheermateapp.data.model.Appearance(theme = if (isChecked) "dark" else "light")
-                        val newSettings = if (current != null) {
-                            current.copy(Appearance = appearance)
-                        } else {
-                            com.cheermateapp.data.model.UserSettings(User_ID = userId, Appearance = appearance)
-                        }
-                        withContext(kotlinx.coroutines.Dispatchers.IO) { db.userSettingsDao().upsert(newSettings) }
-                    } catch (_: Exception) {}
-                }
                 // Single controlled recreate to apply theme
                 recreate()
             }
 
             switchNotifications?.setOnCheckedChangeListener { _, isChecked ->
-                updateNotificationSetting(isChecked)
-                ToastManager.showToast(
-                    this,
-                    if (isChecked) "🔔 Notifications enabled" else "🔕 Notifications disabled",
-                    Toast.LENGTH_SHORT
-                )
+                val currentEnabledState = com.cheermateapp.data.SettingsManager.isNotificationsEnabled(this)
+                if (isChecked != currentEnabledState) {
+                    com.cheermateapp.data.SettingsManager.setNotificationsEnabled(this, isChecked)
+                    ToastManager.showToast(
+                        this,
+                        if (isChecked) "🔔 Notifications enabled" else "🔕 Notifications disabled",
+                        Toast.LENGTH_SHORT
+                    )
+                }
             }
 
             cardSignOut?.setOnClickListener {
@@ -1005,7 +995,7 @@ class MainActivity : AppCompatActivity() {
 
             val dateInput = EditText(this)
             dateInput.hint = "YYYY-MM-DD"
-            dateInput.setText(task.DueAt ?: "")
+            dateInput.setText(task.DueDate ?: "")
             dateInput.setPadding(16, 16, 16, 16)
             dateInput.isFocusable = false
             dateInput.isClickable = true
@@ -1099,7 +1089,7 @@ class MainActivity : AppCompatActivity() {
                     Priority = priorityEnum,
                     Status = statusEnum,
                     TaskProgress = progress,
-                    DueAt = if (dueDate.isNotBlank()) dueDate else null,
+                    DueDate = if (dueDate.isNotBlank()) dueDate else null,
                     DueTime = if (dueTime.isNotBlank()) dueTime else null,
                     UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
                 )
@@ -1167,8 +1157,8 @@ class MainActivity : AppCompatActivity() {
             val sortedTasks: List<Task> = when (sortType) {
                 0 -> { // Due Date
                     currentTasks.sortedWith { task1, task2 ->
-                        val date1 = task1.DueAt ?: ""
-                        val date2 = task2.DueAt ?: ""
+                        val date1 = task1.DueDate ?: ""
+                        val date2 = task2.DueDate ?: ""
                         date1.compareTo(date2)
                     }
                 }
@@ -1296,9 +1286,7 @@ class MainActivity : AppCompatActivity() {
                     )
                 }
 
-                val userSettings = withContext(Dispatchers.IO) {
-                    db.userSettingsDao().getSettingsByUser(userId)
-                }
+
 
                 // Build display values
                 val profileName: String
@@ -1331,7 +1319,7 @@ class MainActivity : AppCompatActivity() {
                     statTotal = stats["total"] ?: 0,
                     statCompleted = stats["completed"] ?: 0,
                     statSuccess = successRate,
-                    notificationEnabled = userSettings?.Notification?.equals("On", ignoreCase = true) ?: true
+                    notificationEnabled = com.cheermateapp.data.SettingsManager.isNotificationsEnabled(this@MainActivity)
                 )
 
                 settingsCache = newCache
@@ -1736,31 +1724,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateNotificationSetting(enabled: Boolean) {
-        uiScope.launch {
-            try {
-                val db = AppDb.get(this@MainActivity)
-                withContext(Dispatchers.IO) {
-                    val userSettingsDao = db.userSettingsDao()
-                    var settings = userSettingsDao.getSettingsByUser(userId)
-                    if (settings == null) {
-                        settings = com.cheermateapp.data.model.UserSettings(User_ID = userId)
-                    }
-                    
-                    val notificationValue = if (enabled) "On" else "Off"
-                    settings = settings.copy(Notification = notificationValue)
-                    userSettingsDao.upsert(settings)
-                }
-                
-                // Update cache to reflect the change
-                settingsCache = settingsCache?.copy(notificationEnabled = enabled)
-                
-            } catch (e: Exception) {
-                android.util.Log.e("MainActivity", "Error updating notification setting", e)
-                ToastManager.showToast(this@MainActivity, "Error updating notification setting", Toast.LENGTH_SHORT)
-            }
-        }
-    }
+
 
     private fun showLogoutConfirmation() {
         AlertDialog.Builder(this)
@@ -2106,6 +2070,7 @@ class MainActivity : AppCompatActivity() {
                 
                 android.util.Log.d("DIALOG_DEBUG", "Task created successfully, dismissing dialog")
                 dialog.dismiss()
+                ToastManager.showToast(this@MainActivity, "Task created successfully", Toast.LENGTH_SHORT)
             }
 
             android.util.Log.d("DIALOG_DEBUG", "Showing enhanced XML dialog")
@@ -2221,7 +2186,7 @@ class MainActivity : AppCompatActivity() {
                     description = description,
                     category = category,
                     priority = priority,
-                    dueAt = dueDate,
+                    dueDate = dueDate,
                     dueTime = dueTime,
                     status = Status.Pending
                 )
@@ -2301,7 +2266,7 @@ class MainActivity : AppCompatActivity() {
                         TaskReminder_ID = reminderId,
                         Task_ID = taskId,
                         User_ID = userId,
-                        RemindAt = remindAtMillis,
+                        RemindAt = com.cheermateapp.data.model.TaskReminder.timestampToReadableString(remindAtMillis),
                         ReminderType = reminderType,
                         IsActive = true
                     )
@@ -2318,7 +2283,7 @@ class MainActivity : AppCompatActivity() {
                                 task.Title,
                                 task.Description,
                                 task.User_ID,
-                                reminder.RemindAt
+                                reminder.remindAtTimestamp
                             )
                             android.util.Log.d("MainActivity", "✅ Alarm scheduled for task $taskId")
                         }
@@ -2985,7 +2950,7 @@ class MainActivity : AppCompatActivity() {
             }
             append("🎯 Priority: ${task.Priority}\n")
             append("📊 Status: ${task.Status}\n")
-            append("📅 Due Date: ${task.DueAt ?: "Not set"}\n")
+            append("📅 Due Date: ${task.DueDate ?: "Not set"}\n")
             if (!task.DueTime.isNullOrBlank()) {
                 append("⏰ Due Time: ${task.DueTime}\n")
             }

@@ -253,15 +253,6 @@
         android:textColor="?android:attr/textColorPrimary"/>
 
     <!-- Helper Text -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="* Required fields"
-        android:textSize="12sp"
-        android:textColor="?android:attr/textColorSecondary"
-        android:fontFamily="@font/sf_pro_rounded_regular"
-        android:lineSpacingExtra="2dp"
-        android:layout_marginBottom="24dp" />
 
     <!-- Buttons -->
     <LinearLayout

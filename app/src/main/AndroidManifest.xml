@@ -41,7 +41,8 @@
             android:name=".MainActivity"
             android:exported="false"
             android:configChanges="orientation|screenSize"
-            android:theme="@style/Theme.CheermateApp" />
+            android:theme="@style/Theme.CheermateApp"
+            android:windowSoftInputMode="adjustPan" />
 
         <!-- Sign Up Activity -->
         <activity
@@ -64,11 +65,31 @@
             android:exported="false"
             android:theme="@style/Theme.Material3.Light.NoActionBar" />
 
+        <!-- ✅ FULL-SCREEN ALARM ACTIVITY -->
+        <activity
+            android:name=".AlarmActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Material3.Light.NoActionBar"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance" />
+
         <!-- Broadcast Receivers -->
 
 
         <receiver
             android:name=".receiver.AlarmReceiver"
+            android:enabled="true" />
+
+        <!-- ✅ ALARM ACTION RECEIVER (for notification buttons) -->
+        <receiver
+            android:name=".receiver.AlarmActionReceiver"
+            android:enabled="true" />
+
+        <!-- ✅ UPCOMING ALARM RECEIVER -->
+        <receiver
+            android:name=".receiver.UpcomingAlarmReceiver"
             android:enabled="true" />
 
         <receiver

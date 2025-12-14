@@ -4,11 +4,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.ImageButton
 import android.widget.Toast
+import com.cheermateapp.util.ToastManager
 import androidx.appcompat.app.AppCompatActivity
 import com.cheermateapp.data.StaticDataRepository
 import com.cheermateapp.data.db.AppDb
 import com.cheermateapp.data.model.Personality
+import com.cheermateapp.util.ThemeManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -19,10 +22,24 @@ class PersonalityActivity : AppCompatActivity() {
     private lateinit var staticDataRepository: StaticDataRepository
     private var personalities: List<Personality> = emptyList()
 
+    private fun updateThemeToggleButton(button: ImageButton?) {
+        button?.setImageResource(
+            if (ThemeManager.isDarkModeActive(this)) R.drawable.dark_mode__streamline_rounded_material_pro_free else R.drawable.light_mode__streamline_rounded_material_symbols
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         com.cheermateapp.util.ThemeManager.initializeTheme(this)
         setContentView(R.layout.activity_personality)
+
+        // Setup theme toggle button
+        val btnToggleTheme = findViewById<ImageButton>(R.id.btnToggleTheme)
+        updateThemeToggleButton(btnToggleTheme)
+        btnToggleTheme?.setOnClickListener {
+            com.cheermateapp.util.ThemeManager.toggleDarkMode(this)
+            recreate()
+        }
 
         // Initialize repository
         staticDataRepository = StaticDataRepository(this)
@@ -33,12 +50,12 @@ class PersonalityActivity : AppCompatActivity() {
 
         if (userId == -1) {
             Log.e("PersonalityActivity", "USER_ID is invalid!")
-            Toast.makeText(this, "Invalid user ID", Toast.LENGTH_SHORT).show()
+            ToastManager.showCustomToast(this, "Invalid user ID", Toast.LENGTH_SHORT)
             finish()
             return
         }
 
-        Toast.makeText(this, "Select your personality", Toast.LENGTH_SHORT).show()
+        ToastManager.showCustomToast(this, "Select your personality", Toast.LENGTH_SHORT)
 
         // Load personalities from database with cache
         loadPersonalities(userId)
@@ -53,7 +70,7 @@ class PersonalityActivity : AppCompatActivity() {
                 }
                 
                 if (personalities.isEmpty()) {
-                    Toast.makeText(this@PersonalityActivity, "No personalities available", Toast.LENGTH_SHORT).show()
+                    ToastManager.showCustomToast(this@PersonalityActivity, "No personalities available", Toast.LENGTH_SHORT)
                     finish()
                     return@launch
                 }
@@ -65,7 +82,7 @@ class PersonalityActivity : AppCompatActivity() {
                 
             } catch (e: Exception) {
                 Log.e("PersonalityActivity", "Error loading personalities", e)
-                Toast.makeText(this@PersonalityActivity, "Error loading personalities", Toast.LENGTH_SHORT).show()
+                ToastManager.showCustomToast(this@PersonalityActivity, "Error loading personalities", Toast.LENGTH_SHORT)
                 finish()
             }
         }
@@ -106,7 +123,7 @@ class PersonalityActivity : AppCompatActivity() {
 
                 } catch (e: Exception) {
                     Log.e("PersonalityActivity", "Error saving personality", e)
-                    Toast.makeText(this@PersonalityActivity, "Error saving personality: ${e.message}", Toast.LENGTH_LONG).show()
+                    ToastManager.showCustomToast(this@PersonalityActivity, "Error saving personality: ${e.message}", Toast.LENGTH_LONG)
 
                     // Re-enable buttons on error
                     findViewById<View>(R.id.cardKalog)?.isEnabled = true

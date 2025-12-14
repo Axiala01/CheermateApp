@@ -46,7 +46,7 @@ fun Task.getPriorityColor(): Int {
  * Get formatted due date and time string
  */
 fun Task.getFormattedDueDateTime(): String {
-    val dueDate = this.DueAt ?: return "No due date"
+    val dueDate = this.DueDate ?: return "No due date"
     val dueTime = this.DueTime
 
     return if (dueTime.isNullOrBlank()) {
@@ -68,7 +68,7 @@ fun Task.isOverdue(): Boolean {
  * Private helper function to check if task is overdue by date calculation
  */
 private fun Task.isTaskOverdueByDate(): Boolean {
-    val dueDate = this.DueAt ?: return false
+    val dueDate = this.DueDate ?: return false
     val dueTime = this.DueTime
     val currentTimeMillis = System.currentTimeMillis()
 
@@ -141,7 +141,7 @@ fun Task.getStatusText(): String {
  * Get relative due date text (Today, Tomorrow, etc.)
  */
 fun Task.getRelativeDueText(): String {
-    val dueDate = this.DueAt ?: return "No due date"
+    val dueDate = this.DueDate ?: return "No due date"
 
     try {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())

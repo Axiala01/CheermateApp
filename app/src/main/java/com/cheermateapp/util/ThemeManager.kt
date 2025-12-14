@@ -67,7 +67,10 @@ object ThemeManager {
             return when (mode) {
                 THEME_DARK -> true
                 THEME_LIGHT -> false
-                else -> false // Should not happen with current setup, but for safety
+                else -> {
+                    val nightModeFlags = context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
+                    nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES
+                }
             }
         }
     /**

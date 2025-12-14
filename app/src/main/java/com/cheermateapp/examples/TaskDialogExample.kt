@@ -214,7 +214,7 @@ class TaskDialogExample : AppCompatActivity() {
                     Priority = priorityEnum,
                     Status = Status.Pending,
                     TaskProgress = 0,
-                    DueAt = dueDate,
+                    DueDate = dueDate,
                     DueTime = dueTime,
                     CreatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp(),
                     UpdatedAt = com.cheermateapp.data.model.TimestampUtil.getCurrentTimestamp()
@@ -277,7 +277,7 @@ class TaskDialogExample : AppCompatActivity() {
                     TaskReminder_ID = reminderId,
                     Task_ID = taskId,
                     User_ID = currentUserId,
-                    RemindAt = remindAtMillis,
+                    RemindAt = TaskReminder.timestampToReadableString(remindAtMillis),
                     IsActive = true
                 )
                 
@@ -285,7 +285,7 @@ class TaskDialogExample : AppCompatActivity() {
                     db.taskReminderDao().insert(reminder)
                 }
                 
-                android.util.Log.d("TaskDialogExample", "✅ Created reminder for task $taskId at $remindAtMillis")
+                android.util.Log.d("TaskDialogExample", "✅ Created reminder for task $taskId at ${com.cheermateapp.data.model.TaskReminder.formatTimestamp(remindAtMillis)}")
             }
         } catch (e: Exception) {
             android.util.Log.e("TaskDialogExample", "Error creating reminder", e)

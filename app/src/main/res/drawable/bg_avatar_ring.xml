@@ -5,5 +5,5 @@
     android:viewportHeight="49">
   <path
       android:pathData="M0,24.086a24,24.086 0,1 0,48 0a24,24.086 0,1 0,-48 0z"
-      android:fillColor="#F2C7BA"/>
+      android:fillColor="@color/avatar_ring_color"/>
 </vector>

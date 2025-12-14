@@ -1,19 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/gradient_background"
-    android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".ActivityLogin">
+
+    <ImageButton
+        android:id="@+id/btnToggleTheme"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/toggle_theme"
+        android:padding="8dp"
+        android:src="@drawable/light_mode__streamline_rounded_material_symbols" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="match_parent"
         android:layout_gravity="center_vertical"
-        android:layout_weight="1"
         android:gravity="center_horizontal"
         android:orientation="vertical"
         android:padding="20dp">
@@ -22,7 +33,9 @@
             android:id="@+id/imageView2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:srcCompat="@drawable/cheermate_logo" />
+            app:srcCompat="@drawable/cheermate_logo"
+            android:layout_marginTop="48dp"
+            android:layout_marginBottom="16dp" />
 
         <TextView
             android:id="@+id/editTextText2"
@@ -33,7 +46,7 @@
             android:fontFamily="@font/sf_pro_rounded_bold"
             android:inputType="text"
             android:text="@string/welcome"
-            android:textColor="@color/white"
+            android:textColor="@color/primary_text_color"
             android:textSize="45sp" />
 
         <TextView
@@ -47,7 +60,7 @@
             android:inputType="text"
             android:paddingTop="1dp"
             android:text="@string/we_re_glad_to_see_you"
-            android:textColor="@color/white"
+            android:textColor="@color/primary_text_color"
             android:textSize="20sp" />
 
         <!-- Username -->
@@ -57,11 +70,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            app:boxBackgroundColor="#80FFFFFF"
+            app:boxBackgroundColor="@color/glass_fill_color"
             app:boxCornerRadiusBottomEnd="12dp"
             app:boxCornerRadiusBottomStart="12dp"
             app:boxCornerRadiusTopEnd="12dp"
             app:boxCornerRadiusTopStart="12dp"
+            app:hintTextColor="@color/primary_text_color"
             app:boxStrokeColor="#FFFFFFFF"
             app:boxStrokeWidth="1dp"
             app:boxStrokeWidthFocused="2dp">
@@ -72,8 +86,8 @@
                 android:layout_height="wrap_content"
                 android:background="@null"
                 android:hint="@string/username"
-                android:textColor="@color/white"
-                android:textColorHint="@color/white"
+                android:textColor="@color/primary_text_color"
+                android:textColorHint="@color/primary_text_color"
                 android:inputType="textEmailAddress" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -84,17 +98,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            app:boxBackgroundColor="#80FFFFFF"
+            app:boxBackgroundColor="@color/glass_fill_color"
             app:boxCornerRadiusBottomEnd="12dp"
             app:boxCornerRadiusBottomStart="12dp"
             app:boxCornerRadiusTopEnd="12dp"
             app:boxCornerRadiusTopStart="12dp"
+            app:hintTextColor="@color/primary_text_color"
             app:boxStrokeColor="#FFFFFFFF"
             app:boxStrokeWidth="1dp"
             app:boxStrokeWidthFocused="2dp"
             app:endIconMode="custom"
             app:endIconDrawable="@drawable/ic_visibility_off"
-            app:endIconTint="@color/white"
+            app:endIconTint="@color/primary_text_color"
             app:endIconContentDescription="Show password">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -103,8 +118,8 @@
                 android:layout_height="wrap_content"
                 android:background="@null"
                 android:hint="@string/type_a_password"
-                android:textColor="@color/white"
-                android:textColorHint="@color/white"
+                android:textColor="@color/primary_text_color"
+                android:textColorHint="@color/primary_text_color"
                 android:inputType="textPassword" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -116,8 +131,8 @@
             android:layout_marginBottom="12dp"
             android:fontFamily="@font/sf_pro_rounded_bold"
             android:text="@string/login"
-            android:textColor="@color/white"
-            android:textColorHint="@color/white"
+            android:textColor="@color/primary_text_color"
+            android:textColorHint="@color/primary_text_color"
             android:textAllCaps="false"
             android:theme="@style/Rounded12Overlay" />
 
@@ -139,7 +154,7 @@
                 android:focusable="true"
                 android:fontFamily="@font/sf_pro_rounded_regular"
                 android:text="@string/forgot_password_underlined"
-                android:textColor="@android:color/white"
+                android:textColor="@color/primary_text_color"
                 android:foreground="?attr/selectableItemBackgroundBorderless" />
 
             <!-- Line 2: Regular + bold "Sign up" -->
@@ -156,7 +171,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/don_t_have_an_account"
-                    android:textColor="@android:color/white"
+                    android:textColor="@color/primary_text_color"
                     android:textSize="14sp"
                     android:fontFamily="@font/sf_pro_rounded_regular"/>
 
@@ -166,7 +181,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/sign_up"
                     android:layout_marginStart="5dp"
-                    android:textColor="@android:color/white"
+                    android:textColor="@color/primary_text_color"
                     android:textSize="14sp"
                     android:fontFamily="@font/sf_pro_rounded_bold"
                     android:clickable="true"
@@ -174,4 +189,4 @@
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</RelativeLayout>

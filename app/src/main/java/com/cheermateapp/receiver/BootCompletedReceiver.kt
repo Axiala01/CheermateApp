@@ -27,7 +27,7 @@ class BootCompletedReceiver : BroadcastReceiver() {
                             it.Title,
                             it.Description,
                             it.User_ID,
-                            reminder.RemindAt
+                            reminder.remindAtTimestamp
                         )
                     }
                 }

@@ -54,7 +54,7 @@ object ReminderManager {
         android.util.Log.d("ReminderManager", "  Task ID: $taskId")
         android.util.Log.d("ReminderManager", "  Task Title: '$taskTitle'")
         android.util.Log.d("ReminderManager", "  User ID: $userId")
-        android.util.Log.d("ReminderManager", "  Reminder Time: ${java.util.Date(reminderTimeMillis)}")
+        android.util.Log.d("ReminderManager", "  Reminder Time: ${com.cheermateapp.data.model.TaskReminder.formatTimestamp(reminderTimeMillis)}")
         android.util.Log.d("ReminderManager", "  Current Time: ${java.util.Date()}")
         android.util.Log.d("ReminderManager", "  Time Until Alarm: ${(reminderTimeMillis - System.currentTimeMillis()) / 1000} seconds")
         android.util.Log.d("ReminderManager", "  Can Schedule Exact Alarms: $canSchedule")
@@ -78,7 +78,12 @@ object ReminderManager {
             }
             
             android.util.Log.d("ReminderManager", "✅ ALARM SCHEDULED SUCCESSFULLY!")
-            android.util.Log.d("ReminderManager", "⏰ Reminder set for task '$taskTitle' at ${java.util.Date(reminderTimeMillis)}")
+            android.util.Log.d("ReminderManager", "⏰ Reminder set for task '$taskTitle' at ${com.cheermateapp.data.model.TaskReminder.formatTimestamp(reminderTimeMillis)}")
+            
+            // ✅ ALSO SCHEDULE UPCOMING ALARM NOTIFICATION
+            com.cheermateapp.util.UpcomingAlarmManager.scheduleUpcomingAlarmNotification(
+                context, taskId, taskTitle, reminderTimeMillis
+            )
             
         } catch (e: SecurityException) {
             android.util.Log.e("ReminderManager", "❌ PERMISSION DENIED for scheduling alarm", e)

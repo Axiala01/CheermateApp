@@ -6,8 +6,8 @@
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
         
         <!-- Switch styling for light mode -->
-        <item name="colorControlActivated">#6B48FF</item>
-        <item name="colorSwitchThumbNormal">#CCCCCC</item>
+        <item name="colorControlActivated">@color/control_activated</item>
+        <item name="colorSwitchThumbNormal">@color/switch_thumb_normal</item>
         <!-- <item name="android:colorForeground">@android:color/black</item> -->
         
         <!-- Bottom sheet background -->

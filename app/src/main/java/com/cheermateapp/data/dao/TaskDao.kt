@@ -66,10 +66,10 @@ interface TaskDao {
     @Query("SELECT * FROM Task WHERE User_ID = :userId ORDER BY CreatedAt DESC")
     suspend fun getAllTasksForUser(userId: Int): List<Task>
 
-    @Query("SELECT * FROM Task WHERE User_ID = :userId AND DueAt = :date ORDER BY DueTime ASC")
+    @Query("SELECT * FROM Task WHERE User_ID = :userId AND DueDate = :date ORDER BY DueTime ASC")
     suspend fun getTodayTasks(userId: Int, date: String): List<Task>
 
-    @Query("SELECT * FROM Task WHERE User_ID = :userId AND Status IN ('Pending', 'InProgress') ORDER BY DueAt ASC")
+    @Query("SELECT * FROM Task WHERE User_ID = :userId AND Status IN ('Pending', 'InProgress') ORDER BY DueDate ASC")
     suspend fun getPendingTasks(userId: Int): List<Task>
 
     @Query("SELECT * FROM Task WHERE User_ID = :userId AND Status = 'Completed' ORDER BY UpdatedAt DESC")
@@ -79,7 +79,7 @@ interface TaskDao {
     @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId")
     suspend fun getAllTasksCount(userId: Int): Int
 
-    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DueAt = :date")
+    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DueDate = :date")
     suspend fun getTodayTasksCount(userId: Int, date: String): Int
 
     @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND Status IN ('Pending', 'InProgress')")
@@ -102,13 +102,13 @@ interface TaskDao {
     @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId")
     fun getAllTasksCountFlow(userId: Int): Flow<Int>
 
-    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DueAt = :date")
+    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DueDate = :date")
     fun getTodayTasksCountFlow(userId: Int, date: String): Flow<Int>
 
     @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND Status = 'Completed'")
     fun getCompletedTasksCountFlow(userId: Int): Flow<Int>
 
-    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DueAt = :todayStr AND Status = 'Completed'")
+    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DueDate = :todayStr AND Status = 'Completed'")
     fun getCompletedTodayTasksCountFlow(userId: Int, todayStr: String): Flow<Int>
 
     @Query("""
@@ -123,10 +123,10 @@ interface TaskDao {
     @Query("SELECT * FROM Task WHERE User_ID = :userId ORDER BY CreatedAt DESC")
     fun getAllTasksLive(userId: Int): LiveData<List<Task>>
 
-    @Query("SELECT * FROM Task WHERE User_ID = :userId AND DueAt = :todayStr ORDER BY DueTime ASC")
+    @Query("SELECT * FROM Task WHERE User_ID = :userId AND DueDate = :todayStr ORDER BY DueTime ASC")
     fun getTodayTasksLive(userId: Int, todayStr: String): LiveData<List<Task>>
 
-    @Query("SELECT * FROM Task WHERE User_ID = :userId AND Status IN ('Pending', 'InProgress') ORDER BY DueAt ASC")
+    @Query("SELECT * FROM Task WHERE User_ID = :userId AND Status IN ('Pending', 'InProgress') ORDER BY DueDate ASC")
     fun getPendingTasksLive(userId: Int): LiveData<List<Task>>
 
     @Query("SELECT * FROM Task WHERE User_ID = :userId AND Status = 'Completed' ORDER BY UpdatedAt DESC")
@@ -136,10 +136,10 @@ interface TaskDao {
     @Query("SELECT * FROM Task WHERE User_ID = :userId ORDER BY CreatedAt DESC")
     fun getAllTasksFlow(userId: Int): Flow<List<Task>>
 
-    @Query("SELECT * FROM Task WHERE User_ID = :userId AND DueAt = :todayStr ORDER BY DueTime ASC")
+    @Query("SELECT * FROM Task WHERE User_ID = :userId AND DueDate = :todayStr ORDER BY DueTime ASC")
     fun getTodayTasksFlow(userId: Int, todayStr: String): Flow<List<Task>>
 
-    @Query("SELECT * FROM Task WHERE User_ID = :userId AND Status IN ('Pending', 'InProgress') ORDER BY DueAt ASC")
+    @Query("SELECT * FROM Task WHERE User_ID = :userId AND Status IN ('Pending', 'InProgress') ORDER BY DueDate ASC")
     fun getPendingTasksFlow(userId: Int): Flow<List<Task>>
 
     @Query("SELECT * FROM Task WHERE User_ID = :userId AND Status = 'Completed' ORDER BY UpdatedAt DESC")
@@ -156,13 +156,13 @@ interface TaskDao {
     @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND Status = 'OverDue'")
     suspend fun getOverdueTasksCount(userId: Int): Int
 
-    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DueAt = :todayStr AND Status = 'Completed'")
+    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DueDate = :todayStr AND Status = 'Completed'")
     suspend fun getCompletedTodayTasksCount(userId: Int, todayStr: String): Int
 
-    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DueAt = :todayStr AND Status = 'InProgress'")
+    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DueDate = :todayStr AND Status = 'InProgress'")
     suspend fun getInProgressTodayTasksCount(userId: Int, todayStr: String): Int
 
-    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DueAt = :todayStr AND Status = 'InProgress'")
+    @Query("SELECT COUNT(*) FROM Task WHERE User_ID = :userId AND DueDate = :todayStr AND Status = 'InProgress'")
     fun getInProgressTodayTasksCountFlow(userId: Int, todayStr: String): Flow<Int>
 
     // ✅ NEW: Count tasks that were marked complete today (based on UpdatedAt timestamp)
@@ -201,7 +201,7 @@ interface TaskDao {
     @Query("SELECT * FROM Task WHERE User_ID = :userId AND Status = :status ORDER BY CreatedAt DESC")
     suspend fun getTasksByStatus(userId: Int, status: String): List<Task>
 
-    @Query("SELECT * FROM Task WHERE User_ID = :userId AND Status = :status ORDER BY DueAt ASC, DueTime ASC LIMIT :limit")
+    @Query("SELECT * FROM Task WHERE User_ID = :userId AND Status = :status ORDER BY DueDate ASC, DueTime ASC LIMIT :limit")
     suspend fun getTasksByStatusLimited(userId: Int, status: String, limit: Int): List<Task>
 
     // ✅ RECENT TASKS
@@ -210,12 +210,12 @@ interface TaskDao {
 
     // ✅ STATISTICS QUERIES
     @Query("""
-        SELECT COUNT(DISTINCT DueAt) FROM Task 
+        SELECT COUNT(DISTINCT DueDate) FROM Task 
         WHERE User_ID = :userId 
         AND Status = 'Completed'
-        AND DueAt >= :startDateStr 
-        AND DueAt <= :endDateStr 
-        ORDER BY DueAt DESC
+        AND DueDate >= :startDateStr 
+        AND DueDate <= :endDateStr 
+        ORDER BY DueDate DESC
     """)
     suspend fun getCompletedDaysInRange(userId: Int, startDateStr: String, endDateStr: String): Int
 

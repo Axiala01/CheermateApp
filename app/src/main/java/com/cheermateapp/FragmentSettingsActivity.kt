@@ -10,7 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import com.cheermateapp.data.StaticDataRepository
 import com.cheermateapp.data.db.AppDb
 import com.cheermateapp.data.model.Personality
-import com.cheermateapp.data.model.UserSettings
+
 import com.cheermateapp.util.ThemeManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.Dispatchers
@@ -25,6 +25,13 @@ class FragmentSettingsActivity : AppCompatActivity() {
 
     private var userId: Int = 0
     private lateinit var staticDataRepository: StaticDataRepository
+
+    private fun updateDarkModeIcon() {
+        val darkModeIcon = findViewById<ImageView>(R.id.darkModeIcon)
+        darkModeIcon?.setImageResource(
+            if (ThemeManager.isDarkModeActive(this)) R.drawable.dark_mode__streamline_rounded_material_pro_free else R.drawable.light_mode__streamline_rounded_material_symbols
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,6 +48,7 @@ class FragmentSettingsActivity : AppCompatActivity() {
         setupBottomNavigation()
         loadSettingsUserData()
         setupSettingsInteractions()
+        updateDarkModeIcon()
     }
 
     private fun setupToolbar() {
@@ -116,15 +124,12 @@ class FragmentSettingsActivity : AppCompatActivity() {
                     }
 
                     // Load and set notification switch state
-                    val userSettings = withContext(Dispatchers.IO) {
-                        db.userSettingsDao().getSettingsByUser(userId)
-                    }
-                    findViewById<Switch>(R.id.switchNotifications)?.isChecked = userSettings?.Notification == "On"
-                    
+                    findViewById<Switch>(R.id.switchNotifications)?.isChecked = com.cheermateapp.data.SettingsManager.isNotificationsEnabled(this@FragmentSettingsActivity)
+
                     // Set initial state of Dark Mode switch
                     val switchDarkMode = findViewById<Switch>(R.id.switchDarkMode)
                     if (switchDarkMode != null) {
-                        switchDarkMode.isChecked = userSettings?.Appearance?.theme == ThemeManager.THEME_DARK
+                        switchDarkMode.isChecked = com.cheermateapp.data.SettingsManager.isDarkMode(this@FragmentSettingsActivity)
                     }
 
                     // ✅ UPDATE TASK STATISTICS
@@ -261,13 +266,13 @@ class FragmentSettingsActivity : AppCompatActivity() {
             switchDarkMode?.setOnCheckedChangeListener { _, isChecked ->
                 val newMode = if (isChecked) ThemeManager.THEME_DARK else ThemeManager.THEME_LIGHT
                 ThemeManager.setThemeMode(this, newMode)
-                updateAppearanceSetting(newMode)
+                com.cheermateapp.data.SettingsManager.setDarkMode(this, isChecked)
                 Toast.makeText(
                     this, 
                     if (isChecked) "🌙 Dark mode enabled" else "☀️ Light mode enabled", 
                     Toast.LENGTH_SHORT
                 ).show()
-                
+                updateDarkModeIcon()
                 // Recreate activity to apply theme
                 recreate()
             }
@@ -278,7 +283,8 @@ class FragmentSettingsActivity : AppCompatActivity() {
             }
 
             findViewById<Switch>(R.id.switchNotifications)?.setOnCheckedChangeListener { _, isChecked ->
-                updateNotificationSetting(isChecked)
+                com.cheermateapp.data.SettingsManager.setNotificationsEnabled(this, isChecked)
+                Toast.makeText(this, "Notifications ${if (isChecked) "enabled" else "disabled"}", Toast.LENGTH_SHORT).show()
             }
 
             // Sign Out
@@ -536,55 +542,9 @@ class FragmentSettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateNotificationSetting(enabled: Boolean) {
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val db = AppDb.get(this@FragmentSettingsActivity)
-                val userSettingsDao = db.userSettingsDao()
 
-                var settings = userSettingsDao.getSettingsByUser(userId)
-                if (settings == null) {
-                    settings = com.cheermateapp.data.model.UserSettings(User_ID = userId)
-                }
-                
-                val notificationValue = if (enabled) "On" else "Off"
-                settings = settings.copy(Notification = notificationValue)
-                userSettingsDao.upsert(settings)
 
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@FragmentSettingsActivity, "Notifications ${if (enabled) "enabled" else "disabled"}", Toast.LENGTH_SHORT).show()
-                }
-            } catch (e: Exception) {
-                android.util.Log.e("FragmentSettingsActivity", "Error updating notification setting", e)
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@FragmentSettingsActivity, "Error updating notification setting", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
 
-    private fun updateAppearanceSetting(theme: String) {
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val db = AppDb.get(this@FragmentSettingsActivity)
-                val userSettingsDao = db.userSettingsDao()
-
-                var settings = userSettingsDao.getSettingsByUser(userId)
-                if (settings == null) {
-                    settings = com.cheermateapp.data.model.UserSettings(User_ID = userId)
-                }
-                settings = settings.copy(Appearance = com.cheermateapp.data.model.Appearance(theme = theme))
-                userSettingsDao.upsert(settings)
-
-                // No toast here as it's handled by the switch listener
-            } catch (e: Exception) {
-                android.util.Log.e("FragmentSettingsActivity", "Error updating appearance setting", e)
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@FragmentSettingsActivity, "Error updating appearance setting", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
 
     private fun showNotificationSettings() {
         val options = arrayOf(

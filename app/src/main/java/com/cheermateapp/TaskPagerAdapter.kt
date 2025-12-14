@@ -56,13 +56,13 @@ Status.Completed -> holder.tvTaskStatus.text = "✅ Completed"
         
         // Set due date with proper formatting
                     if (task.Status == Status.Completed) {            holder.tvTaskDueDate.visibility = View.GONE
-        } else if (task.DueAt != null) {
+        } else if (task.DueDate != null) {
             holder.tvTaskDueDate.visibility = View.VISIBLE
             val formattedDate = task.getFormattedDueDateTime()
             holder.tvTaskDueDate.text = if (formattedDate != null) {
                 "📅 Due: $formattedDate"
             } else {
-                "📅 Due: ${task.DueAt}"
+                "📅 Due: ${task.DueDate}"
             }
             holder.tvTaskDueDate.setTextColor(0xFFE53E3E.toInt()) // Red
         } else {

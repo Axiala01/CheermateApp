@@ -47,4 +47,15 @@ interface TaskReminderDao {
 
     @Query("SELECT * FROM TaskReminder WHERE IsActive = 1")
     suspend fun getAllActiveReminders(): List<TaskReminder>
+
+    // ✅ UTILITY: Clean up duplicate reminders (keeps only the latest one per task)
+    @Query("""
+        DELETE FROM TaskReminder 
+        WHERE TaskReminder_ID NOT IN (
+            SELECT MAX(TaskReminder_ID) 
+            FROM TaskReminder 
+            GROUP BY Task_ID, User_ID
+        )
+    """)
+    suspend fun cleanupDuplicateReminders()
 }

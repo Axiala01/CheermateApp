@@ -1,49 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Text colors for dark mode -->
-    <color name="text_primary">#FFFFFFFF</color>
-    <color name="text_secondary">#B3FFFFFF</color>
-    
-    <!-- Calendar background for dark mode - transparent -->
-    <color name="calendar_background">#00FFFFFF</color>
-    
-    <!-- Toolbar icon color for dark mode -->
-    <color name="toolbar_icon">#FFFFFFFF</color>
+    <color name="black">#FFFFFFFF</color> <!-- White in dark mode -->
+    <color name="white">#FFFFFFFF</color> <!-- White in dark mode -->
+    <color name="gradient_start">#FFA667C3</color>
+    <color name="gradient_end">#FF00B4D8</color>
+
+    <!-- Text colors -->
+    <color name="text_secondary_white_70">#B3FFFFFF</color> <!-- Translucent white in dark mode -->
+    <color name="text_primary">#FFFFFFFF</color> <!-- White in dark mode -->
+    <color name="text_secondary">#B3FFFFFF</color> <!-- Translucent white in dark mode -->
+
+    <!-- Calendar colors -->
+    <color name="calendar_today">#FF00B4D8</color>
+    <color name="calendar_selected">#FFA667C3</color>
+    <color name="calendar_background">#FF121212</color> <!-- Dark background -->
+    <color name="calendar_selector_stroke">#40000000</color> <!-- Translucent black -->
+    <color name="calendar_pressed_solid">#CC7F5FD9</color> <!-- Slightly desaturated pressed color -->
+    <color name="calendar_placeholder_text_color">#FFCCCCCC</color> <!-- Lighter grey -->
+
+    <!-- Toolbar icon color for dark mode (force white to match glass background) -->
+    <color name="toolbar_icon">#FF000000</color> <!-- Black in dark mode -->
 
     <!-- Bottom Sheet & Dialog colors for Dark Mode -->
-    <color name="bottom_sheet_background">#1E1E1E</color>
-    <color name="bottom_sheet_text_primary">#FFFFFF</color>
+    <color name="bottom_sheet_background">#FF1F1F1F</color> <!-- Darker grey -->
+    <color name="bottom_sheet_text_primary">#FFFFFFFF</color>
     <color name="bottom_sheet_text_secondary">#B3FFFFFF</color>
-    <color name="bottom_sheet_button_background">#2D2D2D</color>
-    <color name="bottom_sheet_button_border">#444444</color>
+    <color name="bottom_sheet_button_background">#FF333333</color>
+    <color name="bottom_sheet_button_border">#FF555555</color>
     <color name="bottom_sheet_ripple">#1AFFFFFF</color>
-    
-    <!-- Dark Mode Task Dialog Colors - WCAG AA Compliant -->
-    <color name="dialog_background">#1A1A1A</color>
-    <color name="dialog_surface">#2D2D2D</color>
-    <color name="dialog_text_primary">#FFFFFF</color>
-    <color name="dialog_text_secondary">#E0E0E0</color>
-    <color name="dialog_text_hint">#9E9E9E</color>
-    <color name="dialog_text_error">#F44336</color>
-    <color name="dialog_input_background">#333333</color>
-    <color name="dialog_input_border">#555555</color>
-    <color name="dialog_input_border_focused">#00B4D8</color>
-    <color name="dialog_label_text">#E0E0E0</color>
-    <color name="dialog_required_asterisk">#FF6B6B</color>
-    <color name="dialog_helper_text">#B0B0B0</color>
 
-    <!-- Dark Mode Glass Colors -->
-    <color name="glass_background_dark">#1A000000</color>
-    <color name="glass_border_dark">#33FFFFFF</color>
-    <color name="glass_hover_dark">#1AFFFFFF</color>
-    <color name="glass_pressed_dark">#26FFFFFF</color>
+    <!-- Dark Mode Task Dialog Colors -->
+    <color name="dialog_background">#FF1F1F1F</color>
+    <color name="dialog_surface">#FF2A2A2A</color>
+    <color name="dialog_text_primary">#FFFFFFFF</color>
+    <color name="dialog_text_secondary">#B3FFFFFF</color>
+    <color name="dialog_text_hint">#80FFFFFF</color>
+    <color name="dialog_text_error">#FFD32F2F</color> <!-- Same red -->
+    <color name="dialog_input_background">#FF333333</color>
+    <color name="dialog_input_border">#FF555555</color>
+    <color name="dialog_input_border_focused">#FF00B4D8</color> <!-- Same blue -->
+    <color name="dialog_label_text">#B3FFFFFF</color>
+    <color name="dialog_required_asterisk">#FFD32F2F</color> <!-- Same red -->
+    <color name="dialog_helper_text">#80FFFFFF</color>
 
-    <color name="calendar_placeholder_text_color">#FFFFFFFF</color>
     <color name="spinner_text_color">#FFFFFFFF</color>
     <color name="btn_create_task_text_color">#FF000000</color>
 
-    <!-- Glass effect colors for login/signup screens (same as light mode for gradient background) -->
-    <color name="glass_fill_color">#33FFFFFF</color>
-    <color name="glass_stroke_color">#66FFFFFF</color>
-    <color name="glass_hint_color">#B3FFFFFF</color>
+    <color name="switch_thumb_normal">#FF666666</color>
+    <color name="control_activated">#FF8A65FF</color>
+
+    <color name="toast_background_color">#FF333333</color>
+    <color name="toast_text_color">#FFFFFFFF</color>
+
+    <!-- Glass effect colors -->
+    <color name="glass_fill_color">#0D000000</color> <!-- Base dark glass from drawable-night -->
+    <color name="glass_stroke_color">#33FFFFFF</color> <!-- From drawable-night -->
+    <color name="glass_hint_color">#B3FFFFFF</color> <!-- Assuming it should be translucent white -->
+    <color name="glass_background_dark">#1A000000</color>
+    <color name="glass_border_dark">#33000000</color>
+    <color name="glass_hover_dark">#1A000000</color>
+    <color name="glass_pressed_dark">#26000000</color>
+    <color name="glass_pressed_solid">#26FFFFFF</color> <!-- From drawable-night/bg_card_glass_hover.xml -->
+    <color name="glass_pressed_stroke">#66FFFFFF</color> <!-- From drawable-night/bg_card_glass_hover.xml -->
+    <color name="glass_hovered_solid">#1AFFFFFF</color> <!-- From drawable-night/bg_card_glass_hover.xml -->
+    <color name="glass_hovered_stroke">#4DFFFFFF</color> <!-- From drawable-night/bg_card_glass_hover.xml -->
+    <color name="glass_focused_solid">#1AFFFFFF</color> <!-- From drawable-night/bg_card_glass_hover.xml -->
+    <color name="glass_focused_stroke">#80FFFFFF</color> <!-- From drawable-night/bg_card_glass_hover.xml -->
+
+    <!-- Avatar ring -->
+    <color name="avatar_ring_color">#FF505050</color> <!-- Dark grey for avatar ring in dark mode -->
+
+    <!-- Danger Card Glass colors (from drawable-night/bg_card_glass_danger_selector.xml for dark mode) -->
+    <color name="card_glass_danger_fill">#1AFF6B6B</color>
+    <color name="card_glass_danger_stroke">#4DFF6B6B</color>
+    <color name="card_glass_danger_pressed_solid">#33FF6B6B</color>
+    <color name="card_glass_danger_pressed_stroke">#66FF6B6B</color>
+    <color name="card_glass_danger_hovered_solid">#26FF6B6B</color>
+    <color name="card_glass_danger_hovered_stroke">#59FF6B6B</color>
+    <color name="card_glass_danger_default_solid">#1AFF6B6B</color>
+    <color name="card_glass_danger_default_stroke">#4DFF6B6B</color>
+
+    <!-- Dropdown colors -->
+    <color name="dropdown_item_pressed_solid">#33000000</color>
+    <color name="dropdown_item_hovered_solid">#26000000</color>
+    <color name="dropdown_round_solid">#F2000000</color>
+    <color name="dropdown_round_stroke">#33000000</color>
+    <color name="dropdown_text_color">#FFFFFFFF</color>
+
+    <!-- Nav Row colors -->
+    <color name="nav_row_ripple_color">#26000000</color>
+    <color name="nav_row_solid_color">#14000000</color>
+
+    <!-- Sidebar Glass colors -->
+    <color name="sidebar_glass_stroke_color">#80000000</color>
+    <color name="sidebar_glass_fill_color">#99202020</color> <!-- Darker grey for dark mode -->
+    <color name="sidebar_glass_stroke_color_alt">#60000000</color> <!-- Translucent black for dark mode -->
+
+    <!-- Cheermate Logo colors -->
+    <color name="cheermate_logo_purple">#FF5311AF</color>
+    <color name="cheermate_logo_blue_dark">#FF2F9DD1</color>
+    <color name="cheermate_logo_blue_light">#FF2DA0D2</color>
+
+    <!-- Dashboard Icon colors -->
+    <color name="dashboard_icon_stroke">#FF333333</color> <!-- Dark grey for dark mode -->
+
+    <!-- Generic Icon fill color -->
+    <color name="icon_fill_color">#FF000000</color> <!-- Black for dark mode -->
 </resources>

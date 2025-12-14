@@ -3,6 +3,7 @@ package com.cheermateapp
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ArrayAdapter
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -11,11 +12,14 @@ import com.cheermateapp.databinding.ActivityForgotPasswordBinding
 import com.cheermateapp.data.db.AppDb
 import com.cheermateapp.util.PasswordHashUtil
 import com.cheermateapp.util.InputValidationUtil
+import com.cheermateapp.util.ThemeManager
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+
 
 /**
  * Activity for password recovery using security questions
@@ -26,6 +30,12 @@ class ForgotPasswordActivity : AppCompatActivity() {
     private val uiScope = CoroutineScope(Dispatchers.Main)
     private lateinit var staticDataRepository: StaticDataRepository
 
+    private fun updateThemeToggleButton(button: ImageButton?) {
+        button?.setImageResource(
+            if (ThemeManager.isDarkModeActive(this)) R.drawable.dark_mode__streamline_rounded_material_pro_free else R.drawable.light_mode__streamline_rounded_material_symbols
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         com.cheermateapp.util.ThemeManager.initializeTheme(this)
@@ -33,6 +43,14 @@ class ForgotPasswordActivity : AppCompatActivity() {
         try {
             binding = ActivityForgotPasswordBinding.inflate(layoutInflater)
             setContentView(binding.root)
+
+            // Setup theme toggle button
+            val btnToggleTheme = findViewById<ImageButton>(R.id.btnToggleTheme)
+            updateThemeToggleButton(btnToggleTheme)
+            btnToggleTheme?.setOnClickListener {
+                com.cheermateapp.util.ThemeManager.toggleDarkMode(this)
+                recreate()
+            }
 
             // Initialize repository
             staticDataRepository = StaticDataRepository(this)
@@ -70,7 +88,7 @@ class ForgotPasswordActivity : AppCompatActivity() {
                 
                 val adapter = ArrayAdapter(
                     this@ForgotPasswordActivity,
-                    android.R.layout.simple_dropdown_item_1line,
+                    R.layout.dropdown_item,
                     securityQuestions
                 )
                 binding.etSecurityQuestion?.setAdapter(adapter)

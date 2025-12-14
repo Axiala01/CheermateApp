@@ -72,8 +72,8 @@ data class Task(
     @ColumnInfo(name = "Priority")
     val Priority: com.cheermateapp.data.model.Priority = com.cheermateapp.data.model.Priority.Medium,
 
-    @ColumnInfo(name = "DueAt")
-    val DueAt: String? = null,
+    @ColumnInfo(name = "DueDate")
+    val DueDate: String? = null,
 
     @ColumnInfo(name = "DueTime")
     val DueTime: String? = null,
@@ -98,7 +98,7 @@ data class Task(
             description: String? = null,
             category: com.cheermateapp.data.model.Category = com.cheermateapp.data.model.Category.Work,
             priority: com.cheermateapp.data.model.Priority = com.cheermateapp.data.model.Priority.Medium,
-            dueAt: String? = null,
+            dueDate: String? = null,
             dueTime: String? = null,
             status: com.cheermateapp.data.model.Status = com.cheermateapp.data.model.Status.Pending,
             taskProgress: Int = 0,
@@ -111,7 +111,7 @@ data class Task(
             Description = description,
             Category = category,
             Priority = priority,
-            DueAt = dueAt,
+            DueDate = dueDate,
             DueTime = dueTime,
             Status = status,
             TaskProgress = taskProgress,
@@ -125,12 +125,12 @@ data class Task(
         }
 
         fun timeToString(date: Date): String {
-            val format = SimpleDateFormat("HH:mm", Locale.getDefault())
+            val format = SimpleDateFormat("h:mm a", Locale.getDefault())
             return format.format(date)
         }
 
         fun dateToTimeString(date: Date): String {
-            val format = SimpleDateFormat("HH:mm", Locale.getDefault())
+            val format = SimpleDateFormat("h:mm a", Locale.getDefault())
             return format.format(date)
         }
 
@@ -138,39 +138,51 @@ data class Task(
             val dateTimeStr = if (timeStr != null) {
                 "$dateStr $timeStr"
             } else {
-                "$dateStr 00:00:00"
+                "$dateStr 12:00 AM"
             }
             
             return try {
-                // Try canonical format first
-                val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-                format.parse(dateTimeStr)
+                // Try 12-hour format first (h:mm a)
+                val format12Hour = SimpleDateFormat("yyyy-MM-dd h:mm a", Locale.getDefault())
+                format12Hour.parse(dateTimeStr)
             } catch (e: Exception) {
                 try {
-                    // Try legacy format
-                    val format = SimpleDateFormat("MMM dd, yyyy HH:mm:ss", Locale.getDefault())
-                    format.parse(dateTimeStr)
+                    // Try 24-hour format for backward compatibility
+                    val format24Hour = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+                    format24Hour.parse(dateTimeStr)
                 } catch (e2: Exception) {
-                    // Both failed
-                    null
+                    try {
+                        // Try legacy format with seconds
+                        val formatLegacy = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                        formatLegacy.parse(dateTimeStr)
+                    } catch (e3: Exception) {
+                        try {
+                            // Try another legacy format
+                            val formatOldLegacy = SimpleDateFormat("MMM dd, yyyy HH:mm:ss", Locale.getDefault())
+                            formatOldLegacy.parse(dateTimeStr)
+                        } catch (e4: Exception) {
+                            // All formats failed
+                            null
+                        }
+                    }
                 }
             }
         }
     }
 
-    fun getDueDate(): Date? {
-        return if (DueAt != null) {
-            Task.stringToDate(DueAt, DueTime)
+    fun getParsedDueDate(): Date? {
+        return if (DueDate != null) {
+            Task.stringToDate(DueDate, DueTime)
         } else null
     }
 
     fun isOverdue(): Boolean {
-        val dueDate = getDueDate()
+        val dueDate = getParsedDueDate()
         return dueDate != null && dueDate.before(Date()) && Status != com.cheermateapp.data.model.Status.Completed
     }
 
     fun isToday(): Boolean {
-        val dueDate = getDueDate()
+        val dueDate = getParsedDueDate()
         if (dueDate == null) return false
 
         val today = Calendar.getInstance()
@@ -182,11 +194,11 @@ data class Task(
     }
 
     fun getFormattedDueDateTime(): String? {
-        return if (DueAt != null) {
-            val dueDate = getDueDate()
+        return if (DueDate != null) {
+            val dueDate = getParsedDueDate()
             if (dueDate != null) {
                 val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-                val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
                 val formattedDate = dateFormat.format(dueDate)
                 val formattedTime = if (DueTime != null) {
                     " at ${timeFormat.format(dueDate)}"

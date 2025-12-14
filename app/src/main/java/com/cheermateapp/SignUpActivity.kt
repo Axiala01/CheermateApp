@@ -3,7 +3,9 @@ package com.cheermateapp
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ArrayAdapter
+import android.widget.ImageButton
 import android.widget.Toast
+import com.cheermateapp.util.ToastManager
 import androidx.appcompat.app.AppCompatActivity
 import com.cheermateapp.data.StaticDataRepository
 import com.cheermateapp.databinding.ActivitySignUpBinding
@@ -13,6 +15,7 @@ import com.cheermateapp.data.model.SecurityQuestion
 import com.cheermateapp.data.model.UserSecurityAnswer
 import com.cheermateapp.util.PasswordHashUtil
 import com.cheermateapp.util.InputValidationUtil
+import com.cheermateapp.util.ThemeManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -27,6 +30,12 @@ class SignUpActivity : AppCompatActivity() {
     private val uiScope = CoroutineScope(Dispatchers.Main)
     private lateinit var staticDataRepository: StaticDataRepository
 
+    private fun updateThemeToggleButton(button: ImageButton?) {
+        button?.setImageResource(
+            if (ThemeManager.isDarkModeActive(this)) R.drawable.dark_mode__streamline_rounded_material_pro_free else R.drawable.light_mode__streamline_rounded_material_symbols
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         com.cheermateapp.util.ThemeManager.initializeTheme(this)
@@ -34,6 +43,14 @@ class SignUpActivity : AppCompatActivity() {
         try {
             binding = ActivitySignUpBinding.inflate(layoutInflater)
             setContentView(binding.root)
+
+            // Setup theme toggle button
+            val btnToggleTheme = findViewById<ImageButton>(R.id.btnToggleTheme)
+            updateThemeToggleButton(btnToggleTheme)
+            btnToggleTheme?.setOnClickListener {
+                com.cheermateapp.util.ThemeManager.toggleDarkMode(this)
+                recreate()
+            }
 
             // Set initial state
             binding.etPassword.transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
@@ -67,7 +84,7 @@ class SignUpActivity : AppCompatActivity() {
             setupKeyboardAwareScroll()
 
         } catch (e: Exception) {
-            Toast.makeText(this, "Error loading sign up screen", Toast.LENGTH_LONG).show()
+            ToastManager.showCustomToast(this, "Error loading sign up screen", Toast.LENGTH_LONG)
             android.util.Log.e("SignUpActivity", "Error in onCreate", e)
             finish()
         }
@@ -85,18 +102,18 @@ class SignUpActivity : AppCompatActivity() {
                 }
                 
                 if (securityQuestions.isEmpty()) {
-                    Toast.makeText(
+                    ToastManager.showCustomToast(
                         this@SignUpActivity,
                         "No security questions available. Please try again later.",
                         Toast.LENGTH_LONG
-                    ).show()
+                    )
                     android.util.Log.e("SignUpActivity", "No security questions found")
                     return@launch
                 }
                 
                 val adapter = ArrayAdapter(
                     this@SignUpActivity,
-                    android.R.layout.simple_dropdown_item_1line,
+                    R.layout.dropdown_item,
                     securityQuestions
                 )
                 binding.etSecurityQuestion?.setAdapter(adapter)
@@ -105,11 +122,11 @@ class SignUpActivity : AppCompatActivity() {
                 android.util.Log.d("SignUpActivity", "Loaded ${securityQuestions.size} security questions")
             } catch (e: Exception) {
                 android.util.Log.e("SignUpActivity", "Error loading security questions", e)
-                Toast.makeText(
+                ToastManager.showCustomToast(
                     this@SignUpActivity,
                     "Error loading security questions",
                     Toast.LENGTH_SHORT
-                ).show()
+                )
             }
         }
     }

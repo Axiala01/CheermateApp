@@ -1,24 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+    <color name="secondary_text_color">#FF000000</color>
+    <color name="primary_text_color">#FFFFFFFF</color>
     <color name="gradient_start">#FFA667C3</color>
     <color name="gradient_end">#FF00B4D8</color>
-    
+
     <!-- Text colors -->
     <color name="text_secondary_white_70">#B3FFFFFF</color>
-    
-    <!-- Text colors for light mode -->
     <color name="text_primary">#FF000000</color>
     <color name="text_secondary">#99000000</color>
-    
+
     <!-- Calendar colors -->
     <color name="calendar_today">#FF00B4D8</color>
     <color name="calendar_selected">#FFA667C3</color>
-    
-    <!-- Calendar background for light mode -->
     <color name="calendar_background">#00FFFFFF</color>
-    
+    <color name="calendar_selector_stroke">#FFFFFF40</color>
+    <color name="calendar_pressed_solid">#CC9F5FD9</color>
+    <color name="calendar_placeholder_text_color">#FFFFFFFF</color>
+
     <!-- Toolbar icon color for light mode (force white to match glass background) -->
     <color name="toolbar_icon">#FFFFFFFF</color>
 
@@ -29,7 +30,7 @@
     <color name="bottom_sheet_button_background">#F5F5F5</color>
     <color name="bottom_sheet_button_border">#DDDDDD</color>
     <color name="bottom_sheet_ripple">#1A000000</color>
-    
+
     <!-- Light Mode Task Dialog Colors -->
     <color name="dialog_background">#FFFFFF</color>
     <color name="dialog_surface">#F8F9FA</color>
@@ -44,16 +45,67 @@
     <color name="dialog_required_asterisk">#D32F2F</color>
     <color name="dialog_helper_text">#757575</color>
 
-    <color name="calendar_placeholder_text_color">#FFFFFFFF</color>
     <color name="spinner_text_color">#FF000000</color>
     <color name="btn_create_task_text_color">#FFFFFFFF</color>
 
-    <!-- Glass effect colors for login/signup screens -->
-        <color name="glass_fill_color">#33FFFFFF</color>
-        <color name="glass_stroke_color">#66FFFFFF</color>
-        <color name="glass_hint_color">#B3FFFFFF</color>
-        <color name="glass_background_dark">#1AFFFFFF</color>
+    <color name="switch_thumb_normal">#CCCCCC</color>
+    <color name="control_activated">#6B48FF</color>
+
+    <color name="toast_background_color">#FFEEEEEE</color>
+    <color name="toast_text_color">#FF000000</color>
+
+    <!-- Glass effect colors -->
+    <color name="glass_fill_color">#33FFFFFF</color>
+    <color name="glass_stroke_color">#66FFFFFF</color>
+    <color name="glass_hint_color">#B3FFFFFF</color>
+    <color name="glass_background_dark">#1AFFFFFF</color>
     <color name="glass_border_dark">#33FFFFFF</color>
     <color name="glass_hover_dark">#1AFFFFFF</color>
     <color name="glass_pressed_dark">#26FFFFFF</color>
-    </resources>
+    <color name="glass_pressed_solid">#4DFFFFFF</color>
+    <color name="glass_pressed_stroke">#99FFFFFF</color>
+    <color name="glass_hovered_solid">#3DFFFFFF</color>
+    <color name="glass_hovered_stroke">#80FFFFFF</color>
+    <color name="glass_focused_solid">#3DFFFFFF</color>
+    <color name="glass_focused_stroke">#FFFFFFFF</color>
+
+    <!-- Avatar ring -->
+    <color name="avatar_ring_color">#FFF2C7BA</color>
+
+    <!-- Danger Card Glass colors (from drawable/bg_card_glass_danger_selector.xml for light mode) -->
+    <color name="card_glass_danger_fill">#26FF6B6B</color>
+    <color name="card_glass_danger_stroke">#33FF6B6B</color>
+    <color name="card_glass_danger_pressed_solid">#33FF6B6B</color>
+    <color name="card_glass_danger_pressed_stroke">#4DFF6B6B</color>
+    <color name="card_glass_danger_hovered_solid">#26FF6B6B</color>
+    <color name="card_glass_danger_hovered_stroke">#59FF6B6B</color>
+    <color name="card_glass_danger_default_solid">#26FF6B6B</color>
+    <color name="card_glass_danger_default_stroke">#33FF6B6B</color>
+
+    <!-- Dropdown colors -->
+    <color name="dropdown_item_pressed_solid">#33FFFFFF</color>
+    <color name="dropdown_item_hovered_solid">#26FFFFFF</color>
+    <color name="dropdown_round_solid">#F2FFFFFF</color>
+    <color name="dropdown_round_stroke">#33FFFFFF</color>
+    <color name="dropdown_text_color">#FF000000</color>
+
+    <!-- Nav Row colors -->
+    <color name="nav_row_ripple_color">#26FFFFFF</color>
+    <color name="nav_row_solid_color">#14FFFFFF</color>
+
+    <!-- Sidebar Glass colors -->
+    <color name="sidebar_glass_stroke_color">#80FFFFFF</color>
+    <color name="sidebar_glass_fill_color">#99B0B0B0</color>
+    <color name="sidebar_glass_stroke_color_alt">#60FFFFFF</color>
+
+    <!-- Cheermate Logo colors -->
+    <color name="cheermate_logo_purple">#5311AF</color>
+    <color name="cheermate_logo_blue_dark">#2F9DD1</color>
+    <color name="cheermate_logo_blue_light">#2DA0D2</color>
+
+    <!-- Dashboard Icon colors -->
+    <color name="dashboard_icon_stroke">#ffffff</color>
+
+    <!-- Generic Icon fill color -->
+    <color name="icon_fill_color">#FFFFFF</color>
+</resources>
