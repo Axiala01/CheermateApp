@@ -22,6 +22,9 @@ class TaskListAdapter(
     private val onTaskUpdate: (Task, Category?, Priority?, String?) -> Unit
 ) : RecyclerView.Adapter<TaskListAdapter.TaskViewHolder>() {
 
+    val currentList: List<Task>
+        get() = tasks
+
     private var expandedPosition = -1
 
     class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

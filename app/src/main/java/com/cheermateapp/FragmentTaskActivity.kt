@@ -57,9 +57,8 @@ class FragmentTaskActivity : AppCompatActivity() {
 
     private var currentFilter = FilterType.ALL
     private var userId: Int = 0
-    private var currentTasks = mutableListOf<Task>()
-    private var allTasks = mutableListOf<Task>()
-    private var filteredTasks: List<Task> = emptyList()
+    private var masterTaskList = mutableListOf<Task>() // Holds all tasks from DB
+    private var currentSearchQuery: String = "" // Holds the current search query
 
     enum class FilterType {
         ALL, TODAY, PENDING, COMPLETED
@@ -96,11 +95,10 @@ class FragmentTaskActivity : AppCompatActivity() {
 
                 android.util.Log.d("FragmentTaskActivity", "Loaded ${allTasks.size} tasks for user $userId")
 
-                currentTasks.clear()
-                currentTasks.addAll(allTasks)
+                masterTaskList.clear()
+                masterTaskList.addAll(allTasks)
 
-                filterTasks(currentFilter)
-                updateTabCounts()
+                applyCombinedFilters()
 
             } catch (e: Exception) {
                 android.util.Log.e("FragmentTaskActivity", "Error loading tasks", e)
@@ -138,8 +136,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                     android.util.Log.d("DEBUG", "Task $index: ${task.Title} (ID: ${task.Task_ID}, UserID: ${task.User_ID})")
                 }
 
-                android.util.Log.d("DEBUG", "Current tasks list size: ${currentTasks.size}")
-                android.util.Log.d("DEBUG", "Filtered tasks list size: ${filteredTasks.size}")
+
                 android.util.Log.d("DEBUG", "=== END DEBUG ===")
 
             } catch (e: Exception) {
@@ -216,6 +213,7 @@ class FragmentTaskActivity : AppCompatActivity() {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
                 override fun afterTextChanged(s: Editable?) {
+                    android.util.Log.d("FragmentTaskActivity", "🔍 Search text changed: ${s.toString()}")
                     searchTasks(s?.toString())
                 }
             })
@@ -260,10 +258,6 @@ class FragmentTaskActivity : AppCompatActivity() {
     // ✅ UPDATED: Display tasks with navigation support
     private fun displayTaskInCard(tasks: List<Task>) {
         try {
-            filteredTasks = tasks
-            currentTasks.clear()
-            currentTasks.addAll(tasks)
-
             if (tasks.isEmpty()) {
                 showEmptyState()
             } else {
@@ -421,9 +415,6 @@ class FragmentTaskActivity : AppCompatActivity() {
     // ✅ FIXED: Corrected showEmptyState method
     private fun showEmptyState() {
         try {
-            filteredTasks = emptyList()
-            currentTasks.clear()
-
             recyclerViewTasks.visibility = View.GONE
             tvEmptyState.visibility = View.VISIBLE
 
@@ -615,52 +606,8 @@ class FragmentTaskActivity : AppCompatActivity() {
     // ✅ CRUD OPERATION: READ - Filter and display tasks
     private fun filterTasks(filterType: FilterType) {
         android.util.Log.d("FragmentTaskActivity", "🔍 filterTasks called with: $filterType")
-        android.util.Log.d("FragmentTaskActivity", "🔍 Current userId: $userId")
-
-        lifecycleScope.launch {
-            try {
-                val db = AppDb.get(this@FragmentTaskActivity)
-                val tasks = withContext(Dispatchers.IO) {
-                    when (filterType) {
-                        FilterType.ALL -> {
-                            android.util.Log.d("FragmentTaskActivity", "🔍 Getting ALL tasks...")
-                            db.taskDao().getAllTasksForUser(userId)
-                        }
-                        FilterType.TODAY -> {
-                            val todayStr = getCurrentDateString()
-                            android.util.Log.d("FragmentTaskActivity", "🔍 Getting TODAY tasks for date: $todayStr")
-                            db.taskDao().getTodayTasks(userId, todayStr)
-                        }
-                        FilterType.PENDING -> {
-                            android.util.Log.d("FragmentTaskActivity", "🔍 Getting PENDING tasks...")
-                            db.taskDao().getPendingTasks(userId)
-                        }
-                        FilterType.COMPLETED -> {
-                            android.util.Log.d("FragmentTaskActivity", "🔍 Getting COMPLETED tasks...")
-                            db.taskDao().getCompletedTasks(userId)
-                        }
-                        else -> emptyList()
-                    }
-                }
-
-                android.util.Log.d("FragmentTaskActivity", "🔍 Filter $filterType returned ${tasks.size} tasks")
-
-                allTasks.clear()
-                allTasks.addAll(tasks)
-
-                // ✅ Display filtered tasks in card
-                displayTaskInCard(tasks)
-                
-                // ✅ Update chipFound with the filtered count immediately
-                chipFound.text = "${tasks.size} found"
-                
-                updateTabCounts()
-
-            } catch (e: Exception) {
-                android.util.Log.e("FragmentTaskActivity", "❌ Error filtering tasks", e)
-                Toast.makeText(this@FragmentTaskActivity, "Error filtering tasks: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-        }
+        currentFilter = filterType // Update currentFilter
+        applyCombinedFilters() // Apply new filter along with any search query
     }
 
     private fun updateTabCounts() {
@@ -766,27 +713,36 @@ class FragmentTaskActivity : AppCompatActivity() {
         }
     }
 
-    private fun searchTasks(query: String?) {
-        if (query.isNullOrBlank()) {
-            displayTaskInCard(allTasks)
-            chipFound.text = "${allTasks.size} found"
-        } else {
-            val searchResults = allTasks.filter { task ->
-                task.Title.contains(query, ignoreCase = true) ||
-                        (task.Description?.contains(query, ignoreCase = true) == true)
+    private fun applyCombinedFilters() {
+        var workingList = masterTaskList.toList() // Start with a copy of all tasks
+
+        // Apply tab filter first
+        workingList = when (currentFilter) {
+            FilterType.ALL -> workingList
+            FilterType.TODAY -> {
+                val todayStr = getCurrentDateString()
+                workingList.filter { it.DueDate == todayStr }
             }
-            displayTaskInCard(searchResults)
-            
-            // Display task titles in chipFound
-            if (searchResults.isEmpty()) {
-                chipFound.text = "No tasks found"
-            } else if (searchResults.size == 1) {
-                chipFound.text = "Found: ${searchResults[0].Title}"
-            } else {
-                // Show first task title and count
-                chipFound.text = "Found: ${searchResults[0].Title} +${searchResults.size - 1} more"
+            FilterType.PENDING -> workingList.filter { it.Status == Status.Pending }
+            FilterType.COMPLETED -> workingList.filter { it.Status == Status.Completed }
+        }
+
+        // Apply search query to the tab-filtered list
+        if (currentSearchQuery.isNotBlank()) {
+            workingList = workingList.filter { task ->
+                task.Title.contains(currentSearchQuery, ignoreCase = true) ||
+                        (task.Description?.contains(currentSearchQuery, ignoreCase = true) == true)
             }
         }
+
+        displayTaskInCard(workingList)
+        chipFound.text = "${workingList.size} found"
+        updateTabCounts()
+    }
+
+    private fun searchTasks(query: String?) {
+        currentSearchQuery = query.orEmpty()
+        applyCombinedFilters()
     }
 
     private fun showSortOptionsDialog() {
@@ -812,43 +768,46 @@ class FragmentTaskActivity : AppCompatActivity() {
 
     private fun sortTasks(sortType: Int) {
         try {
+            val tasksToSort = taskListAdapter.currentList // Get the currently displayed list
             val sortedTasks: List<Task> = when (sortType) {
                 0 -> { // Due Date
-                    currentTasks.sortedWith { task1, task2 ->
+                    tasksToSort.sortedWith { task1: Task, task2: Task ->
                         val date1 = task1.DueDate ?: ""
                         val date2 = task2.DueDate ?: ""
                         date1.compareTo(date2)
                     }
                 }
                 1 -> { // Priority (High first)
-                    currentTasks.sortedWith { task1, task2 ->
+                    tasksToSort.sortedWith { task1: Task, task2: Task ->
                         val priority1 = when (task1.Priority) {
                             Priority.High -> 3
                             Priority.Medium -> 2
                             Priority.Low -> 1
+                            else -> 0 // Added else branch for exhaustiveness
                         }
                         val priority2 = when (task2.Priority) {
                             Priority.High -> 3
                             Priority.Medium -> 2
                             Priority.Low -> 1
+                            else -> 0 // Added else branch for exhaustiveness
                         }
                         priority2.compareTo(priority1)
                     }
                 }
                 2 -> { // Title A-Z
-                    currentTasks.sortedWith { task1, task2 ->
+                    tasksToSort.sortedWith { task1: Task, task2: Task ->
                         task1.Title.compareTo(task2.Title, ignoreCase = true)
                     }
                 }
                 3 -> { // Status
-                    currentTasks.sortedWith { task1, task2 ->
+                    tasksToSort.sortedWith { task1: Task, task2: Task ->
                         val status1 = when (task1.Status) {
                             Status.Pending -> 1
                             Status.InProgress -> 2
                             Status.OverDue -> 3
                             Status.Completed -> 4
                             Status.Cancelled -> 5
-                            else -> 0
+                            else -> 0 // Added else branch for exhaustiveness
                         }
                         val status2 = when (task2.Status) {
                             Status.Pending -> 1
@@ -856,20 +815,20 @@ class FragmentTaskActivity : AppCompatActivity() {
                             Status.OverDue -> 3
                             Status.Completed -> 4
                             Status.Cancelled -> 5
-                            else -> 0
+                            else -> 0 // Added else branch for exhaustiveness
                         }
                         status1.compareTo(status2)
                     }
                 }
                 4 -> { // Progress (High first)
-                    currentTasks.sortedWith { task1, task2 ->
+                    tasksToSort.sortedWith { task1: Task, task2: Task ->
                         task2.TaskProgress.compareTo(task1.TaskProgress)
                     }
                 }
-                else -> currentTasks
+                else -> tasksToSort // If sortType is unknown, return original list
             }
 
-            displayTaskInCard(sortedTasks)
+            displayTaskInCard(sortedTasks) // Display the sorted list
 
             val sortNames = arrayOf("Due Date", "Priority", "Title", "Status", "Progress")
             val sortName = if (sortType in sortNames.indices) sortNames[sortType] else "Unknown"

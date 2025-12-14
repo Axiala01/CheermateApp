@@ -41,7 +41,8 @@
             android:name=".MainActivity"
             android:exported="false"
             android:configChanges="orientation|screenSize"
-            android:theme="@style/Theme.CheermateApp" />
+            android:theme="@style/Theme.CheermateApp"
+            android:windowSoftInputMode="adjustPan" />
 
         <!-- Sign Up Activity -->
         <activity

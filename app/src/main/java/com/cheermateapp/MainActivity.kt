@@ -670,7 +670,8 @@ class MainActivity : AppCompatActivity() {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
                 override fun afterTextChanged(s: android.text.Editable?) {
-                    // tasksViewModel.setSearchQuery(s.toString())
+                    android.util.Log.d("MainActivity", "🔍 Search text changed: ${s.toString()}") // Re-add the debug log
+                    tasksViewModel.setSearchQuery(s.toString())
                 }
             })
 
@@ -707,7 +708,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun observeTasks() {
         lifecycleScope.launch {
-            tasksViewModel.tasks.collectLatest { tasks ->
+            tasksViewModel.tasks.collectLatest { tasks: List<Task> -> // Explicit type here
                 taskAdapter?.updateTasks(tasks)
                 findViewById<TextView>(R.id.chipFound)?.text = "${tasks.size} found"
 
@@ -729,24 +730,24 @@ class MainActivity : AppCompatActivity() {
         }
         
         lifecycleScope.launch {
-            tasksViewModel.allTasksCount.collectLatest {
-                tabAll.text = "All ($it)"
-                tvTasksSub.text = "$it total tasks"
+            tasksViewModel.allTasksCount.collectLatest { count: Int -> // Explicit type here
+                tabAll.text = "All ($count)"
+                tvTasksSub.text = "$count total tasks"
             }
         }
         lifecycleScope.launch {
-            tasksViewModel.todayTasksCount.collectLatest {
-                tabToday.text = "Today ($it)"
+            tasksViewModel.todayTasksCount.collectLatest { count: Int -> // Explicit type here
+                tabToday.text = "Today ($count)"
             }
         }
         lifecycleScope.launch {
-            tasksViewModel.pendingTasksCount.collectLatest {
-                tabPending.text = "Pending ($it)"
+            tasksViewModel.pendingTasksCount.collectLatest { count: Int -> // Explicit type here
+                tabPending.text = "Pending ($count)"
             }
         }
         lifecycleScope.launch {
-            tasksViewModel.completedTasksCount.collectLatest {
-                tabDone.text = "Completed ($it)"
+            tasksViewModel.completedTasksCount.collectLatest { count: Int -> // Explicit type here
+                tabDone.text = "Completed ($count)"
             }
         }
     }

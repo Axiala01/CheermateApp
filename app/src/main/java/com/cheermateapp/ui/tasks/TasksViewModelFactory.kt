@@ -3,6 +3,7 @@ package com.cheermateapp.ui.tasks
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.cheermateapp.data.db.AppDb
+import com.cheermateapp.ui.tasks.TasksViewModel
 
 class TasksViewModelFactory(private val db: AppDb, private val userId: Int) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
