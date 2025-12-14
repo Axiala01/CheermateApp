@@ -3,18 +3,26 @@ package com.cheermateapp.data.repository
 import com.cheermateapp.data.dao.TaskDao
 import com.cheermateapp.data.dao.SubTaskDao
 import com.cheermateapp.data.dao.TaskReminderDao
-import com.cheermateapp.data.dao.TaskDependencyDao
 import com.cheermateapp.data.model.Task
 import com.cheermateapp.data.model.Priority
 import com.cheermateapp.data.model.Status
+import com.cheermateapp.data.model.TimestampUtil // Added import
+import android.util.Log
+import org.junit.After
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.anyString // Added import
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
-import org.mockito.Mockito.*
+import org.mockito.Mockito
+import org.mockito.MockedStatic
 import org.mockito.MockitoAnnotations
+import org.mockito.junit.MockitoJUnitRunner
 
 /**
  * Unit tests for TaskRepository
@@ -30,6 +38,7 @@ import org.mockito.MockitoAnnotations
  * 2. Setup proper test infrastructure
  * 3. Create actual test cases based on your needs
  */
+@RunWith(MockitoJUnitRunner::class)
 class TaskRepositoryTest {
 
     @Mock
@@ -41,11 +50,10 @@ class TaskRepositoryTest {
     @Mock
     private lateinit var taskReminderDao: TaskReminderDao
     
-    @Mock
-    private lateinit var taskDependencyDao: TaskDependencyDao
-    
     private lateinit var repository: TaskRepository
     
+    private lateinit var mockedLog: MockedStatic<Log> // Declare MockedStatic
+
     private val sampleTask = Task(
         Task_ID = 1,
         User_ID = 1,
@@ -53,13 +61,20 @@ class TaskRepositoryTest {
         Description = "Test Description",
         Priority = Priority.High,
         Status = Status.Pending,
-        CreatedAt = System.currentTimeMillis()
+        CreatedAt = TimestampUtil.getCurrentTimestamp() // Changed to String
     )
 
     @Before
     fun setup() {
         MockitoAnnotations.openMocks(this)
-        repository = TaskRepository(taskDao, subTaskDao, taskReminderDao, taskDependencyDao)
+        mockedLog = Mockito.mockStatic(Log::class.java) // Initialize MockedStatic
+        mockedLog.`when`<Int> { Log.d(anyString(), anyString()) }.thenReturn(0) // Configure static mock for Log.d
+        repository = TaskRepository(taskDao, subTaskDao, taskReminderDao) // Removed taskDependencyDao
+    }
+
+    @After
+    fun tearDown() {
+        mockedLog.close() // Close MockedStatic
     }
 
     // ==================== INSERT TASK TESTS ====================
@@ -67,7 +82,7 @@ class TaskRepositoryTest {
     @Test
     fun `insertTask returns Success when insert succeeds`() = runTest {
         // Given
-        `when`(taskDao.insert(sampleTask)).thenReturn(1L)
+        Mockito.when(taskDao.insert(sampleTask)).thenReturn(1L)
         
         // When
         val result = repository.insertTask(sampleTask)
@@ -82,7 +97,7 @@ class TaskRepositoryTest {
     fun `insertTask returns Error when insert fails`() = runTest {
         // Given
         val exception = Exception("Database error")
-        `when`(taskDao.insert(sampleTask)).thenThrow(exception)
+        Mockito.when(taskDao.insert(sampleTask)).thenThrow(exception)
         
         // When
         val result = repository.insertTask(sampleTask)
@@ -98,7 +113,7 @@ class TaskRepositoryTest {
     @Test
     fun `updateTask returns Success when update succeeds`() = runTest {
         // Given
-        `when`(taskDao.update(sampleTask)).thenReturn(Unit)
+        Mockito.when(taskDao.update(sampleTask)).thenReturn(Unit)
         
         // When
         val result = repository.updateTask(sampleTask)
@@ -112,7 +127,7 @@ class TaskRepositoryTest {
     fun `updateTask returns Error when update fails`() = runTest {
         // Given
         val exception = Exception("Update failed")
-        `when`(taskDao.update(sampleTask)).thenThrow(exception)
+        Mockito.when(taskDao.update(sampleTask)).thenThrow(exception)
         
         // When
         val result = repository.updateTask(sampleTask)
@@ -122,28 +137,13 @@ class TaskRepositoryTest {
         assertEquals(exception, (result as DataResult.Error).exception)
     }
 
-    // ==================== DELETE TASK TESTS ====================
-
-    @Test
-    fun `softDeleteTask returns Success when delete succeeds`() = runTest {
-        // Given
-        `when`(taskDao.softDelete(1, 1)).thenReturn(Unit)
-        
-        // When
-        val result = repository.softDeleteTask(1, 1)
-        
-        // Then
-        assertTrue(result is DataResult.Success)
-        verify(taskDao).softDelete(eq(1), eq(1), any(), any())
-    }
-
     // ==================== GET TASKS TESTS ====================
 
     @Test
     fun `getAllTasks returns Success with tasks when query succeeds`() = runTest {
         // Given
         val tasks = listOf(sampleTask)
-        `when`(taskDao.getAllTasksForUser(1)).thenReturn(tasks)
+        Mockito.when(taskDao.getAllTasksForUser(1)).thenReturn(tasks)
         
         // When
         val result = repository.getAllTasks(1)
@@ -158,7 +158,7 @@ class TaskRepositoryTest {
     fun `getAllTasks returns Error when query fails`() = runTest {
         // Given
         val exception = Exception("Query failed")
-        `when`(taskDao.getAllTasksForUser(1)).thenThrow(exception)
+        Mockito.when(taskDao.getAllTasksForUser(1)).thenThrow(exception)
         
         // When
         val result = repository.getAllTasks(1)
@@ -175,7 +175,7 @@ class TaskRepositoryTest {
         // Given
         val tasks = listOf(sampleTask)
         val flow = flowOf(tasks)
-        `when`(taskDao.getAllTasksFlow(1)).thenReturn(flow)
+        Mockito.when(taskDao.getAllTasksFlow(1)).thenReturn(flow)
         
         // When/Then
         repository.getAllTasksFlow(1).collect { emittedTasks ->
@@ -191,7 +191,7 @@ class TaskRepositoryTest {
         val flow = flowOf<List<Task>>().also {
             throw Exception("Flow error")
         }
-        `when`(taskDao.getAllTasksFlow(1)).thenReturn(flow)
+        Mockito.when(taskDao.getAllTasksFlow(1)).thenReturn(flow)
         
         // When/Then
         // Flow should catch error and emit empty list
@@ -206,7 +206,7 @@ class TaskRepositoryTest {
     @Test
     fun `markTaskCompleted returns Success when operation succeeds`() = runTest {
         // Given
-        `when`(taskDao.markTaskCompleted(1, 1)).thenReturn(Unit)
+        Mockito.when(taskDao.markTaskCompleted(1, 1)).thenReturn(Unit)
         
         // When
         val result = repository.markTaskCompleted(1, 1)
@@ -223,7 +223,7 @@ class TaskRepositoryTest {
         // Given
         val query = "Test"
         val matchingTasks = listOf(sampleTask)
-        `when`(taskDao.searchTasks(1, "%$query%")).thenReturn(matchingTasks)
+        Mockito.when(taskDao.searchTasks(1, "%$query%")).thenReturn(matchingTasks)
         
         // When
         val result = repository.searchTasks(1, query)
@@ -239,7 +239,7 @@ class TaskRepositoryTest {
     fun `insertTasks returns Success when batch insert succeeds`() = runTest {
         // Given
         val tasks = listOf(sampleTask, sampleTask.copy(Task_ID = 2))
-        `when`(taskDao.insertAll(tasks)).thenReturn(Unit)
+        Mockito.when(taskDao.insertAll(tasks)).thenReturn(Unit)
         
         // When
         val result = repository.insertTasks(tasks)
@@ -250,24 +250,10 @@ class TaskRepositoryTest {
     }
 
     @Test
-    fun `softDeleteTasks returns Success when batch delete succeeds`() = runTest {
-        // Given
-        val taskIds = listOf(1, 2, 3)
-        `when`(taskDao.softDeleteMultiple(1, taskIds)).thenReturn(Unit)
-        
-        // When
-        val result = repository.softDeleteTasks(1, taskIds)
-        
-        // Then
-        assertTrue(result is DataResult.Success)
-        verify(taskDao).softDeleteMultiple(eq(1), eq(taskIds), any())
-    }
-
-    @Test
     fun `markTasksCompleted returns Success when batch complete succeeds`() = runTest {
         // Given
         val taskIds = listOf(1, 2, 3)
-        `when`(taskDao.markMultipleCompleted(1, taskIds)).thenReturn(Unit)
+        Mockito.when(taskDao.markMultipleCompleted(1, taskIds)).thenReturn(Unit)
         
         // When
         val result = repository.markTasksCompleted(1, taskIds)

@@ -69,22 +69,7 @@ class RoomSchemaValidatorTest {
         assertTrue("SubTask should not have critical foreign key issues", criticalIssues.isEmpty())
     }
 
-    @Test
-    fun `test validate TaskDependency has correct multi-reference foreign keys`() {
-        // Given
-        val entities = listOf(User::class, Task::class, TaskDependency::class)
 
-        // When
-        val issues = validator.validateEntity(TaskDependency::class, entities)
-
-        // Then
-        // TaskDependency references Task twice, both should be valid
-        val foreignKeyIssues = issues.filter {
-            it.type == ValidationIssueType.INVALID_FOREIGN_KEY_REFERENCE &&
-            it.severity == ValidationSeverity.CRITICAL
-        }
-        assertTrue("TaskDependency should have valid foreign keys", foreignKeyIssues.isEmpty())
-    }
 
     @Test
     fun `test validate User entity has primary key`() {
@@ -171,20 +156,7 @@ class RoomSchemaValidatorTest {
         assertTrue("Cascade operations should be valid", cascadeIssues.isEmpty())
     }
 
-    @Test
-    fun `test validate circular dependencies detection`() {
-        // Given
-        val entities = listOf(User::class, Task::class, TaskDependency::class)
-        val config = ValidationConfig(checkCircularDependencies = true)
 
-        // When
-        val result = validator.validate(entities, config)
-
-        // Then
-        // TaskDependency can create circular dependencies
-        assertNotNull(result)
-        // May or may not have circular dependencies depending on data
-    }
 
     @Test
     fun `test validation result summary`() {

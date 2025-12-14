@@ -33,10 +33,10 @@ class SubTaskAdapter(
 
         // Set subtask name and completion state
         holder.tvSubTaskName.text = subTask.Name
-        holder.checkBox.isChecked = subTask.IsCompleted
+        holder.checkBox.isChecked = (subTask.IsCompleted == "Yes")
 
         // Apply strikethrough if completed
-        if (subTask.IsCompleted) {
+        if (subTask.IsCompleted == "Yes") {
             holder.tvSubTaskName.paintFlags = holder.tvSubTaskName.paintFlags or
                     android.graphics.Paint.STRIKE_THRU_TEXT_FLAG
             holder.tvSubTaskName.alpha = 0.6f
@@ -102,7 +102,7 @@ class SubTaskAdapter(
      */
     fun getCompletionPercentage(): Int {
         if (subTasks.isEmpty()) return 0
-        val completed = subTasks.count { it.IsCompleted }
+        val completed = subTasks.count { it.IsCompleted == "Yes" }
         return (completed * 100) / subTasks.size
     }
 }

@@ -67,4 +67,15 @@ class AppTypeConverters(private val gson: Gson = Gson()) {
             Category.Work // Default fallback
         }
     }
+
+    // ✅ BOOLEAN TO STRING ("Yes"/"No") CONVERTERS
+    @TypeConverter
+    fun fromBooleanToString(isCompleted: Boolean): String {
+        return if (isCompleted) "Yes" else "No"
+    }
+
+    @TypeConverter
+    fun fromStringtoBoolean(isCompletedString: String): Boolean {
+        return isCompletedString == "Yes"
+    }
 }

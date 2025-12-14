@@ -25,7 +25,7 @@ data class SubTask(
     val Task_ID: Int,
     val User_ID: Int,
     val Name: String,
-    val IsCompleted: Boolean = false,
+    val IsCompleted: String = "No",
     val CreatedAt: String = TimestampUtil.getCurrentTimestamp(),
     val UpdatedAt: String = TimestampUtil.getCurrentTimestamp()
 )

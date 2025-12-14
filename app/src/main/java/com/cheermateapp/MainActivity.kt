@@ -840,12 +840,15 @@ class MainActivity : AppCompatActivity() {
             }
 
             switchNotifications?.setOnCheckedChangeListener { _, isChecked ->
-                com.cheermateapp.data.SettingsManager.setNotificationsEnabled(this, isChecked)
-                ToastManager.showToast(
-                    this,
-                    if (isChecked) "🔔 Notifications enabled" else "🔕 Notifications disabled",
-                    Toast.LENGTH_SHORT
-                )
+                val currentEnabledState = com.cheermateapp.data.SettingsManager.isNotificationsEnabled(this)
+                if (isChecked != currentEnabledState) {
+                    com.cheermateapp.data.SettingsManager.setNotificationsEnabled(this, isChecked)
+                    ToastManager.showToast(
+                        this,
+                        if (isChecked) "🔔 Notifications enabled" else "🔕 Notifications disabled",
+                        Toast.LENGTH_SHORT
+                    )
+                }
             }
 
             cardSignOut?.setOnClickListener {
