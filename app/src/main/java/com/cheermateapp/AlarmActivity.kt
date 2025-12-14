@@ -11,7 +11,6 @@ import android.os.Vibrator
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.cheermateapp.util.ReminderManager
@@ -29,7 +28,7 @@ class AlarmActivity : AppCompatActivity() {
     private lateinit var tvAlarmTime: TextView
     private lateinit var btnStop: Button
     private lateinit var btnSnooze: Button
-    
+
     private var mediaPlayer: MediaPlayer? = null
     private var vibrator: Vibrator? = null
     private var taskId: Int = -1
@@ -39,34 +38,34 @@ class AlarmActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         // 🚨 FULL-SCREEN ALARM SETUP (works even when locked)
         setupFullScreenAlarm()
-        
+
         setContentView(R.layout.activity_alarm)
-        
+
         // Get alarm data from intent
         taskId = intent.getIntExtra("TASK_ID", -1)
         userId = intent.getIntExtra("USER_ID", -1)
         taskTitle = intent.getStringExtra("TASK_TITLE") ?: "Task Reminder"
         taskDescription = intent.getStringExtra("TASK_DESCRIPTION") ?: ""
-        
+
         android.util.Log.d("AlarmActivity", "🚨 ALARM ACTIVITY STARTED")
         android.util.Log.d("AlarmActivity", "📋 Task: '$taskTitle' (ID: $taskId)")
-        
+
         initializeViews()
         displayAlarmInfo()
         startAlarmSound()
         startVibration()
     }
-    
+
     private fun setupFullScreenAlarm() {
         // ✅ Show over lock screen (Android 8.0+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
             setTurnScreenOn(true)
         }
-        
+
         // ✅ For older Android versions
         window.addFlags(
             WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
@@ -74,13 +73,13 @@ class AlarmActivity : AppCompatActivity() {
             WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
         )
-        
+
         // ✅ Disable keyguard
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
             keyguardManager.requestDismissKeyguard(this, null)
         }
-        
+
         // ✅ Full screen immersive mode
         window.decorView.systemUiVisibility = (
             View.SYSTEM_UI_FLAG_FULLSCREEN or
@@ -88,7 +87,7 @@ class AlarmActivity : AppCompatActivity() {
             View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
         )
     }
-    
+
     private fun initializeViews() {
         tvTaskTitle = findViewById(R.id.tv_alarm_task_title)
         tvTaskDescription = findViewById(R.id.tv_alarm_task_description)
