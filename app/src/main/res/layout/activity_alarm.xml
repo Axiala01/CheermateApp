@@ -12,8 +12,7 @@
         android:layout_height="120dp"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="80dp"
-        android:src="@drawable/ic_alarm_large"
-        android:tint="@color/alarm_accent" />
+        android:src="@drawable/reshot_icon_alarm_clock_rhw38p5sef" />
 
     <!-- ✅ CURRENT TIME DISPLAY -->
     <TextView
