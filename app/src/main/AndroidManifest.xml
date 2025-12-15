@@ -6,8 +6,11 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:name=".CheermateApp"
@@ -18,7 +21,8 @@
         android:label="@string/app_name"
         android:roundIcon="@drawable/ic_cheermate_logo"
         android:supportsRtl="true"
-        android:theme="@style/Theme.CheermateApp">
+        android:theme="@style/Theme.CheermateApp"
+        android:attributionTags="@null">
 
         <!-- ActivityLogin as launcher (working fix) -->
         <activity
@@ -73,7 +77,9 @@
             android:showWhenLocked="true"
             android:turnScreenOn="true"
             android:excludeFromRecents="true"
-            android:launchMode="singleInstance" />
+            android:launchMode="singleInstance"
+            android:showOnLockScreen="true"
+            android:screenOrientation="portrait" />
 
         <!-- Broadcast Receivers -->
 

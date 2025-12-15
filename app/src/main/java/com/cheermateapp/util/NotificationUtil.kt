@@ -22,27 +22,41 @@ object NotificationUtil {
     private const val CHANNEL_NAME = "Task Reminders"
     private const val CHANNEL_DESCRIPTION = "Notifications for task reminders"
     
+    // Additional channels for different notification types
+    private const val UPCOMING_ALARMS_CHANNEL_ID = "upcoming_alarms"
+    private const val UPCOMING_ALARMS_CHANNEL_NAME = "Upcoming Alarms"
+    private const val UPCOMING_ALARMS_CHANNEL_DESCRIPTION = "Notifications shown before alarms trigger"
+    
     /**
-     * Create notification channel (required for Android O and above)
+     * Create all notification channels (required for Android O and above)
      */
     fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val importance = NotificationManager.IMPORTANCE_HIGH
-            val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, importance).apply {
+            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            
+            // Create task reminders channel (high priority with alarm sound)
+            val taskRemindersChannel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH).apply {
                 description = CHANNEL_DESCRIPTION
                 enableLights(true)
                 enableVibration(true)
-                // Set the default alarm sound for the channel
                 setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM), null)
-                // Set a custom vibration pattern for the channel
-                // Example: wait 0ms, vibrate 1000ms, pause 500ms, vibrate 1000ms
                 vibrationPattern = longArrayOf(0, 1000, 500, 1000)
+                setBypassDnd(true) // Allow to bypass Do Not Disturb
             }
             
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
+            // Create upcoming alarms channel (medium priority, no sound)
+            val upcomingAlarmsChannel = NotificationChannel(UPCOMING_ALARMS_CHANNEL_ID, UPCOMING_ALARMS_CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT).apply {
+                description = UPCOMING_ALARMS_CHANNEL_DESCRIPTION
+                enableLights(true)
+                enableVibration(false) // No vibration for upcoming alarms
+                setSound(null, null) // No sound for upcoming alarms
+            }
             
-            android.util.Log.d("NotificationUtil", "✅ Notification channel created")
+            // Register both channels
+            notificationManager.createNotificationChannel(taskRemindersChannel)
+            notificationManager.createNotificationChannel(upcomingAlarmsChannel)
+            
+            android.util.Log.d("NotificationUtil", "✅ All notification channels created")
         }
     }
     
