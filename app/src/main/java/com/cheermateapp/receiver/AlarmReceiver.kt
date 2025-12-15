@@ -4,6 +4,7 @@ import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.cheermateapp.AlarmActivity
 import com.cheermateapp.CheermateApp
@@ -59,19 +60,25 @@ class AlarmReceiver : BroadcastReceiver() {
     
     private fun launchAlarmActivity(context: Context, taskId: Int, userId: Int, taskTitle: String, taskDescription: String) {
         try {
-            android.util.Log.d("AlarmReceiver", "🚨 Launching full-screen alarm activity")
+            android.util.Log.d("AlarmReceiver", "🚨 Attempting to launch full-screen alarm activity")
             
             val alarmIntent = Intent(context, AlarmActivity::class.java).apply {
                 putExtra("TASK_ID", taskId)
                 putExtra("USER_ID", userId)
                 putExtra("TASK_TITLE", taskTitle)
                 putExtra("TASK_DESCRIPTION", taskDescription)
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NO_USER_ACTION)
             }
             
+            // Try to launch the activity
             context.startActivity(alarmIntent)
-            android.util.Log.d("AlarmReceiver", "✅ Alarm activity launched successfully!")
             
+            // Note: We can't reliably detect if the activity actually launched due to background restrictions
+            // The full-screen intent in the notification will be the primary method for launching the activity
+            android.util.Log.d("AlarmReceiver", "📱 Activity launch attempted - full-screen notification will handle display")
+            
+        } catch (e: SecurityException) {
+            android.util.Log.w("AlarmReceiver", "🚫 Background activity launch blocked - relying on full-screen notification", e)
         } catch (e: Exception) {
             android.util.Log.e("AlarmReceiver", "💥 ERROR launching alarm activity", e)
         }
@@ -79,7 +86,7 @@ class AlarmReceiver : BroadcastReceiver() {
 
     private fun showAlarmNotification(context: Context, taskId: Int, taskTitle: String, taskDescription: String) {
         try {
-            android.util.Log.d("AlarmReceiver", "🔔 Creating alarm notification with action buttons...")
+            android.util.Log.d("AlarmReceiver", "🔔 Creating high-priority alarm notification with full-screen intent...")
             
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             val channelId = "task_reminders"
@@ -106,34 +113,39 @@ class AlarmReceiver : BroadcastReceiver() {
                 android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
             )
 
+            // Create full-screen intent for launching AlarmActivity
+            val fullScreenIntent = android.app.PendingIntent.getActivity(
+                context, taskId,
+                Intent(context, AlarmActivity::class.java).apply {
+                    putExtra("TASK_ID", taskId)
+                    putExtra("TASK_TITLE", taskTitle)
+                    putExtra("TASK_DESCRIPTION", taskDescription)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NO_USER_ACTION)
+                },
+                android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+            )
+
             val notification = NotificationCompat.Builder(context, channelId)
                 .setSmallIcon(R.drawable.ic_alarm_large)
                 .setContentTitle("🚨 ALARM: $taskTitle")
                 .setContentText(taskDescription.ifEmpty { "Task reminder alarm" })
+                .setStyle(NotificationCompat.BigTextStyle()
+                    .bigText("$taskTitle\n${taskDescription.ifEmpty { "Task reminder alarm" }}\n\nTap to open or use buttons below"))
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
                 .setAutoCancel(false) // Don't auto-dismiss
                 .setOngoing(true) // Keep notification until manually dismissed
                 .setDefaults(NotificationCompat.DEFAULT_ALL)
-                .setVibrate(longArrayOf(0, 500, 200, 500))
+                .setVibrate(longArrayOf(0, 1000, 500, 1000, 500, 1000))
                 .addAction(R.drawable.ic_snooze, "Snooze 10m", snoozePendingIntent)
                 .addAction(R.drawable.ic_stop, "Stop", stopPendingIntent)
-                .setFullScreenIntent(
-                    android.app.PendingIntent.getActivity(
-                        context, taskId,
-                        Intent(context, AlarmActivity::class.java).apply {
-                            putExtra("TASK_ID", taskId)
-                            putExtra("TASK_TITLE", taskTitle)
-                            putExtra("TASK_DESCRIPTION", taskDescription)
-                        },
-                        android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
-                    ), true
-                )
+                .setContentIntent(fullScreenIntent) // Tap to open alarm activity
+                .setFullScreenIntent(fullScreenIntent, true) // This is the key for background launch
                 .build()
 
-            android.util.Log.d("AlarmReceiver", "🚀 Posting alarm notification with ID: $taskId")
+            android.util.Log.d("AlarmReceiver", "🚀 Posting high-priority alarm notification with full-screen intent, ID: $taskId")
             notificationManager.notify(taskId, notification)
-            android.util.Log.d("AlarmReceiver", "✅ Alarm notification posted successfully!")
+            android.util.Log.d("AlarmReceiver", "✅ Critical alarm notification posted - should bypass background restrictions!")
             
         } catch (e: Exception) {
             android.util.Log.e("AlarmReceiver", "💥 ERROR creating alarm notification", e)
